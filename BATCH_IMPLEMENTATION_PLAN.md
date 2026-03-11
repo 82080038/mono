@@ -63,6 +63,7 @@ class AuthService {
 class MemberService {
     - Registration with NIK validation
     - KTP OCR integration
+    - Data KK dan keluarga pemohon (simpan ke database)
     - GPS geotagging
     - Document management
     - Profile management
