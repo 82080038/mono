@@ -1,71 +1,79 @@
--- Multi-Tenant Database Schema untuk KSP SaaS Koperasi Harian
+-- Single Cooperative Database Schema untuk KSP Lam Gabe Jaya
 -- Author: KSP Lam Gabe Jaya Development Team
--- Version: 1.0
--- Date: 2026-03-11
+-- Version: 2.0 (Single Cooperative)
+-- Date: 2026-03-12
 
 -- Create main database
-CREATE DATABASE IF NOT EXISTS ksp_saas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE ksp_saas;
-
--- Enable PostGIS extension (untuk GPS/spatial data)
--- CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE DATABASE IF NOT EXISTS ksp_lamgabejaya CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE ksp_lamgabejaya;
 
 -- =============================================
--- TENANT MANAGEMENT SCHEMA
+-- COOPERATIVE MANAGEMENT
 -- =============================================
 
--- Tenants table untuk multi-tenant architecture
-CREATE TABLE tenants (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+-- Cooperative information
+CREATE TABLE cooperatives (
+    id INT PRIMARY KEY DEFAULT 1,
+    uuid VARCHAR(36) UNIQUE NOT NULL DEFAULT 'ksp-lamgabejaya-uuid',
+    name VARCHAR(255) NOT NULL DEFAULT 'KSP Lam Gabe Jaya',
+    code VARCHAR(50) NOT NULL DEFAULT 'LAMGABE',
+    address TEXT NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    website VARCHAR(255),
+    npwp VARCHAR(25),
+    siup_number VARCHAR(50),
+    establishment_date DATE NOT NULL,
+    registration_number VARCHAR(50),
+    operational_license VARCHAR(50),
+    bank_name VARCHAR(100),
+    bank_account_number VARCHAR(50),
+    bank_account_name VARCHAR(255),
+    max_daily_loan_amount DECIMAL(15,2) DEFAULT 5000000,
+    max_monthly_loan_amount DECIMAL(15,2) DEFAULT 50000000,
+    interest_rate_monthly DECIMAL(5,4) DEFAULT 0.0200,
+    late_fee_rate DECIMAL(5,4) DEFAULT 0.0010,
+    admin_fee_rate DECIMAL(5,4) DEFAULT 0.0100,
+    settings JSON DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Units/Cabang untuk single cooperative
+CREATE TABLE units (
+    id INT PRIMARY KEY AUTO_INCREMENT,
     uuid VARCHAR(36) UNIQUE NOT NULL,
+    cooperative_id INT DEFAULT 1,
     name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    domain VARCHAR(255) UNIQUE,
-    database_name VARCHAR(255) UNIQUE NOT NULL,
-    database_host VARCHAR(255) DEFAULT '127.0.0.1',
-    database_port INT DEFAULT 3306,
-    database_username VARCHAR(255) NOT NULL,
-    database_password VARCHAR(255) NOT NULL,
-    status ENUM('active', 'inactive', 'suspended', 'trial') DEFAULT 'trial',
-    subscription_plan ENUM('basic', 'professional', 'enterprise') DEFAULT 'basic',
-    max_users INT DEFAULT 10,
-    max_storage_mb INT DEFAULT 1024,
-    trial_expires_at TIMESTAMP NULL,
-    subscription_expires_at TIMESTAMP NULL,
+    code VARCHAR(50) NOT NULL,
+    type ENUM('main', 'branch', 'sub_branch') DEFAULT 'branch',
+    address TEXT NOT NULL,
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    head_name VARCHAR(255),
+    head_phone VARCHAR(20),
+    operational_area TEXT,
+    coverage_radius_km DECIMAL(8,3) DEFAULT 5.000,
+    latitude DECIMAL(10,8),
+    longitude DECIMAL(11,8),
+    is_active BOOLEAN DEFAULT TRUE,
+    max_members INT DEFAULT 1000,
+    max_loan_amount DECIMAL(15,2) DEFAULT 10000000,
     settings JSON DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
     
-    INDEX idx_tenants_uuid (uuid),
-    INDEX idx_tenants_status (status),
-    INDEX idx_tenants_subscription (subscription_plan),
-    INDEX idx_tenants_trial_expires (trial_expires_at)
-);
-
--- Tenant users untuk cross-tenant access
-CREATE TABLE tenant_users (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    tenant_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    role ENUM('super_admin', 'admin', 'mantri', 'member') NOT NULL,
-    permissions JSON DEFAULT '{}',
-    is_active BOOLEAN DEFAULT TRUE,
-    last_login_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    INDEX idx_tenant_users_tenant (tenant_id),
-    INDEX idx_tenant_users_user (user_id),
-    INDEX idx_tenant_users_role (role)
+    FOREIGN KEY (cooperative_id) REFERENCES cooperatives(id),
+    INDEX idx_units_cooperative (cooperative_id),
+    INDEX idx_units_code (code),
+    INDEX idx_units_active (is_active)
 );
 
 -- =============================================
--- CORE USER MANAGEMENT
+-- USER MANAGEMENT (Single Cooperative)
 -- =============================================
 
--- Users table (global users)
+-- Users table (single cooperative)
 CREATE TABLE users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     uuid VARCHAR(36) UNIQUE NOT NULL,
@@ -91,13 +99,101 @@ CREATE TABLE users (
     INDEX idx_users_active (is_active)
 );
 
--- User sessions untuk authentication
-CREATE TABLE user_sessions (
+-- User roles untuk single cooperative
+CREATE TABLE user_roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    display_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    permissions JSON DEFAULT '{}',
+    is_system_role BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- User assignments
+CREATE TABLE user_assignments (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
-    token_hash VARCHAR(255) NOT NULL,
-    device_info JSON,
-    ip_address VARCHAR(45),
+    unit_id INT NOT NULL,
+    role_id INT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    assigned_by BIGINT,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES user_roles(id),
+    UNIQUE KEY unique_user_unit_role (user_id, unit_id, role_id),
+    INDEX idx_user_assignments_user (user_id),
+    INDEX idx_user_assignments_unit (unit_id),
+    INDEX idx_user_assignments_role (role_id)
+);
+
+-- =============================================
+-- MEMBER MANAGEMENT
+-- =============================================
+
+-- Members table
+CREATE TABLE members (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    uuid VARCHAR(36) UNIQUE NOT NULL,
+    user_id BIGINT NOT NULL,
+    member_number VARCHAR(20) UNIQUE NOT NULL,
+    nik VARCHAR(16) UNIQUE NOT NULL,
+    kk_number VARCHAR(16),
+    birth_place VARCHAR(100),
+    birth_date DATE,
+    gender ENUM('male', 'female') NOT NULL,
+    address TEXT NOT NULL,
+    rt VARCHAR(3),
+    rw VARCHAR(3),
+    village VARCHAR(100),
+    district VARCHAR(100),
+    city VARCHAR(100),
+    province VARCHAR(100),
+    postal_code VARCHAR(10),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    occupation VARCHAR(100),
+    company_name VARCHAR(255),
+    company_address TEXT,
+    monthly_income DECIMAL(12,2),
+    marital_status ENUM('single', 'married', 'divorced', 'widowed') NOT NULL,
+    spouse_name VARCHAR(255),
+    spouse_nik VARCHAR(16),
+    spouse_phone VARCHAR(20),
+    mother_name VARCHAR(255),
+    emergency_contact_name VARCHAR(255),
+    emergency_contact_phone VARCHAR(20),
+    emergency_contact_relation VARCHAR(50),
+    photo_ktp VARCHAR(255),
+    photo_selfie VARCHAR(255),
+    photo_signature VARCHAR(255),
+    registration_unit_id INT NOT NULL,
+    registration_date DATE NOT NULL,
+    status ENUM('active', 'inactive', 'suspended', 'blacklisted') DEFAULT 'active',
+    credit_score DECIMAL(5,2) DEFAULT 0.00,
+    membership_level ENUM('bronze', 'silver', 'gold', 'platinum') DEFAULT 'bronze',
+    total_savings DECIMAL(15,2) DEFAULT 0.00,
+    total_loans DECIMAL(15,2) DEFAULT 0.00,
+    outstanding_loans DECIMAL(15,2) DEFAULT 0.00,
+    late_payment_count INT DEFAULT 0,
+    blacklist_reason TEXT,
+    blacklist_date DATE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (registration_unit_id) REFERENCES units(id),
+    INDEX idx_members_uuid (uuid),
+    INDEX idx_members_number (member_number),
+    INDEX idx_members_nik (nik),
+    INDEX idx_members_status (status),
+    INDEX idx_members_unit (registration_unit_id),
+    INDEX idx_members_credit_score (credit_score)
+);
     user_agent TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     expires_at TIMESTAMP NOT NULL,

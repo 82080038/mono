@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - KSP Lam Gabe Jaya</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+        
+        .dev-credentials {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .dev-credentials h4 {
+            color: #856404;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .credential-item {
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .credential-item strong {
+            color: #333;
+        }
+        
+        .credential-item .role {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .alert {
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        .environment-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #333;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="environment-badge">DEVELOPMENT MODE</div>
+        
+        <div class="logo">
+            <h1>KSP Lam Gabe Jaya</h1>
+            <p>Sistem Koperasi Single Cooperative</p>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+        
+        <div class="dev-credentials">
+            <h4>🔧 Development Login Credentials:</h4>
+            
+            <div class="credential-item">
+                <strong>Super Admin:</strong> admin@lamgabejaya.coop / admin123
+                <span class="role">(Full system access)</span>
+            </div>
+            
+            <div class="credential-item">
+                <strong>Admin:</strong> test_admin@lamgabejaya.coop / test12345
+                <span class="role">(User & member management)</span>
+            </div>
+            
+            <div class="credential-item">
+                <strong>Mantri:</strong> test_mantri@lamgabejaya.coop / test12345
+                <span class="role">(Field operations)</span>
+            </div>
+            
+            <div class="credential-item">
+                <strong>Member:</strong> test_member@lamgabejaya.coop / test12345
+                <span class="role">(Member access)</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2026 KSP Lam Gabe Jaya - Development Version</p>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const alertDiv = document.getElementById('alert');
+            
+            // Show loading
+            const loginBtn = document.querySelector('.btn-login');
+            const originalText = loginBtn.textContent;
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.disabled = true;
+            
+            try {
+                // Simulate API call (replace with actual API endpoint)
+                const response = await fetch('/api/auth?action=login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', 'Login successful! Redirecting...');
+                    
+                    // Store token
+                    localStorage.setItem('auth_token', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1500);
+                } else {
+                    showAlert('error', result.message || 'Login failed');
+                }
+            } catch (error) {
+                // For development, show mock success
+                if (email === 'admin@lamgabejaya.coop' && password === 'admin123') {
+                    showAlert('success', 'Login successful! Redirecting to dashboard...');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1500);
+                } else {
+                    showAlert('error', 'Invalid credentials. Please check the development credentials above.');
+                }
+            } finally {
+                // Reset button
+                loginBtn.textContent = originalText;
+                loginBtn.disabled = false;
+            }
+        });
+        
+        function showAlert(type, message) {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Auto-fill for development (optional)
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        
+        if (role) {
+            const credentials = {
+                'super_admin': { email: 'admin@lamgabejaya.coop', password: 'admin123' },
+                'admin': { email: 'test_admin@lamgabejaya.coop', password: 'test12345' },
+                'mantri': { email: 'test_mantri@lamgabejaya.coop', password: 'test12345' },
+                'member': { email: 'test_member@lamgabejaya.coop', password: 'test12345' }
+            };
+            
+            if (credentials[role]) {
+                document.getElementById('email').value = credentials[role].email;
+                document.getElementById('password').value = credentials[role].password;
+            }
+        }
+    </script>
+</body>
+</html>

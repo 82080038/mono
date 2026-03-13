@@ -1,415 +1,572 @@
 <?php
 /**
- * API Routes - SaaS Koperasi Harian
- * 
- * RESTful API endpoints for all system functionality
- * with authentication, authorization, and rate limiting
- * 
- * @author KSP Lam Gabe Jaya Development Team
- * @version 1.0
+ * API Routes for Single Cooperative Application
+ * KSP Lam Gabe Jaya - Single Cooperative Setup
  */
 
-// Include required services
-require_once '../src/services/AuthService.php';
-require_once '../src/services/MemberService.php';
-require_once '../src/services/LoanService.php';
-require_once '../src/services/TransactionService.php';
+// Include required files
+require_once __DIR__ . '/../config/Config.php';
+require_once __DIR__ . '/../services/AuthService.php';
 
 // Enable CORS
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 // Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
 }
 
 // Initialize services
 $authService = new AuthService();
-$memberService = new MemberService();
-$loanService = new LoanService();
-$transactionService = new TransactionService();
 
-// Get request method and path
-$method = $_SERVER['REQUEST_METHOD'];
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// Get request path
+$requestUri = $_SERVER['REQUEST_URI'];
+$path = parse_url($requestUri, PHP_URL_PATH);
 $pathParts = explode('/', trim($path, '/'));
 
-// API Version
+// API version and endpoint
 $apiVersion = $pathParts[0] ?? 'v1';
-
-// Response helper function
-function jsonResponse($data, $statusCode = 200) {
-    header('Content-Type: application/json');
-    http_response_code($statusCode);
-    echo json_encode($data);
-    exit;
-}
+$endpoint = $pathParts[1] ?? '';
+$resourceId = $pathParts[2] ?? null;
 
 // Authentication middleware
-function authenticate($authService) {
+function authenticate() {
+    global $authService;
+    
     $headers = getallheaders();
     $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
     
     if (!$authHeader) {
-        jsonResponse(['error' => 'Authorization header required'], 401);
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Authorization header required']);
+        exit();
     }
     
     $token = str_replace('Bearer ', '', $authHeader);
-    $tokenResult = $authService->verifyToken($token);
+    $validation = $authService->validateToken($token);
     
-    if (!$tokenResult['success']) {
-        jsonResponse(['error' => 'Invalid token'], 401);
+    if (!$validation['valid']) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => $validation['message']]);
+        exit();
     }
     
-    return $tokenResult['user'];
+    return $validation['user_id'];
 }
 
-// Rate limiting middleware
-function rateLimit($limit = 100, $window = 3600) {
-    $clientIp = $_SERVER['REMOTE_ADDR'];
-    $key = "rate_limit_{$clientIp}";
+// Permission check middleware
+function checkPermission($userId, $permission) {
+    global $authService;
     
-    // Simple rate limiting (in production, use Redis or similar)
-    if (!isset($_SESSION[$key])) {
-        $_SESSION[$key] = ['count' => 0, 'reset_time' => time() + $window];
+    if (!$authService->hasPermission($userId, $permission)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Insufficient permissions']);
+        exit();
     }
-    
-    $rateData = $_SESSION[$key];
-    
-    if (time() > $rateData['reset_time']) {
-        $_SESSION[$key] = ['count' => 1, 'reset_time' => time() + $window];
-    } else {
-        $_SESSION[$key]['count']++;
+}
+
+// Route requests
+switch ($endpoint) {
+    case 'auth':
+        handleAuthRoutes();
+        break;
         
-        if ($_SESSION[$key]['count'] > $limit) {
-            jsonResponse(['error' => 'Rate limit exceeded'], 429);
-        }
-    }
+    case 'dashboard':
+        $userId = authenticate();
+        handleDashboardRoutes($userId, $resourceId);
+        break;
+        
+    default:
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Endpoint not found']);
+        break;
 }
 
-// Apply rate limiting to all API requests
-rateLimit();
-
-// Route handling based on path
-try {
-    switch ($apiVersion) {
-        case 'v1':
-            handleV1Routes($method, $pathParts, $authService, $memberService, $loanService, $transactionService);
-            break;
-        default:
-            jsonResponse(['error' => 'API version not supported'], 404);
-    }
-} catch (Exception $e) {
-    jsonResponse(['error' => $e->getMessage()], 500);
-}
-
-function handleV1Routes($method, $pathParts, $authService, $memberService, $loanService, $transactionService) {
-    $endpoint = $pathParts[1] ?? '';
+/**
+ * Authentication Routes
+ */
+function handleAuthRoutes() {
+    global $authService;
     
-    // Public endpoints (no authentication required)
-    $publicEndpoints = ['auth/login', 'auth/register'];
-    
-    if (!in_array($endpoint, $publicEndpoints)) {
-        $user = authenticate($authService);
-    }
-    
-    switch ($endpoint) {
-        // Authentication endpoints
-        case 'auth':
-            handleAuthRoutes($method, $pathParts, $authService);
-            break;
-            
-        // Member endpoints
-        case 'members':
-            handleMemberRoutes($method, $pathParts, $memberService, $user ?? null);
-            break;
-            
-        // Loan endpoints
-        case 'loans':
-            handleLoanRoutes($method, $pathParts, $loanService, $user ?? null);
-            break;
-            
-        // Transaction endpoints
-        case 'transactions':
-            handleTransactionRoutes($method, $pathParts, $transactionService, $user ?? null);
-            break;
-            
-        // Dashboard endpoints
-        case 'dashboard':
-            handleDashboardRoutes($method, $pathParts, $transactionService, $user ?? null);
-            break;
-            
-        default:
-            jsonResponse(['error' => 'Endpoint not found'], 404);
-    }
-}
-
-// Authentication routes
-function handleAuthRoutes($method, $pathParts, $authService) {
-    $action = $pathParts[2] ?? '';
+    $method = $_SERVER['REQUEST_METHOD'];
+    $action = $_GET['action'] ?? '';
     
     switch ($method) {
         case 'POST':
+            $input = json_decode(file_get_contents('php://input'), true);
+            
             switch ($action) {
-                case 'login':
-                    $data = json_decode(file_get_contents('php://input'), true);
-                    $result = $authService->login($data);
-                    jsonResponse($result, $result['success'] ? 200 : 401);
-                    break;
-                    
                 case 'register':
-                    $data = json_decode(file_get_contents('php://input'), true);
-                    $result = $authService->register($data);
-                    jsonResponse($result, $result['success'] ? 201 : 400);
+                    $result = $authService->registerUser($input);
                     break;
                     
-                case 'refresh':
-                    $data = json_decode(file_get_contents('php://input'), true);
-                    $result = $authService->refreshToken($data['refresh_token']);
-                    jsonResponse($result, $result['success'] ? 200 : 401);
+                case 'login':
+                    $result = $authService->loginUser(
+                        $input['email'] ?? '',
+                        $input['password'] ?? '',
+                        $input['device_info'] ?? []
+                    );
+                    break;
+                    
+                case 'logout':
+                    $sessionId = $input['session_id'] ?? '';
+                    $result = ['success' => $authService->logoutUser($sessionId)];
                     break;
                     
                 default:
-                    jsonResponse(['error' => 'Auth action not found'], 404);
+                    http_response_code(400);
+                    $result = ['success' => false, 'message' => 'Invalid action'];
+                    break;
             }
             break;
             
-        case 'POST':
-            if ($action === 'logout') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $result = $authService->logout($data['token']);
-                jsonResponse($result, $result['success'] ? 200 : 401);
+        case 'GET':
+            $userId = authenticate();
+            
+            switch ($action) {
+                case 'profile':
+                    $result = [
+                        'success' => true,
+                        'user' => $authService->getUserWithRoles($userId)
+                    ];
+                    break;
+                    
+                default:
+                    http_response_code(400);
+                    $result = ['success' => false, 'message' => 'Invalid action'];
+                    break;
+            }
+            break;
+            
+        case 'PUT':
+            $userId = authenticate();
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            switch ($action) {
+                case 'profile':
+                    $result = $authService->updateProfile($userId, $input);
+                    break;
+                    
+                case 'password':
+                    $result = $authService->changePassword(
+                        $userId,
+                        $input['current_password'] ?? '',
+                        $input['new_password'] ?? ''
+                    );
+                    break;
+                    
+                default:
+                    http_response_code(400);
+                    $result = ['success' => false, 'message' => 'Invalid action'];
+                    break;
             }
             break;
             
         default:
-            jsonResponse(['error' => 'Method not allowed'], 405);
+            http_response_code(405);
+            $result = ['success' => false, 'message' => 'Method not allowed'];
+            break;
     }
+    
+    echo json_encode($result);
 }
 
-// Member routes
-function handleMemberRoutes($method, $pathParts, $memberService, $user) {
-    $memberId = $pathParts[2] ?? null;
-    $action = $pathParts[3] ?? '';
+/**
+ * Member Routes
+ */
+function handleMemberRoutes($userId, $memberId) {
+    global $memberService;
+    
+    $method = $_SERVER['REQUEST_METHOD'];
     
     switch ($method) {
         case 'GET':
             if ($memberId) {
-                // Get specific member
-                $member = $memberService->getMemberById($memberId, $user['tenant_id']);
-                if ($member) {
-                    jsonResponse(['success' => true, 'data' => $member]);
-                } else {
-                    jsonResponse(['error' => 'Member not found'], 404);
-                }
+                checkPermission($userId, 'members_read');
+                $result = $memberService->getMember($memberId);
             } else {
-                // Get members list
+                checkPermission($userId, 'members_read');
                 $filters = $_GET;
-                $page = (int)($_GET['page'] ?? 1);
-                $limit = (int)($_GET['limit'] ?? 20);
-                
-                $result = $memberService->getMembersList($user['tenant_id'], $filters, $page, $limit);
-                jsonResponse($result);
+                $result = $memberService->getMembers($filters);
             }
             break;
             
         case 'POST':
-            $data = json_decode(file_get_contents('php://input'), true);
-            $result = $memberService->registerMember($data, $user['tenant_id']);
-            jsonResponse($result, $result['success'] ? 201 : 400);
+            checkPermission($userId, 'members_write');
+            $input = json_decode(file_get_contents('php://input'), true);
+            $result = $memberService->createMember($input, $userId);
             break;
             
         case 'PUT':
+            checkPermission($userId, 'members_write');
             if ($memberId) {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $result = $memberService->updateMember($memberId, $data, $user['tenant_id']);
-                jsonResponse($result, $result['success'] ? 200 : 400);
+                $input = json_decode(file_get_contents('php://input'), true);
+                $result = $memberService->updateMember($memberId, $input, $userId);
             } else {
-                jsonResponse(['error' => 'Member ID required'], 400);
-            }
-            break;
-            
-        case 'DELETE':
-            if ($memberId && $action === 'deactivate') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $result = $memberService->deactivateMember($memberId, $user['tenant_id'], $data['reason'] ?? '');
-                jsonResponse($result, $result['success'] ? 200 : 400);
-            } else {
-                jsonResponse(['error' => 'Invalid member action'], 400);
+                http_response_code(400);
+                $result = ['success' => false, 'message' => 'Member ID required'];
             }
             break;
             
         default:
-            jsonResponse(['error' => 'Method not allowed'], 405);
+            http_response_code(405);
+            $result = ['success' => false, 'message' => 'Method not allowed'];
+            break;
     }
+    
+    echo json_encode($result);
 }
 
-// Loan routes
-function handleLoanRoutes($method, $pathParts, $loanService, $user) {
-    $loanId = $pathParts[2] ?? null;
-    $action = $pathParts[3] ?? '';
+/**
+ * Loan Routes
+ */
+function handleLoanRoutes($userId, $loanId) {
+    global $loanService;
+    
+    $method = $_SERVER['REQUEST_METHOD'];
     
     switch ($method) {
         case 'GET':
             if ($loanId) {
-                // Get specific loan
-                $loan = $loanService->getLoanApplicationById($loanId, $user['tenant_id']);
-                if ($loan) {
-                    jsonResponse(['success' => true, 'data' => $loan]);
-                } else {
-                    jsonResponse(['error' => 'Loan not found'], 404);
-                }
+                checkPermission($userId, 'loans_read');
+                $result = $loanService->getLoan($loanId);
             } else {
-                // Get loans list
+                checkPermission($userId, 'loans_read');
                 $filters = $_GET;
-                $page = (int)($_GET['page'] ?? 1);
-                $limit = (int)($_GET['limit'] ?? 20);
-                
-                $result = $loanService->getLoanApplicationsList($user['tenant_id'], $filters, $page, $limit);
-                jsonResponse($result);
+                $result = $loanService->getLoans($filters);
             }
             break;
             
         case 'POST':
-            $data = json_decode(file_get_contents('php://input'), true);
-            $result = $loanService->submitLoanApplication($data, $data['member_id'], $user['tenant_id']);
-            jsonResponse($result, $result['success'] ? 201 : 400);
+            checkPermission($userId, 'loans_write');
+            $input = json_decode(file_get_contents('php://input'), true);
+            $result = $loanService->createLoanApplication($input, $userId);
             break;
             
         case 'PUT':
-            if ($loanId && $action === 'review') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $result = $loanService->reviewLoanApplication($loanId, $data, $user['id'], $user['tenant_id']);
-                jsonResponse($result, $result['success'] ? 200 : 400);
-            } elseif ($loanId && $action === 'disburse') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $result = $loanService->disburseLoan($loanId, $data, $user['id'], $user['tenant_id']);
-                jsonResponse($result, $result['success'] ? 200 : 400);
-            } elseif ($loanId && $action === 'payment') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $result = $loanService->processLoanPayment($loanId, $data, $user['id'], $user['tenant_id']);
-                jsonResponse($result, $result['success'] ? 200 : 400);
+            checkPermission($userId, 'loans_write');
+            if ($loanId) {
+                $input = json_decode(file_get_contents('php://input'), true);
+                $result = $loanService->updateLoan($loanId, $input, $userId);
             } else {
-                jsonResponse(['error' => 'Invalid loan action'], 400);
+                http_response_code(400);
+                $result = ['success' => false, 'message' => 'Loan ID required'];
             }
             break;
             
         default:
-            jsonResponse(['error' => 'Method not allowed'], 405);
+            http_response_code(405);
+            $result = ['success' => false, 'message' => 'Method not allowed'];
+            break;
     }
+    
+    echo json_encode($result);
 }
 
-// Transaction routes
-function handleTransactionRoutes($method, $pathParts, $transactionService, $user) {
-    $transactionId = $pathParts[2] ?? null;
-    $action = $pathParts[3] ?? '';
+/**
+ * Savings Routes
+ */
+function handleSavingsRoutes($userId, $savingsId) {
+    global $savingsService;
+    
+    $method = $_SERVER['REQUEST_METHOD'];
     
     switch ($method) {
         case 'GET':
-            if ($transactionId) {
-                if ($action === 'chain') {
-                    // Get transaction chain
-                    $result = $transactionService->getTransactionChain($transactionId);
-                    jsonResponse($result);
-                } else {
-                    // Get specific transaction
-                    $transaction = $transactionService->getTransactionById($transactionId);
-                    if ($transaction) {
-                        jsonResponse(['success' => true, 'data' => $transaction]);
-                    } else {
-                        jsonResponse(['error' => 'Transaction not found'], 404);
-                    }
-                }
+            if ($savingsId) {
+                checkPermission($userId, 'savings_read');
+                $result = $savingsService->getSavingsAccount($savingsId);
             } else {
-                // Get transactions list
+                checkPermission($userId, 'savings_read');
                 $filters = $_GET;
-                $page = (int)($_GET['page'] ?? 1);
-                $limit = (int)($_GET['limit'] ?? 20);
-                
-                $result = $transactionService->getTransactionsList($user['tenant_id'], $filters, $page, $limit);
-                jsonResponse($result);
+                $result = $savingsService->getSavingsAccounts($filters);
             }
             break;
             
         case 'POST':
-            if ($transactionId && $action === 'correction') {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $result = $transactionService->createTransactionCorrection($transactionId, $data, $user['id']);
-                jsonResponse($result, $result['success'] ? 201 : 400);
+            checkPermission($userId, 'savings_write');
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            if ($_GET['action'] === 'deposit') {
+                $result = $savingsService->deposit($input, $userId);
+            } elseif ($_GET['action'] === 'withdraw') {
+                $result = $savingsService->withdraw($input, $userId);
             } else {
-                jsonResponse(['error' => 'Invalid transaction action'], 400);
+                $result = $savingsService->createSavingsAccount($input, $userId);
             }
             break;
             
         default:
-            jsonResponse(['error' => 'Method not allowed'], 405);
+            http_response_code(405);
+            $result = ['success' => false, 'message' => 'Method not allowed'];
+            break;
     }
+    
+    echo json_encode($result);
 }
 
-// Dashboard routes
-function handleDashboardRoutes($method, $pathParts, $transactionService, $user) {
-    $action = $pathParts[2] ?? '';
+/**
+ * Report Routes
+ */
+function handleReportRoutes($userId, $reportId) {
+    checkPermission($userId, 'reports_read');
+    
+    $reportType = $_GET['type'] ?? 'daily';
+    $filters = $_GET;
+    
+    switch ($reportType) {
+        case 'daily':
+            $result = generateDailyReport($filters);
+            break;
+            
+        case 'members':
+            $result = generateMembersReport($filters);
+            break;
+            
+        case 'loans':
+            $result = generateLoansReport($filters);
+            break;
+            
+        case 'savings':
+            $result = generateSavingsReport($filters);
+            break;
+            
+        default:
+            http_response_code(400);
+            $result = ['success' => false, 'message' => 'Invalid report type'];
+            break;
+    }
+    
+    echo json_encode($result);
+}
+
+/**
+ * Notification Routes
+ */
+function handleNotificationRoutes($userId, $notificationId) {
+    global $notificationService;
+    
+    $method = $_SERVER['REQUEST_METHOD'];
     
     switch ($method) {
         case 'GET':
-            switch ($action) {
-                case 'cash-flow':
-                    $date = $_GET['date'] ?? date('Y-m-d');
-                    $result = $transactionService->getDailyCashFlow($user['tenant_id'], $date);
-                    jsonResponse($result);
-                    break;
-                    
-                case 'mantri-position':
-                    $mantriId = (int)($_GET['mantri_id'] ?? 0);
-                    if ($mantriId) {
-                        $result = $transactionService->getMantriCashPosition($mantriId, $user['tenant_id']);
-                        jsonResponse($result);
-                    } else {
-                        jsonResponse(['error' => 'Mantri ID required'], 400);
-                    }
-                    break;
-                    
-                default:
-                    // Get dashboard overview
-                    $today = date('Y-m-d');
-                    $cashFlow = $transactionService->getDailyCashFlow($user['tenant_id'], $today);
-                    
-                    jsonResponse([
-                        'success' => true,
-                        'data' => [
-                            'date' => $today,
-                            'cash_flow' => $cashFlow,
-                            'summary' => [
-                                'total_members' => 1234, // Get from database
-                                'total_loans' => 45600000, // Get from database
-                                'daily_collection' => $cashFlow['cash_in'] ?? 0,
-                                'overdue_count' => 23 // Get from database
-                            ]
-                        ]
-                    ]);
+            if ($notificationId) {
+                $result = $notificationService->getNotification($notificationId);
+            } else {
+                $filters = $_GET;
+                $result = $notificationService->getNotifications($userId, $filters);
             }
             break;
             
         default:
-            jsonResponse(['error' => 'Method not allowed'], 405);
+            http_response_code(405);
+            $result = ['success' => false, 'message' => 'Method not allowed'];
+            break;
     }
+    
+    echo json_encode($result);
+}
+
+/**
+ * Location Routes
+ */
+function handleLocationRoutes($userId, $locationId) {
+    global $locationService;
+    
+    $method = $_SERVER['REQUEST_METHOD'];
+    
+    switch ($method) {
+        case 'POST':
+            checkPermission($userId, 'location_track');
+            $input = json_decode(file_get_contents('php://input'), true);
+            $result = $locationService->trackLocation($input, $userId);
+            break;
+            
+        case 'GET':
+            if ($_GET['action'] === 'nearby_members') {
+                checkPermission($userId, 'location_view');
+                $filters = $_GET;
+                $result = $locationService->getNearbyMembers($filters, $userId);
+            } else {
+                http_response_code(400);
+                $result = ['success' => false, 'message' => 'Invalid action'];
+            }
+            break;
+            
+        default:
+            http_response_code(405);
+            $result = ['success' => false, 'message' => 'Method not allowed'];
+            break;
+    }
+    
+    echo json_encode($result);
+}
+
+/**
+ * Fraud Routes
+ */
+function handleFraudRoutes($userId, $fraudId) {
+    global $fraudService;
+    
+    checkPermission($userId, 'fraud_view');
+    
+    $method = $_SERVER['REQUEST_METHOD'];
+    
+    if ($method !== 'GET') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+        return;
+    }
+    
+    if ($fraudId) {
+        $result = $fraudService->getFraudDetection($fraudId);
+    } else {
+        $filters = $_GET;
+        $result = $fraudService->getFraudDetections($filters);
+    }
+    
+    echo json_encode($result);
+}
+
+/**
+ * Dashboard Routes
+ */
+function handleDashboardRoutes($userId, $dashboardId) {
+    $method = $_SERVER['REQUEST_METHOD'];
+    
+    if ($method !== 'GET') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+        return;
+    }
+    
+    $dashboardType = $_GET['type'] ?? 'overview';
+    $filters = $_GET;
+    
+    switch ($dashboardType) {
+        case 'overview':
+            $result = generateOverviewDashboard($userId, $filters);
+            break;
+            
+        case 'analytics':
+            checkPermission($userId, 'analytics_view');
+            $result = generateAnalyticsDashboard($filters);
+            break;
+            
+        default:
+            http_response_code(400);
+            $result = ['success' => false, 'message' => 'Invalid dashboard type'];
+            break;
+    }
+    
+    echo json_encode($result);
+}
+
+/**
+ * Helper Functions
+ */
+function generateDailyReport($filters) {
+    return [
+        'success' => true,
+        'data' => [
+            'date' => date('Y-m-d'),
+            'total_members' => 150,
+            'new_members' => 5,
+            'total_savings' => 15000000,
+            'total_loans' => 25000000,
+            'outstanding_loans' => 18000000,
+            'revenue' => 2500000,
+            'expenses' => 800000
+        ]
+    ];
+}
+
+function generateMembersReport($filters) {
+    return [
+        'success' => true,
+        'data' => [
+            'total_members' => 150,
+            'active_members' => 145,
+            'new_members_this_month' => 8,
+            'member_growth_rate' => 5.2
+        ]
+    ];
+}
+
+function generateLoansReport($filters) {
+    return [
+        'success' => true,
+        'data' => [
+            'total_loans' => 45,
+            'active_loans' => 42,
+            'overdue_loans' => 3,
+            'total_amount' => 25000000,
+            'outstanding_amount' => 18000000
+        ]
+    ];
+}
+
+function generateSavingsReport($filters) {
+    return [
+        'success' => true,
+        'data' => [
+            'total_savings' => 15000000,
+            'total_deposits_today' => 500000,
+            'total_withdrawals_today' => 200000,
+            'savings_growth_rate' => 8.5
+        ]
+    ];
+}
+
+function generateOverviewDashboard($userId, $filters) {
+    return [
+        'success' => true,
+        'data' => [
+            'total_members' => 150,
+            'active_loans' => 45,
+            'total_savings' => 15000000,
+            'outstanding_loans' => 18000000,
+            'monthly_revenue' => 2500000,
+            'pending_approvals' => 8,
+            'overdue_loans' => 3,
+            'fraud_alerts' => 2
+        ]
+    ];
+}
+
+function generateAnalyticsDashboard($filters) {
+    return [
+        'success' => true,
+        'data' => [
+            'member_growth' => [
+                ['month' => 'Jan', 'count' => 120],
+                ['month' => 'Feb', 'count' => 135],
+                ['month' => 'Mar', 'count' => 150]
+            ],
+            'loan_performance' => [
+                ['month' => 'Jan', 'amount' => 20000000],
+                ['month' => 'Feb', 'amount' => 22000000],
+                ['month' => 'Mar', 'amount' => 25000000]
+            ]
+        ]
+    ];
 }
 
 // Error handling
-function handleError($errno, $errstr, $errfile, $errline) {
-    jsonResponse(['error' => 'Internal server error'], 500);
+function handleError($exception) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Internal server error',
+        'error' => Config::APP_ENV === 'development' ? $exception->getMessage() : null
+    ]);
 }
 
 // Set error handler
-set_error_handler('handleError');
+set_exception_handler('handleError');
 
-// Exception handling
-function handleException($exception) {
-    jsonResponse(['error' => $exception->getMessage()], 500);
-}
-
-// Set exception handler
-set_exception_handler('handleException');
 ?>
