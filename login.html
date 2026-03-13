@@ -101,38 +101,6 @@
             font-size: 0.9rem;
         }
         
-        .credential-btn {
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-        
-        .credential-btn:hover {
-            background: #e9ecef;
-            border-color: #667eea;
-            transform: translateY(-1px);
-        }
-        
-        .credential-btn strong {
-            display: block;
-            color: #333;
-            font-size: 0.9rem;
-        }
-        
-        .credential-btn .role-desc {
-            display: block;
-            color: #666;
-            font-size: 0.8rem;
-            font-style: italic;
-            margin-top: 0.25rem;
-        }
-        
         .credential-item {
             margin-bottom: 0.5rem;
             font-size: 0.8rem;
@@ -211,27 +179,27 @@
         </form>
         
         <div class="dev-credentials">
-            <h4>🔧 Development Login Credentials:</h4>
+            <h4>🔧 Quick Login (Click to auto-fill):</h4>
             
-            <div class="credential-item">
-                <strong>Super Admin:</strong> admin@lamgabejaya.coop / admin123
-                <span class="role">(Full system access)</span>
-            </div>
+            <button class="credential-btn" onclick="fillCredentials('admin@lamgabejaya.coop', 'admin123')">
+                <strong>Super Admin</strong>
+                <span class="role-desc">Full system access</span>
+            </button>
             
-            <div class="credential-item">
-                <strong>Admin:</strong> test_admin@lamgabejaya.coop / test12345
-                <span class="role">(User & member management)</span>
-            </div>
+            <button class="credential-btn" onclick="fillCredentials('test_admin@lamgabejaya.coop', 'test12345')">
+                <strong>Admin</strong>
+                <span class="role-desc">User & member management</span>
+            </button>
             
-            <div class="credential-item">
-                <strong>Mantri:</strong> test_mantri@lamgabejaya.coop / test12345
-                <span class="role">(Field operations)</span>
-            </div>
+            <button class="credential-btn" onclick="fillCredentials('test_mantri@lamgabejaya.coop', 'test12345')">
+                <strong>Mantri</strong>
+                <span class="role-desc">Field operations</span>
+            </button>
             
-            <div class="credential-item">
-                <strong>Member:</strong> test_member@lamgabejaya.coop / test12345
-                <span class="role">(Member access)</span>
-            </div>
+            <button class="credential-btn" onclick="fillCredentials('test_member@lamgabejaya.coop', 'test12345')">
+                <strong>Member</strong>
+                <span class="role-desc">Member access</span>
+            </button>
         </div>
         
         <div class="footer">
@@ -284,7 +252,7 @@
                 if (email === 'admin@lamgabejaya.coop' && password === 'admin123') {
                     showAlert('success', 'Login successful! Redirecting to dashboard...');
                     setTimeout(() => {
-                        window.location.href = '/dashboard.html';
+                        window.location.href = '/mono/dashboard.html';
                     }, 1500);
                 } else {
                     showAlert('error', 'Invalid credentials. Please check the development credentials above.');
@@ -295,6 +263,24 @@
                 loginBtn.disabled = false;
             }
         });
+        
+        function fillCredentials(email, password) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+            
+            // Visual feedback
+            const form = document.getElementById('loginForm');
+            form.style.borderColor = '#28a745';
+            setTimeout(() => {
+                form.style.borderColor = '#e1e1e1';
+            }, 1000);
+            
+            // Show success message
+            showAlert('success', `Credentials filled for ${email}. Click Login to continue.`);
+            
+            // Focus on login button
+            document.querySelector('.btn-login').focus();
+        }
         
         function showAlert(type, message) {
             const alertDiv = document.getElementById('alert');
