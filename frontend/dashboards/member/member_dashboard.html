@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Dashboard - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #28a745;
+            --secondary-color: #2c3e50;
+            --Berhasil-color: #27ae60;
+            --Peringatan-color: #f39c12;
+            --danger-color: #e74c3c;
+            --Info-color: #17a2b8;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--primary-color);
+            padding-top: 70px;
+            z-index: 999;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 16px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.Aktif {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 260px;
+        }
+
+        .top-navbar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .top-nav-menu {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .top-nav-item {
+            color: var(--dark-color);
+            text-decoration: Tidak Ada;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-nav-item:hover,
+        .top-nav-item.Aktif {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .HP-menu-toggle {
+            display: Tidak Ada;
+            background: Tidak Ada;
+            border: Tidak Ada;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .HP-menu-toggle:hover {
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .quick-action-HP {
+            Posisi: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .quick-action-HP .btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            border: Tidak Ada;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Pengguna-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-action {
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .Pinjaman-item {
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .Simpanan-item {
+            padding: 12px;
+            border-left: 4px solid var(--Info-color);
+            background: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .Status-Aktif {
+            color: var(--Berhasil-color);
+            font-weight: bold;
+        }
+
+        .Status-Menunggu {
+            color: var(--Peringatan-color);
+            font-weight: bold;
+        }
+
+        .Status-Telat {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .HP-menu-toggle {
+                display: block;
+            }
+            
+            .top-nav-menu {
+                display: Tidak Ada;
+            }
+            
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+            
+            .top-navbar {
+                padding: 0 15px;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .quick-action {
+                margin-bottom: 15px;
+            }
+            
+            .Pinjaman-item, .Simpanan-item {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .HP-menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .HP-menu-toggle {
+                display: Tidak Ada;
+            }
+            
+            .top-nav-menu {
+                display: flex;
+            }
+            
+            .quick-action-HP {
+                display: Tidak Ada;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="d-flex align-items-center gap-3 flex-grow-1">
+            <button class="HP-menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="top-nav-menu">
+                <a href="#Dashboard" class="top-nav-item Aktif">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#Pinjaman" class="top-nav-item">
+                    <i class="fas fa-hand-holding-usd"></i> My Pinjaman
+                </a>
+                <a href="#Simpanan" class="top-nav-item">
+                    <i class="fas fa-piggy-bank"></i> My Simpanan
+                </a>
+                <a href="#Profil" class="top-nav-item">
+                    <i class="fas fa-user"></i> Profil
+                </a>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="Posisi-relative">
+                <i class="fas fa-bell text-muted"></i>
+                <span class="Posisi-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    2
+                </span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <div class="Pengguna-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <small class="d-block text-muted">Anggota</small>
+                    <span id="currentTime">Memuat...</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-sm btn-outline-danger" onclick="Keluar()">
+                <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="text-center mb-4">
+            <h4 class="text-white">
+                <i class="fas fa-coop"></i> KSP Lam Gabe Jaya
+            </h4>
+            <small class="text-muted">Anggota Portal</small>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link Aktif" href="#Dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Profil">
+                    <i class="fas fa-user"></i> My Profil
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Pinjaman">
+                    <i class="fas fa-hand-holding-usd"></i> My Pinjaman
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Pinjaman-Aplikasi">
+                    <i class="fas fa-File-alt"></i> Apply for Pinjaman
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Simpanan">
+                    <i class="fas fa-piggy-bank"></i> My Simpanan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Setoran">
+                    <i class="fas fa-plus-circle"></i> Setoran Money
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Transaksi">
+                    <i class="fas fa-exchange-alt"></i> Transaksi Riwayat
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#documents">
+                    <i class="fas fa-File-alt"></i> My Documents
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#notifications">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Pengaturan">
+                    <i class="fas fa-cog"></i> Account Pengaturan
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Mobile Quick Action Button -->
+        <div class="quick-action-HP">
+            <button class="btn btn-Berhasil btn-lg" onclick="applyLoan()">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="Dashboard-content">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2>
+                        <i class="fas fa-tachometer-alt"></i> Anggota Dashboard
+                    </h2>
+                    <p class="text-muted">Personal Account Overview</p>
+                </div>
+            </div>
+
+            <!-- Account Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-piggy-bank fa-2x mb-2"></i>
+                            <h5>Total Simpanan</h5>
+                            <h3 id="totalSavings">0</h3>
+                            <p class="mb-0">Available Saldo</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-alert text-white">
+                        <div class="card-body">
+                            <i class="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                            <h5>Aktif Pinjaman</h5>
+                            <h3 id="activeLoans">0</h3>
+                            <p class="mb-0">Outstanding</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-Berhasil text-white">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                            <h5>Lanjut Pembayaran</h5>
+                            <h3 id="nextPayment">0</h3>
+                            <p class="mb-0">Due Tanggal</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-info text-white">
+                        <div class="card-body">
+                            <i class="fas fa-star fa-2x mb-2"></i>
+                            <h5>Kredit Skor</h5>
+                            <h3 id="creditScore">0</h3>
+                            <p class="mb-0">Excellent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="applyLoan()">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                        <h6>Apply Pinjaman</h6>
+                                        <small class="text-muted">New Pinjaman Aplikasi</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="depositSavings()">
+                                        <i class="fas fa-piggy-bank"></i>
+                                        <h6>Setoran Simpanan</h6>
+                                        <small class="text-muted">Tambah to Simpanan</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="makePayment()">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        <h6>Make Pembayaran</h6>
+                                        <small class="text-muted">Pinjaman Pembayaran</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="updateProfile()">
+                                        <i class="fas fa-user-Edit"></i>
+                                        <h6>Perbarui Profil</h6>
+                                        <small class="text-muted">Personal Info</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Loans and Savings -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-hand-holding-usd"></i> My Pinjaman</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="myLoans">
+                                <div class="Pinjaman-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6>Personal Pinjaman - PL-001</h6>
+                                            <p class="mb-1"><small class="text-muted">Jumlah: Rp 5,000,000 | Term: 12 months</small></p>
+                                            <div class="mt-2">
+                                                <span class="Status-Aktif">Aktif</span>
+                                                <small class="text-muted ms-2">Monthly: Rp 450,000</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">Lanjut: 25 Mar 2026</small><br>
+                                            <button class="btn btn-sm btn-Berhasil mt-1">Pay Now</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="Pinjaman-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6>Bisnis Pinjaman - BL-002</h6>
+                                            <p class="mb-1"><small class="text-muted">Jumlah: Rp 10,000,000 | Term: 24 months</small></p>
+                                            <div class="mt-2">
+                                                <span class="Status-Aktif">Aktif</span>
+                                                <small class="text-muted ms-2">Monthly: Rp 850,000</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">Lanjut: 15 Mar 2026</small><br>
+                                            <button class="btn btn-sm btn-Berhasil mt-1">Pay Now</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-Grafik-pie"></i> Account Overview</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="Grafik-container">
+                                <canvas id="accountOverviewChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions and Notifications -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-exchange-alt"></i> Recent Transaksi</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentTransactions">
+                                <div class="Simpanan-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Simpanan Setoran</strong><br>
+                                            <small class="text-muted">Regular Simpanan Account</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="text-Berhasil">+Rp 500,000</span><br>
+                                            <small class="text-muted">10 Mar 2026</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="Simpanan-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Pinjaman Pembayaran</strong><br>
+                                            <small class="text-muted">Personal Pinjaman PL-001</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="text-danger">-Rp 450,000</span><br>
+                                            <small class="text-muted">01 Mar 2026</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="Simpanan-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Bunga Kredit</strong><br>
+                                            <small class="text-muted">Monthly Bunga</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="text-Berhasil">+Rp 12,500</span><br>
+                                            <small class="text-muted">28 Feb 2026</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bell"></i> Notifications</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="notifications">
+                                <div class="alert alert-alert alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Pembayaran Due:</strong> Bisnis Pinjaman Pembayaran due on March 15, 2026
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-info alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>New Offer:</strong> Special Pinjaman rates available Bulan Ini
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-Berhasil alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Pembayaran Received:</strong> Terima Kasih for your recent Pembayaran
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="navigation_config.js"></script>
+    
+    <script>
+        // Initialize Dashboard
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadDashboardData();
+            initializeCharts();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+
+        // Authentication check
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            if (!token || !Pengguna) {
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+            
+            const userData = JSON.parse(Pengguna);
+            if (userData.role !== 'Anggota') {
+                Peringatan('Akses ditolak. Anggota role Wajib.');
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+        }
+
+        // Load Dashboard Data
+        function loadDashboardData() {
+            // Simulate API calls to load Data
+            Dokumen.getElementById('totalSavings').textContent = '2.5M';
+            Dokumen.getElementById('activeLoans').textContent = '2';
+            Dokumen.getElementById('nextPayment').textContent = '15 Mar';
+            Dokumen.getElementById('creditScore').textContent = '850';
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Account Overview Grafik
+            const accountCtx = Dokumen.getElementById('accountOverviewChart').getContext('2d');
+            new Grafik(accountCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Simpanan', 'Pinjaman Saldo', 'Available Kredit'],
+                    datasets: [{
+                        Data: [2500000, 8500000, 5000000],
+                        backgroundColor: [
+                            '#27ae60',
+                            '#f39c12',
+                            '#3498db'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Perbarui Waktu
+        function updateTime() {
+            const now = new Tanggal();
+            Dokumen.getElementById('currentTime').textContent = now.toLocaleString('id-ID');
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            Dokumen.querySelector('.sidebar').classList.toggle('show');
+        }
+
+        // Keluar
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Quick action functions
+        function applyLoan() {
+            window.Lokasi.href = '/mono/Pinjaman-Aplikasi.html';
+        }
+
+        function depositSavings() {
+            window.Lokasi.href = '/mono/Simpanan-Setoran.html';
+        }
+
+        function makePayment() {
+            window.Lokasi.href = '/mono/Pinjaman-Pembayaran.html';
+        }
+
+        function updateProfile() {
+            window.Lokasi.href = '/mono/member_profile.html';
+        }
+    </script>
+</body>
+</html>

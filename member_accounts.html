@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Accounts - Anggota Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .account-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #20c997;
+            cursor: pointer;
+            Posisi: relative;
+            overflow: hidden;
+        }
+        
+        .account-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .account-Tipe {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+            Posisi: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .Tipe-Simpanan { background: #28a745; color: white; }
+        .Tipe-checking { background: #17a2b8; color: white; }
+        .Tipe-Pinjaman { background: #fd7e14; color: white; }
+        .Tipe-investment { background: #6f42c1; color: white; }
+        
+        .account-Status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .Status-Aktif { background: #28a745; color: white; }
+        .Status-Tidak Aktif { background: #6c757d; color: white; }
+        .Status-frozen { background: #dc3545; color: white; }
+        .Status-closed { background: #6c757d; color: white; }
+        
+        .Saldo-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #20c997;
+            margin-bottom: 0.5rem;
+        }
+        
+        .account-Nomor {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #20c997;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+        
+        .Transaksi-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .Transaksi-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+        
+        .Transaksi-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .icon-Berhasil { background: #28a745; }
+        .icon-danger { background: #dc3545; }
+        .icon-Info { background: #17a2b8; }
+        .icon-Peringatan { background: #ffc107; }
+        
+        .Transaksi-Jumlah {
+            font-weight: bold;
+        }
+        
+        .Jumlah-positive { color: #28a745; }
+        .Jumlah-negative { color: #dc3545; }
+        
+        .account-Ringkasan {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .Ringkasan-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Ringkasan-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .Ringkasan-label {
+            opacity: 0.9;
+        }
+        
+        .Ringkasan-value {
+            font-weight: bold;
+        }
+        
+        .account-Detail {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .detail-value {
+            color: #6c757d;
+        }
+        
+        .account-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .account-actions .btn {
+            flex: 1;
+        }
+        
+        .Bunga-Tarif {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+        
+        .trend-up { color: #28a745; }
+        .trend-down { color: #dc3545; }
+        .trend-neutral { color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-university"></i> Anggota Accounts</h1>
+                <p class="mb-0">Anggota - Account Manajemen & Overview</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Account Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="account-Ringkasan">
+                    <h5 class="mb-3">Total Saldo</h5>
+                    <div class="Saldo-display">Rp 15,750,000</div>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Available Saldo:</span>
+                        <span class="Ringkasan-value">Rp 15,750,000</div>
+                    </div>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Total Accounts:</span>
+                        <span class="Ringkasan-value">4</span>
+                    </div>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Aktif Pinjaman:</span>
+                        <span class="Ringkasan-value">2</span>
+                    </div>
+                    <div class="trend-indicator">
+                        <i class="fas fa-arrow-up trend-up"></i>
+                        <span class="trend-up">+2.3% Bulan Ini</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-Berhasil text-white">
+                            <div class="card-body">
+                                <i class="fas fa-piggy-bank fa-2x mb-2"></i>
+                                <h6>Simpanan</h6>
+                                <h3 id="savingsCount">0</h3>
+                                <p class="mb-0">Accounts</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-info text-white">
+                            <div class="card-body">
+                                <i class="fas fa-exchange-alt fa-2x mb-2"></i>
+                                <h6>Checking</h6>
+                                <h3 id="checkingCount">0</h3>
+                                <p class="mb-0">Accounts</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-alert text-white">
+                            <div class="card-body">
+                                <i class="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                                <h6>Pinjaman</h6>
+                                <h3 id="loansCount">0</h3>
+                                <p class="mb-0">Aktif</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <i class="fas fa-Grafik-line fa-2x mb-2"></i>
+                                <h6>Investment</h6>
+                                <h3 id="investmentCount">0</h3>
+                                <p class="mb-0">Accounts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <!-- Accounts List -->
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> My Accounts</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="accountFilter" onchange="filterAccounts()">
+                                <option value="">Semua Types</option>
+                                <option value="Simpanan">Simpanan</option>
+                                <option value="checking">Checking</option>
+                                <option value="Pinjaman">Pinjaman</option>
+                                <option value="investment">Investment</option>
+                            </select>
+                            <button class="btn btn-Berhasil btn-sm" onclick="openNewAccount()">
+                                <i class="fas fa-plus"></i> New Account
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="accountsList">
+                            <!-- Accounts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Account Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-line"></i> Account Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Saldo Riwayat</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="balanceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Account Distribution</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="distributionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="transferFunds()">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <h6>Transfer</h6>
+                                    <small class="text-muted">Send money</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="payBills()">
+                                    <i class="fas fa-File-invoice"></i>
+                                    <h6>Pay Bills</h6>
+                                    <small class="text-muted">Utilities</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="applyLoan()">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                    <h6>Apply Pinjaman</h6>
+                                    <small class="text-muted">Get funds</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="viewStatements()">
+                                    <i class="fas fa-File-alt"></i>
+                                    <h6>Statements</h6>
+                                    <small class="text-muted">View Semua</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Transactions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Transaksi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentTransactions">
+                            <!-- Recent transactions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Payments -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calendar-alt"></i> Upcoming Pembayaran</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="upcomingPayments">
+                            <!-- Upcoming payments will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interest Rates -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Persentase"></i> Bunga Rates</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="interestRates">
+                            <!-- Interest rates will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Account Details Modal -->
+    <div class="modal fade" id="accountDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Account Detail</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="accountDetails">
+                    <!-- Account details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="transferFromAccount()">
+                        <i class="fas fa-exchange-alt"></i> Transfer
+                    </button>
+                    <button type="button" class="btn btn-Berhasil" onclick="viewAccountStatement()">
+                        <i class="fas fa-File-alt"></i> Statement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Account Modal -->
+    <div class="modal fade" id="newAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Open New Account</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newAccountForm">
+                        <div class="mb-3">
+                            <label class="form-label">Account Tipe *</label>
+                            <select class="form-Pilih" id="accountType" required>
+                                <option value="">Pilih account Tipe</option>
+                                <option value="Simpanan">Simpanan Account</option>
+                                <option value="checking">Checking Account</option>
+                                <option value="investment">Investment Account</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Account Nama *</label>
+                            <input type="text" class="form-control" id="accountName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initial Setoran *</label>
+                            <input type="Nomor" class="form-control" id="initialDeposit" min="50000" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Purpose</label>
+                            <select class="form-Pilih" id="accountPurpose">
+                                <option value="">Pilih purpose</option>
+                                <option value="personal">Personal</option>
+                                <option value="Bisnis">Bisnis</option>
+                                <option value="education">Education</option>
+                                <option value="retirement">Retirement</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="autoDebit" checked>
+                                <label class="form-check-label" for="autoDebit">
+                                    Enable automatic debit
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-Berhasil" onclick="submitNewAccount()">
+                        <i class="fas fa-plus"></i> Open Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let accounts = [];
+        let balanceChart = null;
+        let distributionChart = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadAccounts();
+            loadStatistics();
+            loadRecentTransactions();
+            loadUpcomingPayments();
+            loadInterestRates();
+            initializeCharts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Anggota
+            if (currentUser.role !== 'Anggota') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load accounts
+        async function loadAccounts() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_accounts', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        accounts = Data.Data;
+                        displayAccounts();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat accounts:', Error);
+                // Use demo Data
+                accounts = getDemoAccounts();
+                displayAccounts();
+            }
+        }
+
+        // Display accounts
+        function displayAccounts() {
+            const accountsList = Dokumen.getElementById('accountsList');
+            const Filter = Dokumen.getElementById('accountFilter').value;
+            
+            let filteredAccounts = accounts;
+            
+            if (Filter) {
+                filteredAccounts = accounts.Filter(account => account.Tipe === Filter);
+            }
+            
+            accountsList.innerHTML = '';
+            
+            if (filteredAccounts.length === 0) {
+                accountsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak accounts found</div>';
+                return;
+            }
+            
+            filteredAccounts.forEach(account => {
+                const accountCard = Dokumen.createElement('div');
+                accountCard.className = 'account-card card mb-3';
+                accountCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="me-3">
+                                        <i class="fas fa-${getAccountIcon(account.Tipe)} fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${account.Nama}</h6>
+                                        <div class="account-Nomor">${account.account_number}</div>
+                                        <small class="text-muted">Opened: ${formatDate(account.opened_at)}</small>
+                                    </div>
+                                </div>
+                                <div class="account-Detail">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Account Tipe:</span>
+                                        <span class="detail-value">${account.Tipe}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Branch:</span>
+                                        <span class="detail-value">${account.branch}</span>
+                                    </div>
+                                    ${account.interest_rate ? `
+                                        <div class="detail-item">
+                                            <span class="detail-label">Bunga Tarif:</span>
+                                            <span class="detail-value">${account.interest_rate}% p.a.</span>
+                                        </div>
+                                    ` : ''}
+                                    ${account.loan_amount ? `
+                                        <div class="detail-item">
+                                            <span class="detail-label">Pinjaman Jumlah:</span>
+                                            <span class="detail-value">${formatCurrency(account.loan_amount)}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${account.next_payment ? `
+                                        <div class="detail-item">
+                                            <span class="detail-label">Lanjut Pembayaran:</span>
+                                            <span class="detail-value">${formatDate(account.next_payment)}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-end">
+                                    <span class="account-Tipe Tipe-${account.Tipe}">${account.Tipe}</span>
+                                    <div class="Saldo-display">${formatCurrency(account.Saldo)}</div>
+                                    <span class="account-Status Status-${account.Status}">${account.Status}</span>
+                                    ${account.interest_rate ? `
+                                        <div class="mt-1">
+                                            <span class="Bunga-Tarif">${account.interest_rate}% p.a.</span>
+                                        </div>
+                                    ` : ''}
+                                    <div class="account-actions">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewAccountDetails('${account.id}')">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-Berhasil" onclick="transferFromAccount('${account.id}')" ${account.type === 'Pinjaman' ? 'disabled' : ''}>
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                accountsList.appendChild(accountCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_account_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    savings_count: 2,
+                    checking_count: 1,
+                    loans_count: 2,
+                    investment_count: 1
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('savingsCount').textContent = stats.savings_count || 0;
+            Dokumen.getElementById('checkingCount').textContent = stats.checking_count || 0;
+            Dokumen.getElementById('loansCount').textContent = stats.loans_count || 0;
+            Dokumen.getElementById('investmentCount').textContent = stats.investment_count || 0;
+        }
+
+        // Load recent Transaksi
+        function loadRecentTransactions() {
+            const transactionsDiv = Dokumen.getElementById('recentTransactions');
+            
+            const Transaksi = [
+                { Tipe: 'Setoran', Deskripsi: 'Monthly Simpanan Setoran', Jumlah: 500000, Tanggal: '2026-03-17', account: 'Primary Simpanan' },
+                { Tipe: 'Penarikan', Deskripsi: 'ATM Penarikan', Jumlah: 200000, Tanggal: '2026-03-16', account: 'Primary Checking' },
+                { Tipe: 'transfer', Deskripsi: 'Transfer to John Doe', Jumlah: 1000000, Tanggal: '2026-03-15', account: 'Primary Checking' },
+                { Tipe: 'Pembayaran', Deskripsi: 'Pinjaman Pembayaran', Jumlah: 2500000, Tanggal: '2026-03-14', account: 'Bisnis Pinjaman' },
+                { Tipe: 'Setoran', Deskripsi: 'Salary Setoran', Jumlah: 8000000, Tanggal: '2026-03-10', account: 'Primary Checking' }
+            ];
+            
+            transactionsDiv.innerHTML = Transaksi.slice(0, 5).map(Transaksi => `
+                <div class="Transaksi-item">
+                    <div class="d-flex align-items-center">
+                        <div class="Transaksi-icon icon-${getTransactionIconType(Transaksi.Tipe)} me-2">
+                            <i class="fas fa-${getTransactionIcon(Transaksi.Tipe)}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${Transaksi.Deskripsi}</div>
+                            <small class="text-muted">${Transaksi.account} • ${formatDate(Transaksi.Tanggal)}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="Transaksi-Jumlah ${getTransactionAmountClass(Transaksi.Tipe)}">${formatCurrency(Transaksi.Jumlah)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load upcoming Pembayaran
+        function loadUpcomingPayments() {
+            const paymentsDiv = Dokumen.getElementById('upcomingPayments');
+            
+            const Pembayaran = [
+                { Tipe: 'Pinjaman Pembayaran', Jumlah: 2500000, due_date: '2026-03-25', account: 'Bisnis Pinjaman' },
+                { Tipe: 'Insurance Premium', Jumlah: 150000, due_date: '2026-04-01', account: 'Primary Checking' },
+                { Tipe: 'Simpanan Contribution', Jumlah: 500000, due_date: '2026-03-30', account: 'Retirement Simpanan' }
+            ];
+            
+            paymentsDiv.innerHTML = Pembayaran.map(Pembayaran => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h6 class="mb-1">${Pembayaran.Tipe}</h6>
+                        <small class="text-muted">${Pembayaran.account}</small>
+                        <br>
+                        <small class="text-muted">Due: ${formatDate(Pembayaran.due_date)}</small>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="mb-1">${formatCurrency(Pembayaran.Jumlah)}</h6>
+                        <button class="btn btn-sm btn-outline-primary" onclick="makePayment('${Pembayaran.Tipe}', ${Pembayaran.Jumlah})">
+                            Pay Now
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Bunga rates
+        function loadInterestRates() {
+            const ratesDiv = Dokumen.getElementById('interestRates');
+            
+            const rates = [
+                { Tipe: 'Simpanan Account', Tarif: 3.5, trend: 'up' },
+                { Tipe: 'Checking Account', Tarif: 0.5, trend: 'neutral' },
+                { Tipe: 'Investment Account', Tarif: 6.2, trend: 'up' },
+                { Tipe: 'Personal Pinjaman', Tarif: 12.5, trend: 'down' },
+                { Tipe: 'Bisnis Pinjaman', Tarif: 14.2, trend: 'neutral' }
+            ];
+            
+            ratesDiv.innerHTML = rates.map(Tarif => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h6 class="mb-1">${Tarif.Tipe}</h6>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="mb-1">${Tarif.Tarif}% p.a.</h6>
+                        <div class="trend-indicator">
+                            <i class="fas fa-arrow-${Tarif.trend} trend-${Tarif.trend}"></i>
+                            <small class="trend-${Tarif.trend}">${Tarif.trend === 'up' ? '+0.2%' : Tarif.trend === 'down' ? '-0.1%' : 'Tidak change'}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Saldo Grafik
+            const balanceCtx = Dokumen.getElementById('balanceChart').getContext('2d');
+            balanceChart = new Grafik(balanceCtx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Total Saldo',
+                        Data: [12000000, 12500000, 13000000, 13500000, 14500000, 15750000],
+                        borderColor: '#20c997',
+                        backgroundColor: 'rgba(32, 201, 151, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Distribution Grafik
+            const distributionCtx = Dokumen.getElementById('distributionChart').getContext('2d');
+            distributionChart = new Grafik(distributionCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Simpanan', 'Checking', 'Pinjaman', 'Investment'],
+                    datasets: [{
+                        Data: [8500000, 3250000, 2500000, 1500000],
+                        backgroundColor: [
+                            '#28a745',
+                            '#17a2b8',
+                            '#fd7e14',
+                            '#6f42c1'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            Posisi: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // View account Detail
+        function viewAccountDetails(accountId) {
+            const account = accounts.find(a => a.id === accountId);
+            if (!account) return;
+            
+            const Detail = Dokumen.getElementById('accountDetails');
+            
+            Detail.innerHTML = `
+                <div class="account-Detail">
+                    <h6>Account Informasi</h6>
+                    <div class="detail-item">
+                        <span class="detail-label">Account Nama:</span>
+                        <span class="detail-value"><strong>${account.Nama}</strong></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Account Nomor:</span>
+                        <span class="detail-value">${account.account_number}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Account Tipe:</span>
+                        <span class="detail-value">${account.Tipe}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value"><span class="account-Status Status-${account.Status}">${account.Status}</span></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Saldo:</span>
+                        <span class="detail-value"><strong>${formatCurrency(account.Saldo)}</strong></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Branch:</span>
+                        <span class="detail-value">${account.branch}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Opened:</span>
+                        <span class="detail-value">${formatDate(account.opened_at)}</span>
+                    </div>
+                    ${account.interest_rate ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Bunga Tarif:</span>
+                            <span class="detail-value">${account.interest_rate}% p.a.</span>
+                        </div>
+                    ` : ''}
+                    ${account.loan_amount ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Pinjaman Jumlah:</span>
+                            <span class="detail-value">${formatCurrency(account.loan_amount)}</span>
+                        </div>
+                    ` : ''}
+                    ${account.next_payment ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Lanjut Pembayaran:</span>
+                            <span class="detail-value">${formatDate(account.next_payment)}</span>
+                        </div>
+                    ` : ''}
+                    ${account.maturity_date ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Maturity Tanggal:</span>
+                            <span class="detail-value">${formatDate(account.maturity_date)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Account Features</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" ${account.features?.online_banking ? 'checked' : ''} disabled>
+                                <label class="form-check-label">Online Banking</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" ${account.features?.mobile_banking ? 'checked' : ''} disabled>
+                                <label class="form-check-label">HP Banking</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" ${account.features?.auto_debit ? 'checked' : ''} disabled>
+                                <label class="form-check-label">Auto Debit</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" ${account.features?.sms_alerts ? 'checked' : ''} disabled>
+                                <label class="form-check-label">SMS Alerts</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" ${account.features?.email_alerts ? 'checked' : ''} disabled>
+                                <label class="form-check-label">Email Alerts</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" ${account.features?.checkbook ? 'checked' : ''} disabled>
+                                <label class="form-check-label">Checkbook</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('accountDetailsModal'));
+            modal.show();
+        }
+
+        // Quick action functions
+        function openNewAccount() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newAccountModal'));
+            modal.show();
+        }
+
+        function submitNewAccount() {
+            const accountType = Dokumen.getElementById('accountType').value;
+            const accountName = Dokumen.getElementById('accountName').value;
+            const initialDeposit = Dokumen.getElementById('initialDeposit').value;
+            const accountPurpose = Dokumen.getElementById('accountPurpose').value;
+            const autoDebit = Dokumen.getElementById('autoDebit').checked;
+            
+            if (!accountType || !accountName || !initialDeposit) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            if (initialDeposit < 50000) {
+                alert('Minimum Setoran is Rp 50,000');
+                return;
+            }
+            
+            showSuccess('Account opened successfully!');
+            
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newAccountModal'));
+            modal.hide();
+            document.getElementById('newAccountForm').reset();
+            
+            // Reload accounts
+            loadAccounts();
+        }
+
+        function transferFunds() {
+            window.location.href = 'member_transactions.html';
+        }
+
+        function transferFromAccount(accountId) {
+            window.location.href = 'member_transactions.html';
+        }
+
+        function payBills() {
+            
+        }
+
+        function applyLoan() {
+            window.location.href = 'member_applications.html';
+        }
+
+        function viewStatements() {
+            
+        }
+
+        function viewAccountStatement() {
+            
+        }
+
+        function makePayment(type, amount) {
+            if (!confirm(`Pay ${formatCurrency(amount)} for ${type}?`)) return;
+            
+            showSuccess(`Payment of ${formatCurrency(amount)} for ${type} processed successfully!`);
+        }
+
+        // Filter accounts
+        function filterAccounts() {
+            displayAccounts();
+        }
+
+        // Utility functions
+        function getAccountIcon(type) {
+            const icons = {
+                'Simpanan': 'piggy-bank',
+                'checking': 'exchange-alt',
+                'Pinjaman': 'hand-holding-usd',
+                'investment': 'Grafik-line'
+            };
+            return icons[type] || 'university';
+        }
+
+        function getTransactionIcon(type) {
+            const icons = {
+                'Setoran': 'arrow-down',
+                'Penarikan': 'arrow-up',
+                'transfer': 'exchange-alt',
+                'Pembayaran': 'Kredit-card'
+            };
+            return icons[type] || 'exchange-alt';
+        }
+
+        function getTransactionIconType(type) {
+            const types = {
+                'Setoran': 'Berhasil',
+                'Penarikan': 'danger',
+                'transfer': 'Info',
+                'Pembayaran': 'Peringatan'
+            };
+            return types[type] || 'Info';
+        }
+
+        function getTransactionAmountClass(type) {
+            const classes = {
+                'Setoran': 'Jumlah-positive',
+                'Penarikan': 'Jumlah-negative',
+                'transfer': 'Jumlah-negative',
+                'Pembayaran': 'Jumlah-negative'
+            };
+            return classes[type] || 'Jumlah-neutral';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(message) {
+            
+        }
+
+        function showError(message) {
+            console.error('Error:', message);
+        }
+
+        // Get demo accounts
+        function getDemoAccounts() {
+            return [
+                {
+                    id: '1',
+                    name: 'Primary Simpanan',
+                    type: 'Simpanan',
+                    account_number: '1234-5678-9012',
+                    balance: 8500000,
+                    status: 'Aktif',
+                    branch: 'Jakarta Main Branch',
+                    opened_at: '2023-01-15',
+                    interest_rate: 3.5,
+                    features: {
+                        online_banking: true,
+                        mobile_banking: true,
+                        auto_debit: true,
+                        sms_alerts: true,
+                        email_alerts: true,
+                        checkbook: false
+                    }
+                },
+                {
+                    id: '2',
+                    name: 'Primary Checking',
+                    type: 'checking',
+                    account_number: '1234-5678-9013',
+                    balance: 3250000,
+                    status: 'Aktif',
+                    branch: 'Jakarta Main Branch',
+                    opened_at: '2023-01-15',
+                    interest_rate: 0.5,
+                    features: {
+                        online_banking: true,
+                        mobile_banking: true,
+                        auto_debit: true,
+                        sms_alerts: true,
+                        email_alerts: true,
+                        checkbook: true
+                    }
+                },
+                {
+                    id: '3',
+                    name: 'Bisnis Pinjaman',
+                    type: 'Pinjaman',
+                    account_number: '1234-5678-9014',
+                    balance: -2500000,
+                    status: 'Aktif',
+                    branch: 'Jakarta Main Branch',
+                    opened_at: '2023-06-01',
+                    loan_amount: 50000000,
+                    next_payment: '2026-03-25',
+                    maturity_date: '2028-06-01',
+                    features: {
+                        online_banking: true,
+                        mobile_banking: true,
+                        auto_debit: true,
+                        sms_alerts: true,
+                        email_alerts: true,
+                        checkbook: false
+                    }
+                },
+                {
+                    id: '4',
+                    name: 'Personal Pinjaman',
+                    type: 'Pinjaman',
+                    account_number: '1234-5678-9015',
+                    balance: -1000000,
+                    status: 'Aktif',
+                    branch: 'Jakarta Main Branch',
+                    opened_at: '2024-03-01',
+                    loan_amount: 25000000,
+                    next_payment: '2026-03-20',
+                    maturity_date: '2027-03-01',
+                    features: {
+                        online_banking: true,
+                        mobile_banking: true,
+                        auto_debit: true,
+                        sms_alerts: true,
+                        email_alerts: true,
+                        checkbook: false
+                    }
+                },
+                {
+                    id: '5',
+                    name: 'Retirement Simpanan',
+                    type: 'investment',
+                    account_number: '1234-5678-9016',
+                    balance: 1500000,
+                    status: 'Aktif',
+                    branch: 'Jakarta Main Branch',
+                    opened_at: '2023-12-01',
+                    interest_rate: 6.2,
+                    features: {
+                        online_banking: true,
+                        mobile_banking: true,
+                        auto_debit: true,
+                        sms_alerts: true,
+                        email_alerts: true,
+                        checkbook: false
+                    }
+                }
+            ];
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.location.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/mono/helpers/modal-styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-link {
+            color: white;
+            text-decoration: Tidak Ada;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .container {
+            padding: 2rem;
+        }
+        
+        .Pengaturan-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-pills .nav-link {
+            color: #667eea;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-pills .nav-link.Aktif {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .Formulir-switch .Formulir-check-input {
+            width: 3em;
+            height: 1.5em;
+        }
+        
+        .Formulir-switch .Formulir-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚙️ Pengaturan</h1>
+        <div class="d-flex align-items-center gap-3">
+            <span id="Nama Pengguna">Memuat...</span>
+            <a href="/mono/Dashboard.html" class="btn-link">← Dashboard</a>
+            <button class="btn-link" onclick="Keluar()">Keluar</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="Pengaturan-card">
+                    <div class="nav nav-pills flex-column" id="Pengaturan-tabs">
+                        <a class="nav-link Aktif" data-bs-toggle="pill" href="#general">
+                            <i class="fas fa-cog"></i> Umum
+                        </a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#cooperative">
+                            <i class="fas fa-building"></i> Koperasi
+                        </a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#Pinjaman">
+                            <i class="fas fa-hand-holding-usd"></i> Pinjaman
+                        </a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#Simpanan">
+                            <i class="fas fa-piggy-bank"></i> Simpanan
+                        </a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#notifications">
+                            <i class="fas fa-bell"></i> Notifikasi
+                        </a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#Keamanan">
+                            <i class="fas fa-shield-alt"></i> Keamanan
+                        </a>
+                        <a class="nav-link" data-bs-toggle="pill" href="#Backup">
+                            <i class="fas fa-Database"></i> Backup
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="tab-content" id="Pengaturan-content">
+                    <!-- General Settings -->
+                    <div class="tab-pane fade show Aktif" id="general">
+                        <div class="Pengaturan-card">
+                            <h5 class="mb-4">Pengaturan Umum</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Nama Aplikasi</label>
+                                <input type="text" class="form-control" id="appName" value="KSP Lam Gabe Jaya">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Versi Aplikasi</label>
+                                <input type="text" class="form-control" id="appVersion" value="2.0.0" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Environment</label>
+                                <select class="form-Pilih" id="environment">
+                                    <option value="development">Development</option>
+                                    <option value="staging">Staging</option>
+                                    <option value="production" selected>Production</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Zona Waktu</label>
+                                <select class="form-Pilih" id="timezone">
+                                    <option value="Asia/Jakarta" selected>WIB (UTC+7)</option>
+                                    <option value="Asia/Makassar">WITA (UTC+8)</option>
+                                    <option value="Asia/Jayapura">WIT (UTC+9)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="debugMode">
+                                    <label class="form-check-label" for="debugMode">
+                                        Debug Mode
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="saveGeneralSettings()">
+                                <i class="fas fa-Simpan"></i> Simpan Pengaturan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Cooperative Settings -->
+                    <div class="tab-pane fade" id="cooperative">
+                        <div class="Pengaturan-card">
+                            <h5 class="mb-4">Pengaturan Koperasi</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Nama Koperasi</label>
+                                <input type="text" class="form-control" id="coopName" value="KSP Lam Gabe Jaya">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Tidak. Badan Hukum</label>
+                                <input type="text" class="form-control" id="legalNumber" placeholder="Masukkan nomor badan hukum">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Alamat</label>
+                                <textarea class="form-control" id="coopAddress" rows="3">Jl. Contoh Tidak. 123, Jakarta</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Telepon</label>
+                                <input type="tel" class="form-control" id="coopPhone" placeholder="021-12345678">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="coopEmail" placeholder="Info@ksp.coop">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Website</label>
+                                <input type="url" class="form-control" id="coopWebsite" placeholder="https://www.ksp.coop">
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="saveCooperativeSettings()">
+                                <i class="fas fa-Simpan"></i> Simpan Pengaturan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Loan Settings -->
+                    <div class="tab-pane fade" id="Pinjaman">
+                        <div class="Pengaturan-card">
+                            <h5 class="mb-4">Pengaturan Pinjaman</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Bunga Default (%/bulan)</label>
+                                <input type="Nomor" class="form-control" id="defaultInterestRate" value="1.5" step="0.1" min="0" max="10">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Maksimum Pinjaman (Rp)</label>
+                                <input type="Nomor" class="form-control" id="maxLoanAmount" value="50000000" step="1000000" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Minimum Pinjaman (Rp)</label>
+                                <input type="Nomor" class="form-control" id="minLoanAmount" value="1000000" step="100000" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Maksimum Jangka Waktu (bulan)</label>
+                                <input type="Nomor" class="form-control" id="maxLoanTerm" value="36" min="1" max="60">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="requireCollateral" checked>
+                                    <label class="form-check-label" for="requireCollateral">
+                                        Wajib Jaminan
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="autoApproval">
+                                    <label class="form-check-label" for="autoApproval">
+                                        Auto Persetujuan (untuk pinjaman kecil)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="saveLoanSettings()">
+                                <i class="fas fa-Simpan"></i> Simpan Pengaturan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Savings Settings -->
+                    <div class="tab-pane fade" id="Simpanan">
+                        <div class="Pengaturan-card">
+                            <h5 class="mb-4">Pengaturan Simpanan</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Bunga Simpanan Sukarela (%/bulan)</label>
+                                <input type="Nomor" class="form-control" id="savingsInterestRate" value="0.25" step="0.05" min="0" max="5">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Minimum Setoran (Rp)</label>
+                                <input type="Nomor" class="form-control" id="minDeposit" value="10000" step="5000" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Minimum Saldo (Rp)</label>
+                                <input type="Nomor" class="form-control" id="minBalance" value="10000" step="5000" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="autoCalculateInterest" checked>
+                                    <label class="form-check-label" for="autoCalculateInterest">
+                                        Hitung Bunga Otomatis
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="saveSavingsSettings()">
+                                <i class="fas fa-Simpan"></i> Simpan Pengaturan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Other tabs (Notifications, Security, Backup) with placeholder content -->
+                    <div class="tab-pane fade" id="notifications">
+                        <div class="Pengaturan-card">
+                            <h5 class="mb-4">Pengaturan Notifikasi</h5>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Pengaturan notifikasi akan segera tersedia
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="Keamanan">
+                        <div class="Pengaturan-card">
+                            <h5 class="mb-4">Pengaturan Keamanan</h5>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Pengaturan keamanan akan segera tersedia
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+<div class="tab-pane fade" id="Backup">
+    <h5>Backup & Pulihkan</h5>
+    <div class="row">
+        <div class="col-md-6">
+            <h6>Database Backup</h6>
+            <button class="btn btn-primary mb-3" onclick="createBackup()">
+                <i class="fas fa-Unduh"></i> Create Backup
+            </button>
+            <div id="backupStatus"></div>
+        </div>
+        <div class="col-md-6">
+            <h6>Pulihkan Backup</h6>
+            <input type="File" class="form-control mb-3" id="backupFile" accept=".sql">
+            <button class="btn btn-alert" onclick="restoreBackup()">
+                <i class="fas fa-Unggah"></i> Pulihkan
+            </button>
+        </div>
+    </div>
+</div>
+<div class="tab-pane fade" id="Backup">
+                        <div class="Pengaturan-card">
+                            <h5 class="mb-4">Pengaturan Backup</h5>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Pengaturan Backup akan segera tersedia
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <!-- Indonesian Format Helper -->
+    <script src="/mono/helpers/indonesian-format.js"></script>
+    
+    <script>
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna');
+            
+            if (!token || !Pengguna) {
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+            
+            const userData = JSON.parse(Pengguna);
+            Dokumen.getElementById('Nama Pengguna').textContent = userData.Nama || 'Pengguna';
+        }
+        
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+        
+        // Simpan Pengaturan functions
+        function saveGeneralSettings() {
+            const Pengaturan = {
+                appName: Dokumen.getElementById('appName').value,
+                environment: Dokumen.getElementById('environment').value,
+                timezone: Dokumen.getElementById('timezone').value,
+                debugMode: Dokumen.getElementById('debugMode').checked
+            };
+            
+            showAlert('Berhasil', 'Pengaturan umum berhasil disimpan');
+            
+        }
+        
+        function saveCooperativeSettings() {
+            const Pengaturan = {
+                coopName: Dokumen.getElementById('coopName').value,
+                legalNumber: Dokumen.getElementById('legalNumber').value,
+                Alamat: Dokumen.getElementById('coopAddress').value,
+                Telepon: Dokumen.getElementById('coopPhone').value,
+                Email: Dokumen.getElementById('coopEmail').value,
+                Website: Dokumen.getElementById('coopWebsite').value
+            };
+            
+            showAlert('Berhasil', 'Pengaturan koperasi berhasil disimpan');
+            
+        }
+        
+        function saveLoanSettings() {
+            const Pengaturan = {
+                defaultInterestRate: Dokumen.getElementById('defaultInterestRate').value,
+                maxLoanAmount: Dokumen.getElementById('maxLoanAmount').value,
+                minLoanAmount: Dokumen.getElementById('minLoanAmount').value,
+                maxLoanTerm: Dokumen.getElementById('maxLoanTerm').value,
+                requireCollateral: Dokumen.getElementById('requireCollateral').checked,
+                autoApproval: Dokumen.getElementById('autoApproval').checked
+            };
+            
+            showAlert('Berhasil', 'Pengaturan pinjaman berhasil disimpan');
+            
+        }
+        
+        function saveSavingsSettings() {
+            const Pengaturan = {
+                savingsInterestRate: Dokumen.getElementById('savingsInterestRate').value,
+                minDeposit: Dokumen.getElementById('minDeposit').value,
+                minBalance: Dokumen.getElementById('minBalance').value,
+                autoCalculateInterest: Dokumen.getElementById('autoCalculateInterest').checked
+            };
+            
+            showAlert('Berhasil', 'Pengaturan simpanan berhasil disimpan');
+            
+        }
+        
+        // Utility functions
+        function showAlert(Tipe, Pesan) {
+            const alertHtml = `
+                <div class="alert alert-${Tipe} alert-dismissible fade show" role="Peringatan">
+                    ${Pesan}
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                </div>
+            `;
+            $('.container').prepend(alertHtml);
+            
+            setTimeout(() => {
+                $('.Peringatan').fadeOut();
+            }, 5000);
+        }
+        
+        // Initialize
+        checkAuth();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Load Pengaturan Data
+        function loadSettingsData() {
+            // Load general Pengaturan
+            loadGeneralSettings();
+            loadCompanySettings();
+            loadNotificationSettings();
+            loadBackupSettings();
+        }
+
+        function loadGeneralSettings() {
+            // Demo Pengaturan Data
+            const Pengaturan = {
+                koperasi_name: 'KSP Lam Gabe Jaya',
+                Alamat: 'Jl. Contoh Tidak. 123, Jakarta',
+                Telepon: '+62 21 1234 5678',
+                Email: 'Info@ksp-lamgabejaya.com'
+            };
+            
+            // Populate Formulir fields
+            Object.keys(Pengaturan).forEach(key => {
+                const field = Dokumen.querySelector(`[Nama="${key}"]`);
+                if (field) {
+                    field.value = Pengaturan[key];
+                }
+            });
+        }
+
+        function saveSettings(section) {
+            showAlert('Berhasil', `Pengaturan ${section} berhasil disimpan`);
+        }
+
+        function showAlert(Tipe, Pesan) {
+            const alertClass = Tipe === 'Berhasil' ? 'Peringatan-Berhasil' : 
+                              Tipe === 'Peringatan' ? 'Peringatan-Peringatan' : 
+                              Tipe === 'Info' ? 'Peringatan-Info' : 'Peringatan-danger';
+            
+            const Peringatan = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="Peringatan">
+                    <i class="fas fa-${Tipe === 'Berhasil' ? 'check-circle' : Tipe === 'alert' ? 'exclamation-triangle' : Tipe === 'info' ? 'info-circle' : 'times-circle'}"></i>
+                    ${Pesan}
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                </div>
+            `;
+            
+            const container = Dokumen.querySelector('.container');
+            container.insertAdjacentHTML('afterbegin', Peringatan);
+            
+            setTimeout(() => {
+                const alertElement = container.querySelector('.Peringatan');
+                if (alertElement) {
+                    alertElement.remove();
+                }
+            }, 5000);
+        }
+
+        $(Dokumen).ready(function() {
+            loadSettingsData();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengguna - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <link rel="stylesheet" href="/mono/helpers/modal-styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-link {
+            color: white;
+            text-decoration: Tidak Ada;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .container {
+            padding: 2rem;
+        }
+        
+        .Tabel-actions {
+            white-space: nowrap;
+        }
+        
+        .Tabel-actions .btn {
+            margin: 0 2px;
+        }
+        
+        .role-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .role-super_admin { background-color: #dc3545; color: white; }
+        .role-Admin { background-color: #0d6efd; color: white; }
+        .role-mantri { background-color: #198754; color: white; }
+        .role-Anggota { background-color: #6c757d; color: white; }
+        
+        .Status-Aktif { background-color: #d4edda; color: #155724; }
+        .Status-Tidak Aktif { background-color: #f8d7da; color: #721c24; }
+        
+        .Pengguna-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-user-cog"></i> Pengguna</h1>
+            <div>
+                <a href="/mono/Dashboard.html" class="btn-link me-2">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <button class="btn-link" onclick="openUserModal('Tambah')">
+                    <i class="fas fa-user-plus"></i> Tambah Pengguna
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="totalUsers">0</h5>
+                        <p class="card-text">Total Pengguna</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="activeUsers">0</h5>
+                        <p class="card-text">Pengguna Aktif</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="adminUsers">0</h5>
+                        <p class="card-text">Admin/Mantri</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="memberUsers">0</h5>
+                        <p class="card-text">Anggota</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" placeholder="Cari pengguna..." id="searchInput">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-Pilih" id="statusFilter">
+                            <option value="">Semua Status</option>
+                            <option value="1">Aktif</option>
+                            <option value="0">Tidak Aktif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-Pilih" id="roleFilter">
+                            <option value="">Semua Role</option>
+                            <option value="super_admin">Super Admin</option>
+                            <option value="Admin">Admin</option>
+                            <option value="mantri">Mantri</option>
+                            <option value="Anggota">Anggota</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary" onclick="filterUsers()">
+                            <i class="fas fa-Filter"></i> Filter
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="Tabel-responsive">
+                    <table class="Tabel Tabel-striped">
+                        <thead>
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Tanggal Daftar</th>
+                                <th>Masuk Terakhir</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul" id="userModalTitle">Tambah Pengguna Baru</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId" name="id">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Lengkap</label>
+                                    <input type="text" class="form-control" name="Nama" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Kata Sandi</label>
+                                    <input type="password" class="form-control" name="password" id="password">
+                                    <small class="form-text text-muted">Kosongkan jika tidak ingin mengubah Kata Sandi</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Konfirmasi Kata Sandi</label>
+                                    <input type="password" class="form-control" name="confirm_password" id="confirmPassword">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Role</label>
+                                    <select class="form-control" name="role_id" required>
+                                        <option value="">Pilih Role</option>
+                                        <option value="1">Super Administrator</option>
+                                        <option value="2">Administrator</option>
+                                        <option value="3">Petugas Lapangan (Mantri)</option>
+                                        <option value="4">Anggota</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-control" name="is_active">
+                                        <option value="1">Aktif</option>
+                                        <option value="0">Tidak Aktif</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Unit</label>
+                                    <select class="form-control" name="unit_id">
+                                        <option value="1">Unit 1</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="send_email" id="sendEmail">
+                                        <label class="form-check-label" for="sendEmail">
+                                            Kirim Email notifikasi
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Reset Kata Sandi</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="resetPasswordForm">
+                        <input type="hidden" id="resetUserId" name="user_id">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Kata Sandi Baru</label>
+                            <input type="password" class="form-control" name="new_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Konfirmasi Kata Sandi Baru</label>
+                            <input type="password" class="form-control" name="confirm_new_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="send_email_reset" id="sendEmailReset" checked>
+                                <label class="form-check-label" for="sendEmailReset">
+                                    Kirim Kata Sandi baru ke Email
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-alert" onclick="resetPassword()">Reset Kata Sandi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/mono/helpers/indonesian-format.js"></script>
+    <script src="/mono/helpers/modal-Sistem.js"></script>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            
+            
+
+            if (!token || !Pengguna) {
+                
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+
+            const userData = JSON.parse(Pengguna);
+            const userNameElement = Dokumen.getElementById("Nama Pengguna");
+            if (userNameElement) {
+                userNameElement.textContent = userData.Nama || "Pengguna";
+            }
+            
+        }
+
+        // Load Pengguna
+        function loadUsers() {
+            $.ajax({
+                url: '/mono/API/crud.php?path=Pengguna',
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        displayUsers(response.Data);
+                        updateStatistics(response.Data);
+                    }
+                }
+            });
+        }
+
+        // Display Pengguna in Tabel
+        function displayUsers(Pengguna) {
+            const tbody = $('#usersTableBody');
+            tbody.Kosong();
+            
+            Pengguna.forEach(Pengguna => {
+                const roleClass = `role-${Pengguna.role_name}`;
+                const statusClass = Pengguna.is_active ? 'Status-Aktif' : 'Status-Tidak Aktif';
+                const statusText = Pengguna.is_active ? 'Aktif' : 'Tidak Aktif';
+                const initials = Pengguna.Nama.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                
+                tbody.append(`
+                    <tr>
+                        <td>
+                            <div class="Pengguna-avatar">${initials}</div>
+                        </td>
+                        <td>${Pengguna.Nama}</td>
+                        <td>${Pengguna.Email}</td>
+                        <td><span class="role-badge ${roleClass}">${Pengguna.role_display}</span></td>
+                        <td><span class="Status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${formatTanggal(Pengguna.created_at)}</td>
+                        <td>${Pengguna.last_login ? formatTanggal(Pengguna.last_login) : '-'}</td>
+                        <td class="Tabel-actions">
+                            <button class="btn btn-sm btn-info" onclick="viewUser(${Pengguna.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-alert" onclick="editUser(${Pengguna.id})">
+                                <i class="fas fa-Edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="showResetPasswordModal(${Pengguna.id})">
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser(${Pengguna.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(Pengguna) {
+            const totalUsers = Pengguna.length;
+            const activeUsers = Pengguna.Filter(u => u.is_active).length;
+            const adminUsers = Pengguna.Filter(u => u.role_name === 'Admin' || u.role_name === 'mantri').length;
+            const memberUsers = Pengguna.Filter(u => u.role_name === 'Anggota').length;
+            
+            $('#totalUsers').text(totalUsers);
+            $('#activeUsers').text(activeUsers);
+            $('#adminUsers').text(adminUsers);
+            $('#memberUsers').text(memberUsers);
+        }
+
+        // Open Pengguna modal
+        function openUserModal(mode, userId = null) {
+            $('#userModalTitle').text(mode === 'Tambah' ? 'Tambah Pengguna Baru' : 'Edit Pengguna');
+            $('#userForm')[0].Reset();
+            
+            if (mode === 'Edit' && userId) {
+                // Load Pengguna Data
+                $.ajax({
+                    url: `/API/crud.php?path=Pengguna/${userId}`,
+                    method: 'GET',
+                    Berhasil: (response) => {
+                        if (response.Berhasil) {
+                            const Pengguna = response.Data;
+                            $('#userId').val(Pengguna.id);
+                            $('input[Nama="Nama"]').val(Pengguna.Nama);
+                            $('input[Nama="Email"]').val(Pengguna.Email);
+                            $('Pilih[Nama="role_id"]').val(Pengguna.role_id);
+                            $('Pilih[Nama="is_active"]').val(Pengguna.is_active ? '1' : '0');
+                            $('Pilih[Nama="unit_id"]').val(Pengguna.unit_id || '1');
+                            
+                            // Hide Kata Sandi fields for Edit
+                            $('#Kata Sandi').parent().hide();
+                            $('#confirmPassword').parent().hide();
+                        }
+                    }
+                });
+            } else {
+                // Show Kata Sandi fields for Tambah
+                $('#Kata Sandi').parent().show();
+                $('#confirmPassword').parent().show();
+            }
+            
+            $('#userModal').modal('show');
+        }
+
+        // Simpan Pengguna
+        function saveUser() {
+            const formData = $('#userForm').serialize();
+            const userId = $('#userId').val();
+            const isEdit = userId !== '';
+            
+            // Validate passwords for new Pengguna
+            if (!isEdit) {
+                const Kata Sandi = $('input[Nama="Kata Sandi"]').val();
+                const confirmPassword = $('input[Nama="confirm_password"]').val();
+                
+                if (Kata Sandi !== confirmPassword) {
+                    showAlert('Error', 'Kata Sandi dan konfirmasi Kata Sandi tidak sama');
+                    return;
+                }
+                
+                if (Kata Sandi.length < 6) {
+                    showAlert('Error', 'Kata Sandi minimal 6 karakter');
+                    return;
+                }
+            }
+            
+            $.ajax({
+                url: `/api/crud.php?path=users${isEdit ? '/' + userId : ''}`,
+                method: isEdit ? 'PUT' : 'POST',
+                data: formData,
+                success: (response) => {
+                    if (response.Berhasil) {
+                        showAlert('Berhasil', isEdit ? 'Pengguna berhasil diupdate' : 'Pengguna berhasil ditambahkan');
+                        $('#userModal').modal('hide');
+                        loadUsers();
+                    } else {
+                        showAlert('Error', response.Pesan);
+                    }
+                },
+                Error: () => {
+                    showAlert('Error', 'Terjadi kesalahan');
+                }
+            });
+        }
+
+        // View Pengguna Detail
+        function viewUser(userId) {
+            $.ajax({
+                url: `/API/crud.php?path=Pengguna/${userId}`,
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const Pengguna = response.Data;
+                        const Detail = `
+                            Detail Pengguna:
+                            
+                            Informasi Pribadi:
+                            Nama: ${Pengguna.Nama}
+                            Email: ${Pengguna.Email}
+                            Role: ${Pengguna.role_display}
+                            Status: ${Pengguna.is_active ? 'Aktif' : 'Tidak Aktif'}
+                            Unit: ${Pengguna.unit_id || 'Unit 1'}
+                            
+                            Informasi Akun:
+                            ID: ${Pengguna.id}
+                            UUID: ${Pengguna.uuid}
+                            Tanggal Daftar: ${formatTanggal(Pengguna.created_at)}
+                            Terakhir Perbarui: ${formatTanggal(Pengguna.updated_at)}
+                            Masuk Terakhir: ${Pengguna.last_login ? formatTanggal(Pengguna.last_login) : 'Belum pernah Masuk'}
+                        `;
+                        Peringatan(Detail);
+                    }
+                }
+            });
+        }
+
+        // Edit Pengguna
+        function editUser(userId) {
+            openUserModal('Edit', userId);
+        }
+
+        // Show Reset Kata Sandi modal
+        function showResetPasswordModal(userId) {
+            $('#resetUserId').val(userId);
+            $('#resetPasswordForm')[0].Reset();
+            $('#resetPasswordModal').modal('show');
+        }
+
+        // Reset Kata Sandi
+        function resetPassword() {
+            const newPassword = $('input[Nama="new_password"]').val();
+            const confirmPassword = $('input[Nama="confirm_new_password"]').val();
+            const userId = $('#resetUserId').val();
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('Error', 'Kata Sandi dan konfirmasi Kata Sandi tidak sama');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showAlert('Error', 'Kata Sandi minimal 6 karakter');
+                return;
+            }
+            
+            $.ajax({
+                url: `/api/crud.php?path=users/${userId}/reset-password`,
+                method: 'PUT',
+                data: { password: newPassword },
+                success: (response) => {
+                    if (response.Berhasil) {
+                        showAlert('Berhasil', 'Kata Sandi berhasil direset');
+                        $('#resetPasswordModal').modal('hide');
+                    } else {
+                        showAlert('Error', response.Pesan);
+                    }
+                },
+                Error: () => {
+                    showAlert('Error', 'Terjadi kesalahan');
+                }
+            });
+        }
+
+        // Hapus Pengguna
+        function deleteUser(userId) {
+            if (Konfirmasi('Apakah Anda yakin ingin menghapus pengguna ini?')) {
+                $.ajax({
+                    url: `/API/crud.php?path=Pengguna/${userId}`,
+                    method: 'Hapus',
+                    Berhasil: (response) => {
+                        if (response.Berhasil) {
+                            showAlert('Berhasil', 'Pengguna berhasil dihapus');
+                            loadUsers();
+                        } else {
+                            showAlert('Error', response.Pesan);
+                        }
+                    },
+                    Error: () => {
+                        showAlert('Error', 'Terjadi kesalahan');
+                    }
+                });
+            }
+        }
+
+        // Filter Pengguna
+        function filterUsers() {
+            const Cari = $('#searchInput').val();
+            const Status = $('#statusFilter').val();
+            const role = $('#roleFilter').val();
+            
+            // Implement filtering logic
+            loadUsers();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            $('#searchInput').val('');
+            $('#statusFilter').val('');
+            $('#roleFilter').val('');
+            loadUsers();
+        }
+
+        // Show Peringatan
+        function showAlert(Tipe, Pesan) {
+            const alertClass = Tipe === 'Berhasil' ? 'Peringatan-Berhasil' : 'Peringatan-danger';
+            const Peringatan = `<div class="alert ${alertClass} alert-dismissible fade show" role="Peringatan">
+                ${Pesan}
+                <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+            </div>`;
+            $('.container').prepend(Peringatan);
+            
+            setTimeout(() => {
+                $('.Peringatan').fadeOut();
+            }, 3000);
+        }
+
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Initialize
+        $(Dokumen).ready(function() {
+            checkAuth();
+            loadUsers();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

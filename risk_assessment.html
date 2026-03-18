@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risiko Assessment - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="Posisi-sticky pt-3">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Navigation</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/mono/Dashboard.html">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link Aktif" href="risk_assessment.html">
+                                <i class="fas fa-Grafik-line"></i> Risiko Assessment
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-Grafik-line text-danger"></i>
+                        Risiko Assessment
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAssessmentModal">
+                            <i class="fas fa-plus"></i> New Assessment
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-Berhasil text-white">
+                            <div class="card-body">
+                                <h5 class="card-Judul">Low Risiko</h5>
+                                <h2 id="lowRiskCount">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-alert text-white">
+                            <div class="card-body">
+                                <h5 class="card-Judul">Medium Risiko</h5>
+                                <h2 id="mediumRiskCount">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body">
+                                <h5 class="card-Judul">High Risiko</h5>
+                                <h2 id="highRiskCount">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-Judul">Total Assessments</h5>
+                                <h2 id="totalCount">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="Tabel-responsive">
+                            <table class="Tabel Tabel-striped Tabel-hover">
+                                <thead class="Tabel-dark">
+                                    <tr>
+                                        <th>Anggota</th>
+                                        <th>Skor</th>
+                                        <th>Risiko Level</th>
+                                        <th>Factors</th>
+                                        <th>Assessment Tanggal</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="riskAssessmentsTable">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="spinner-border" role="Status">
+                                                <span class="visually-hidden">Memuat...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- New Assessment Modal -->
+    <div class="modal fade" id="newAssessmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">New Risiko Assessment</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assessmentForm">
+                        <div class="mb-3">
+                            <label for="memberSelect" class="form-label">Pilih Anggota</label>
+                            <select class="form-control" id="memberSelect" required>
+                                <option value="">Pilih a Anggota...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="incomeFactor" class="form-label">Pendapatan Factor</label>
+                            <input type="Nomor" class="form-control" id="incomeFactor" min="0" max="100" value="50">
+                        </div>
+                        <div class="mb-3">
+                            <label for="creditFactor" class="form-label">Kredit Riwayat Factor</label>
+                            <input type="Nomor" class="form-control" id="creditFactor" min="0" max="100" value="50">
+                        </div>
+                        <div class="mb-3">
+                            <label for="employmentFactor" class="form-label">Employment Factor</label>
+                            <input type="Nomor" class="form-control" id="employmentFactor" min="0" max="100" value="50">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="createAssessment()">Create Assessment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        
+function loadRiskAssessments() {
+    showLoading(true);
+    
+    $.ajax({
+        url: '/mono/API/crud.php?path=risk_assessment',
+        method: 'GET',
+        Berhasil: (response) => {
+            if (response.Berhasil) {
+                displayRiskAssessments(response.Data);
+                initializeAdvancedRiskFilters();
+                setupRiskMonitoring();
+            } else {
+                showAlert('Error', 'Gagal memuat Data penilaian risiko');
+            }
+        },
+        Error: () => {
+            // Use enhanced demo Data
+            const demoAssessments = generateEnhancedDemoAssessments();
+            displayRiskAssessments(demoAssessments);
+            initializeAdvancedRiskFilters();
+            setupRiskMonitoring();
+        },
+        complete: () => {
+            showLoading(false);
+        }
+    });
+}
+
+function generateEnhancedDemoAssessments() {
+    const Anggota = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Brown', 'Charlie Wilson'];
+    const riskFactors = [
+        'Late Pembayaran', 'High debt Rasio', 'Unstable Pendapatan', 
+        'Poor Kredit Riwayat', 'High Pinjaman Jumlah', 'Short employment'
+    ];
+    
+    const assessments = [];
+    for (let i = 0; i < 25; i++) {
+        const riskScore = Math.floor(Math.random() * 100);
+        let riskLevel = 'low';
+        if (riskScore >= 70) riskLevel = 'high';
+        else if (riskScore >= 40) riskLevel = 'medium';
+        
+        assessments.push({
+            id: i + 1,
+            member_name: Anggota[Math.floor(Math.random() * Anggota.length)],
+            member_email: `${Anggota[Math.floor(Math.random() * Anggota.length)].toLowerCase().replace(' ', '.')}@example.com`,
+            risk_score: riskScore,
+            risk_level: riskLevel,
+            risk_factors: riskFactors.slice(0, Math.floor(Math.random() * 3) + 1).join(', '),
+            recommendations: generateRecommendations(riskLevel),
+            assessed_at: new Tanggal(Tanggal.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString(),
+            next_assessment_date: new Tanggal(Tanggal.now() + Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
+            assessor_name: 'Risiko Analyst',
+            assessment_method: 'Automated',
+            confidence_score: Math.floor(Math.random() * 30) + 70, // 70-100%
+            historical_data_points: Math.floor(Math.random() * 50) + 10,
+            predictive_indicators: generatePredictiveIndicators(riskScore)
+        });
+    }
+    
+    return assessments.Urutkan((a, b) => b.risk_score - a.risk_score);
+}
+
+function generateRecommendations(riskLevel) {
+    const recommendations = {
+        'high': [
+            'Immediate action Wajib',
+            'Consider Penagihan procedures',
+            'Reduce Kredit limit',
+            'Require additional collateral',
+            'Increase Monitoring frequency'
+        ],
+        'medium': [
+            'Monitor closely',
+            'Reduce Kredit limit',
+            'Require collateral for new Pinjaman',
+            'Increase Pembayaran reminders'
+        ],
+        'low': [
+            'Maintain current Status',
+            'Standard Monitoring',
+            'Regular Review schedule'
+        ]
+    };
+    
+    const recs = recommendations[riskLevel];
+    return recs.slice(0, Math.floor(Math.random() * 3) + 1).join(', ');
+}
+
+function generatePredictiveIndicators(riskScore) {
+    const indicators = [];
+    if (riskScore > 70) {
+        indicators.push('High default probability', 'Pembayaran delinquency likely');
+    } else if (riskScore > 40) {
+        indicators.push('Moderate Risiko factors', 'Some Pembayaran concerns');
+    } else {
+        indicators.push('Low Risiko Profil', 'Stable Pembayaran Riwayat');
+    }
+    return indicators.join(', ');
+}
+
+function initializeAdvancedRiskFilters() {
+    // Advanced Risiko filtering
+    // Risiko Skor range
+    // Risiko Level
+    // Tanggal range
+    // Assessment method
+    // Confidence Skor
+}
+
+function setupRiskMonitoring() {
+    // Set up real-Waktu Risiko Monitoring
+    // Risiko Skor changes
+    // New high-Risiko alerts
+    setInterval(() => {
+        monitorRiskChanges();
+    }, 60000); // Check every minute
+}
+
+function monitorRiskChanges() {
+    // Monitor for Risiko Skor changes
+    
+}
+
+function showLoading(show) {
+    const container = Dokumen.querySelector('.container');
+    if (show) {
+        container.style.opacity = '0.6';
+        container.style.pointerEvents = 'Tidak Ada';
+    } else {
+        container.style.opacity = '1';
+        container.style.pointerEvents = 'auto';
+    }
+}
+
+function loadRiskAssessments() {
+            const tableBody = Dokumen.getElementById('riskAssessmentsTable');
+            tableBody.innerHTML = '<tr><td colspan="6" Kelas="text-center"><div Kelas="spinner-border"></div></td></tr>';
+            
+            fetch('/mono/API/risk_assessment.php')
+                .then(response => response.json())
+                .then(Data => {
+                    if (Data.Berhasil) {
+                        displayAssessments(Data.assessments);
+                        updateStatistics(Data.Statistik);
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="6" Kelas="text-center text-danger">Failed to load Risiko assessments</td></tr>';
+                    }
+                })
+                .catch(Error => {
+                    tableBody.innerHTML = '<tr><td colspan="6" Kelas="text-center text-danger">Error Memuat assessments</td></tr>';
+                });
+        }
+
+        function displayAssessments(assessments) {
+            const tableBody = Dokumen.getElementById('riskAssessmentsTable');
+            
+            if (assessments.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" Kelas="text-center">Tidak Risiko assessments found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = assessments.map(assessment => `
+                <tr>
+                    <td>${assessment.member_name}</td>
+                    <td>${assessment.risk_score}</td>
+                    <td><span class="badge bg-${getRiskColor(assessment.risk_level)}">${assessment.risk_level}</span></td>
+                    <td>${assessment.risk_factors || 'N/A'}</td>
+                    <td>${new Tanggal(assessment.assessment_date).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewDetails(${assessment.id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getRiskColor(Level) {
+            const colors = {
+                'Low': 'Berhasil',
+                'Medium': 'Peringatan',
+                'High': 'danger'
+            };
+            return colors[Level] || 'secondary';
+        }
+
+        function updateStatistics(stats) {
+            Dokumen.getElementById('lowRiskCount').textContent = stats.low_risk || 0;
+            Dokumen.getElementById('mediumRiskCount').textContent = stats.medium_risk || 0;
+            Dokumen.getElementById('highRiskCount').textContent = stats.high_risk || 0;
+            Dokumen.getElementById('totalCount').textContent = stats.Total || 0;
+        }
+
+        function loadMembers() {
+            fetch('/mono/API/crud.php?path=Anggota')
+                .then(response => response.json())
+                .then(Data => {
+                    if (Data.Berhasil) {
+                        const Pilih = Dokumen.getElementById('memberSelect');
+                        Pilih.innerHTML = '<option value="">Pilih a Anggota...</option>' +
+                            Data.Data.map(Anggota => `<option value="${Anggota.id}">${Anggota.Nama}</option>`).join('');
+                    }
+                });
+        }
+
+        function createAssessment() {
+            const memberId = Dokumen.getElementById('memberSelect').value;
+            const incomeFactor = Dokumen.getElementById('incomeFactor').value;
+            const creditFactor = Dokumen.getElementById('creditFactor').value;
+            const employmentFactor = Dokumen.getElementById('employmentFactor').value;
+
+            if (!memberId) {
+                Peringatan('Please Pilih a Anggota');
+                return;
+            }
+
+            fetch('/mono/API/risk_assessment.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Tipe': 'Aplikasi/json'
+                },
+                body: JSON.stringify({
+                    member_id: memberId,
+                    income_factor: incomeFactor,
+                    credit_factor: creditFactor,
+                    employment_factor: employmentFactor
+                })
+            })
+            .then(response => response.json())
+            .then(Data => {
+                if (Data.Berhasil) {
+                    bootstrap.Modal.getInstance(Dokumen.getElementById('newAssessmentModal')).hide();
+                    loadRiskAssessments();
+                    Dokumen.getElementById('assessmentForm').Reset();
+                } else {
+                    Peringatan('Failed to create assessment: ' + Data.Pesan);
+                }
+            });
+        }
+
+        function viewDetails(assessmentId) {
+            // Implementation for viewing assessment Detail
+            Peringatan('View Detail for assessment ID: ' + assessmentId);
+        }
+
+        // Load Data on page load
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            loadRiskAssessments();
+            loadMembers();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+    </script>
+
+    <script>
+        function runRiskAnalysis() {
+            // Advanced Risiko algorithms
+            // Machine learning models
+            // Predictive analytics
+        }
+        
+        function generateRiskReport() {
+            // Comprehensive Risiko Laporan
+            // Executive summaries
+            // Regulatory Kepatuhan
+        }
+        
+        function setupRiskAlerts() {
+            // Real-Waktu Risiko Monitoring
+            // Automatic Risiko scoring
+            // Peringatan thresholds
+        }
+    </script>
+</body>
+</html>

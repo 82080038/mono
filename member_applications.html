@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Applications - Anggota Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+
+    <style>
+        .header {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+
+        .btn-Keluar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+
+        .btn-Keluar:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .Aplikasi-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #20c997;
+            cursor: pointer;
+        }
+
+        .Aplikasi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .Aplikasi-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .Status-Menunggu {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .Status-under-Review {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .Status-approved {
+            background: #28a745;
+            color: white;
+        }
+
+        .Status-rejected {
+            background: #dc3545;
+            color: white;
+        }
+
+        .Status-disbursed {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .Status-Selesai {
+            background: #20c997;
+            color: white;
+        }
+
+        .Pinjaman-Tipe {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .Tipe-personal {
+            background: #007bff;
+            color: white;
+        }
+
+        .Tipe-Bisnis {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .Tipe-education {
+            background: #28a745;
+            color: white;
+        }
+
+        .Tipe-Beranda {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .Tipe-vehicle {
+            background: #dc3545;
+            color: white;
+        }
+
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+
+        .quick-action:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: #20c997;
+            margin-bottom: 0.5rem;
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Aplikasi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .icon-Menunggu {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+
+        .icon-under-Review {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .icon-approved {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+
+        .icon-rejected {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .icon-disbursed {
+            background: linear-gradient(135deg, #6f42c1, #5a2d91);
+        }
+
+        .icon-Selesai {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+            Posisi: relative;
+        }
+
+        .progress-ring circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .Pinjaman-Ringkasan {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .Ringkasan-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .Ringkasan-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .Ringkasan-label {
+            opacity: 0.9;
+        }
+
+        .Ringkasan-value {
+            font-weight: bold;
+        }
+
+        .Aplikasi-Detail {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .detail-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .detail-value {
+            color: #6c757d;
+        }
+
+        .Aplikasi-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .Aplikasi-actions .btn {
+            flex: 1;
+        }
+
+        .Bunga-Tarif {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .trend-up {
+            color: #28a745;
+        }
+
+        .trend-down {
+            color: #dc3545;
+        }
+
+        .trend-neutral {
+            color: #6c757d;
+        }
+
+        .wizard-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            Posisi: relative;
+        }
+
+        .wizard-step {
+            flex: 1;
+            text-align: center;
+            Posisi: relative;
+        }
+
+        .wizard-step::after {
+            content: '';
+            Posisi: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e9ecef;
+            z-index: -1;
+        }
+
+        .wizard-step:last-child::after {
+            display: Tidak Ada;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .step-Aktif {
+            background: #20c997;
+            color: white;
+        }
+
+        .step-Selesai {
+            background: #28a745;
+            color: white;
+        }
+
+        .Dokumen-Unggah {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+        }
+
+        .Dokumen-Unggah:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+        }
+
+        .Dokumen-preview {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .Dokumen-Nama {
+            font-weight: 500;
+        }
+
+        .Dokumen-size {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .Dokumen-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .eligibility-check {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .check-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .check-passed {
+            background: #28a745;
+        }
+
+        .check-failed {
+            background: #dc3545;
+        }
+
+        .check-Menunggu {
+            background: #ffc107;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-hand-holding-usd"></i> Anggota Applications</h1>
+                <p class="mb-0">Anggota - Pinjaman Applications & Status Tracking</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Application Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="Pinjaman-Ringkasan">
+                    <h5 class="mb-3">Pinjaman Ringkasan</h5>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Total Applied:</span>
+                        <span class="Ringkasan-value">Rp 75,000,000</span>
+                    </div>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Aktif Pinjaman:</span>
+                        <span class="Ringkasan-value">2</span>
+                    </div>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Monthly Pembayaran:</span>
+                        <span class="Ringkasan-value">Rp 2,750,000</span>
+                    </div>
+                    <div class="trend-indicator">
+                        <i class="fas fa-arrow-up trend-up"></i>
+                        <span class="trend-up">+1 new Aplikasi Bulan Ini</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <i class="fas fa-File-alt fa-2x mb-2"></i>
+                                <h6>Total Applications</h6>
+                                <h3 id="totalApplications">0</h3>
+                                <p class="mb-0">Submitted</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-Berhasil text-white">
+                            <div class="card-body">
+                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                <h6>Approved</h6>
+                                <h3 id="approvedApplications">0</h3>
+                                <p class="mb-0">Applications</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-alert text-white">
+                            <div class="card-body">
+                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                <h6>Menunggu</h6>
+                                <h3 id="pendingApplications">0</h3>
+                                <p class="mb-0">Applications</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-info text-white">
+                            <div class="card-body">
+                                <i class="fas fa-Persentase fa-2x mb-2"></i>
+                                <h6>Avg Bunga</h6>
+                                <h3 id="avgInterestRate">0%</h3>
+                                <p class="mb-0">Tarif</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <!-- Application Form -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-plus-circle"></i> New Pinjaman Aplikasi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="wizard-steps">
+                            <div class="wizard-step">
+                                <div class="step-circle step-Aktif">1</div>
+                                <small>Personal Info</small>
+                            </div>
+                            <div class="wizard-step">
+                                <div class="step-circle">2</div>
+                                <small>Pinjaman Detail</small>
+                            </div>
+                            <div class="wizard-step">
+                                <div class="step-circle">3</div>
+                                <small>Documents</small>
+                            </div>
+                            <div class="wizard-step">
+                                <div class="step-circle">4</div>
+                                <small>Review</small>
+                            </div>
+                        </div>
+
+                        <form id="loanApplicationForm">
+                            <input type="hidden" id="csrfToken" name="csrf_token" value="">
+                            <!-- Step 1: Personal Information -->
+                            <div id="step1" class="wizard-content">
+                                <h6>Personal Informasi</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Full Nama *</label>
+                                            <input type="text" class="form-control" id="fullName" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Email *</label>
+                                            <input type="email" class="form-control" id="email" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Telepon *</label>
+                                            <input type="tel" class="form-control" id="Telepon" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Tanggal of Birth *</label>
+                                            <input type="Tanggal" class="form-control" id="dateOfBirth" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Alamat *</label>
+                                            <textarea class="form-control" id="Alamat" rows="2" required></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Kota *</label>
+                                            <input type="text" class="form-control" id="Kota" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Kode Pos</label>
+                                            <input type="text" class="form-control" id="postalCode">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Monthly Pendapatan *</label>
+                                            <input type="Nomor" class="form-control" id="monthlyIncome" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Employment Status</label>
+                                            <select class="form-Pilih" id="employmentStatus">
+                                                <option value="">Pilih Status</option>
+                                                <option value="employed">Employed</option>
+                                                <option value="self-employed">Self Employed</option>
+                                                <option value="unemployed">Unemployed</option>
+                                                <option value="retired">Retired</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">Lanjut
+                                        Step</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Loan Details -->
+                            <div id="step2" class="wizard-content" style="display: Tidak Ada;">
+                                <h6>Pinjaman Detail</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Pinjaman Tipe *</label>
+                                            <select class="form-Pilih" id="loanType" required>
+                                                <option value="">Pilih Pinjaman Tipe</option>
+                                                <option value="personal">Personal Pinjaman</option>
+                                                <option value="Bisnis">Bisnis Pinjaman</option>
+                                                <option value="education">Education Pinjaman</option>
+                                                <option value="Beranda">Beranda Pinjaman</option>
+                                                <option value="vehicle">Vehicle Pinjaman</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Pinjaman Jumlah *</label>
+                                            <input type="Nomor" class="form-control" id="loanAmount" min="1000000"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Pinjaman Term (months) *</label>
+                                            <input type="Nomor" class="form-control" id="loanTerm" min="6" max="360"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Purpose *</label>
+                                            <select class="form-Pilih" id="loanPurpose" required>
+                                                <option value="">Pilih purpose</option>
+                                                <option value="personal">Personal Use</option>
+                                                <option value="Bisnis">Bisnis Expansion</option>
+                                                <option value="education">Education</option>
+                                                <option value="Beranda">Beranda Purchase</option>
+                                                <option value="vehicle">Vehicle Purchase</option>
+                                                <option value="debt_consolidation">Debt Consolidation</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Collateral</label>
+                                            <select class="form-Pilih" id="collateral">
+                                                <option value="">Pilih collateral Tipe</option>
+                                                <option value="property">Property</option>
+                                                <option value="vehicle">Vehicle</option>
+                                                <option value="Simpanan">Simpanan</option>
+                                                <option value="guarantor">Guarantor</option>
+                                                <option value="Tidak Ada">Tidak Ada</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Deskripsi</label>
+                                            <textarea class="form-control" id="loanDescription" rows="3"
+                                                placeholder="Describe the purpose of the Pinjaman..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="previousStep()">Sebelumnya</button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">Lanjut
+                                        Step</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Documents -->
+                            <div id="step3" class="wizard-content" style="display: Tidak Ada;">
+                                <h6>Wajib Documents</h6>
+                                <div class="eligibility-check">
+                                    <h6>Eligibility Check</h6>
+                                    <div class="check-item">
+                                        <div class="check-icon check-Menunggu">
+                                            <i class="fas fa-question"></i>
+                                        </div>
+                                        <span>Age between 18-65 years</span>
+                                    </div>
+                                    <div class="check-item">
+                                        <div class="check-icon check-Menunggu">
+                                            <i class="fas fa-question"></i>
+                                        </div>
+                                        <span>Minimum Pendapatan requirement</span>
+                                    </div>
+                                    <div class="check-item">
+                                        <div class="check-icon check-Menunggu">
+                                            <i class="fas fa-question"></i>
+                                        </div>
+                                        <span>Kredit Skor check</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6>Unggah Documents</h6>
+                                    <div class="Dokumen-Unggah"
+                                        onclick="Dokumen.getElementById('documentUpload').click()">
+                                        <i class="fas fa-cloud-Unggah-alt fa-2x mb-2"></i>
+                                        <h6>Click to Unggah documents</h6>
+                                        <p class="text-muted">Supported formats: PDF, JPG, PNG (Max 5MB)</p>
+                                        <input type="File" id="documentUpload" multiple accept=".PDF,.jpg,.jpeg,.png"
+                                            style="display: Tidak Ada;">
+                                    </div>
+                                </div>
+
+                                <div id="uploadedDocuments">
+                                    <!-- Uploaded documents will be shown here -->
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="previousStep()">Sebelumnya</button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">Lanjut
+                                        Step</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Review -->
+                            <div id="step4" class="wizard-content" style="display: Tidak Ada;">
+                                <h6>Review Aplikasi</h6>
+                                <div class="Aplikasi-Detail">
+                                    <h6>Personal Informasi</h6>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Nama:</span>
+                                        <span class="detail-value" id="reviewName">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Email:</span>
+                                        <span class="detail-value" id="reviewEmail">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Telepon:</span>
+                                        <span class="detail-value" id="reviewPhone">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Monthly Pendapatan:</span>
+                                        <span class="detail-value" id="reviewIncome">-</span>
+                                    </div>
+                                </div>
+
+                                <div class="Aplikasi-Detail">
+                                    <h6>Pinjaman Detail</h6>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Pinjaman Tipe:</span>
+                                        <span class="detail-value" id="reviewLoanType">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Jumlah:</span>
+                                        <span class="detail-value" id="reviewAmount">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Term:</span>
+                                        <span class="detail-value" id="reviewTerm">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Purpose:</span>
+                                        <span class="detail-value" id="reviewPurpose">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Bunga Tarif:</span>
+                                        <span class="detail-value" id="reviewInterestRate">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Monthly Pembayaran:</span>
+                                        <span class="detail-value" id="reviewPayment">-</span>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Important:</strong> By submitting this Aplikasi, you agree to the terms
+                                    and conditions of the Pinjaman Perjanjian.
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="previousStep()">Sebelumnya</button>
+                                    <button type="button" class="btn btn-Berhasil" onclick="submitApplication()">
+                                        <i class="fas fa-paper-plane"></i> Kirim Aplikasi
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Applications List -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> My Applications</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter"
+                                onchange="filterApplications()">
+                                <option value="">Semua Status</option>
+                                <option value="Menunggu">Menunggu</option>
+                                <option value="under_review">Under Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="disbursed">Disbursed</option>
+                                <option value="Selesai">Selesai</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="typeFilter"
+                                onchange="filterApplications()">
+                                <option value="">Semua Types</option>
+                                <option value="personal">Personal</option>
+                                <option value="Bisnis">Bisnis</option>
+                                <option value="education">Education</option>
+                                <option value="Beranda">Beranda</option>
+                                <option value="vehicle">Vehicle</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="applicationsList">
+                            <!-- Applications will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="checkEligibility()">
+                                    <i class="fas fa-calculator"></i>
+                                    <h6>Check Eligibility</h6>
+                                    <small class="text-muted">Pre-qualify</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="loanCalculator()">
+                                    <i class="fas fa-calculator"></i>
+                                    <h6>Calculator</h6>
+                                    <small class="text-muted">Estimate</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="contactSupport()">
+                                    <i class="fas fa-headset"></i>
+                                    <h6>Support</h6>
+                                    <small class="text-muted">Get Bantuan</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="downloadGuide()">
+                                    <i class="fas fa-book"></i>
+                                    <h6>Guide</h6>
+                                    <small class="text-muted">Unduh</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Status -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-pie"></i> Aplikasi Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="applicationStatus">
+                            <!-- Application status will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Aktivitas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <!-- Recent activity will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let applications = [];
+        let currentStep = 1;
+        let uploadedDocuments = [];
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function () {
+            initializePage();
+            loadApplications();
+            loadStatistics();
+            loadApplicationStatus();
+            loadRecentActivity();
+            initializeEventListeners();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+
+            // Check if Pengguna is Anggota
+            const validRoles = ['Anggota'];
+            if (!validRoles.includes(currentUser.role)) {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+
+            // Initialize CSRF token
+            initializeCSRFToken();
+        }
+
+        // Generate CSRF token
+        function generateCSRFToken() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Initialize CSRF token
+        function initializeCSRFToken() {
+            const csrfToken = generateCSRFToken();
+            const csrfInput = Dokumen.getElementById('csrfToken');
+            if (csrfInput) {
+                csrfInput.value = csrfToken;
+            }
+            return csrfToken;
+        }
+
+        // Validate CSRF token
+        function validateCSRFToken(token) {
+            return token && token.length === 64 && /^[0-9a-f]+$/.test(token);
+        }
+
+        // Load applications
+        async function loadApplications() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_applications', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        applications = Data.Data;
+                        displayApplications();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat applications:', Error);
+                // Use demo Data
+                applications = getDemoApplications();
+                displayApplications();
+            }
+        }
+
+        // Display applications
+        function displayApplications() {
+            const applicationsList = Dokumen.getElementById('applicationsList');
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            const typeFilter = Dokumen.getElementById('typeFilter').value;
+
+            let filteredApplications = applications;
+
+            // Filter by Status
+            if (statusFilter) {
+                filteredApplications = filteredApplications.Filter(app => app.Status === statusFilter);
+            }
+
+            // Filter by Tipe
+            if (typeFilter) {
+                filteredApplications = filteredApplications.Filter(app => app.Tipe === typeFilter);
+            }
+
+            applicationsList.innerHTML = '';
+
+            if (filteredApplications.length === 0) {
+                applicationsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak applications found</div>';
+                return;
+            }
+
+            filteredApplications.forEach(Aplikasi => {
+                const applicationCard = Dokumen.createElement('div');
+                applicationCard.className = 'Aplikasi-card card mb-2';
+                applicationCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="Aplikasi-icon icon-${Aplikasi.Status} me-3">
+                                        <i class="fas fa-${getApplicationIcon(Aplikasi.Status)}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${Aplikasi.purpose}</h6>
+                                        <p class="mb-1">${Aplikasi.Tipe} Pinjaman • ${Aplikasi.Jumlah}</p>
+                                        <small class="text-muted">
+                                            Applied: ${formatDate(Aplikasi.applied_at)} | 
+                                            Reference: ${Aplikasi.reference}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="Aplikasi-Status Status-${Aplikasi.Status}">${Aplikasi.Status.replace('_', ' ')}</span>
+                                <span class="Pinjaman-Tipe Tipe-${Aplikasi.Tipe}">${Aplikasi.Tipe}</span>
+                                <div class="mt-2">
+                                    <div class="Transaksi-Jumlah">${formatCurrency(Aplikasi.Jumlah)}</div>
+                                    <small class="text-muted">
+                                        Term: ${Aplikasi.term} months<br>
+                                        Tarif: ${Aplikasi.interest_rate}%
+                                    </small>
+                                </div>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewApplicationDetails('${Aplikasi.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="downloadApplication('${Aplikasi.id}')" ${application.status !== 'approved' ? 'disabled' : ''}>
+                                        <i class="fas fa-Unduh"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="acceptLoan('${Aplikasi.id}')" ${application.status !== 'approved' ? 'disabled' : ''}>
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                applicationsList.appendChild(applicationCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_application_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_applications: 5,
+                    approved_applications: 2,
+                    pending_applications: 1,
+                    avg_interest_rate: 12.5
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalApplications').textContent = stats.total_applications || 0;
+            Dokumen.getElementById('approvedApplications').textContent = stats.approved_applications || 0;
+            Dokumen.getElementById('pendingApplications').textContent = stats.pending_applications || 0;
+            Dokumen.getElementById('avgInterestRate').textContent = (stats.avg_interest_rate || 0).toFixed(1) + '%';
+        }
+
+        // Load Aplikasi Status
+        function loadApplicationStatus() {
+            const statusDiv = Dokumen.getElementById('applicationStatus');
+
+            const Status = [
+                { Tipe: 'Menunggu', Jumlah: 1, Deskripsi: 'Applications waiting for Review' },
+                { Tipe: 'under_review', Jumlah: 2, Deskripsi: 'Applications under Review' },
+                { Tipe: 'approved', Jumlah: 2, Deskripsi: 'Applications approved' },
+                { Tipe: 'rejected', Jumlah: 1, Deskripsi: 'Applications rejected' }
+            ];
+
+            statusDiv.innerHTML = Status.map(item => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="Aplikasi-Status Status-${item.Tipe}">${item.Tipe.replace('_', ' ')}</span>
+                        <small class="text-muted ms-2">${item.Deskripsi}</small>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">${item.Jumlah}</h6>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load recent Aktivitas
+        function loadRecentActivity() {
+            const activityDiv = Dokumen.getElementById('recentActivity');
+
+            const activities = [
+                { Tipe: 'Berhasil', Judul: 'Aplikasi submitted successfully', Waktu: '2 hours ago' },
+                { Tipe: 'Info', Judul: 'Aplikasi under Review', Waktu: '1 day ago' },
+                { Tipe: 'Berhasil', Judul: 'Pinjaman Aplikasi approved', Waktu: '3 days ago' },
+                { Tipe: 'Peringatan', Judul: 'Additional documents requested', Waktu: '1 week ago' },
+                { Tipe: 'danger', Judul: 'Aplikasi rejected', Waktu: '2 weeks ago' }
+            ];
+
+            activityDiv.innerHTML = activities.map(Aktivitas => `
+                <div class="d-flex align-items-start mb-2">
+                    <div class="Aktivitas-icon icon-${Aktivitas.Tipe} me-2">
+                        <i class="fas fa-${getActivityIcon(Aktivitas.Tipe)}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="Aktivitas-Judul">${Aktivitas.Judul}</div>
+                        <div class="Aktivitas-Waktu">${Aktivitas.Waktu}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Tambah event listener for Dokumen Unggah
+            const documentUpload = Dokumen.getElementById('documentUpload');
+            if (documentUpload) {
+                documentUpload.addEventListener('change', handleDocumentUpload);
+            }
+
+            // Tambah event listener for Pinjaman Jumlah to calculate Bunga Tarif
+            const loanAmount = Dokumen.getElementById('loanAmount');
+            const loanTerm = Dokumen.getElementById('loanTerm');
+            if (loanAmount && loanTerm) {
+                loanAmount.addEventListener('input', updateLoanCalculation);
+                loanTerm.addEventListener('input', updateLoanCalculation);
+            }
+        }
+
+        // Wizard navigation
+        function nextStep() {
+            if (currentStep < 4) {
+                // Validate current step
+                if (!validateStep(currentStep)) {
+                    return;
+                }
+
+                // Hide current step
+                document.getElementById(`step${currentStep}`).style.display = 'Tidak Ada';
+
+                // Show next step
+                currentStep++;
+                document.getElementById(`step${currentStep}`).style.display = 'block';
+
+                // Update wizard steps
+                updateWizardSteps();
+
+                // Update review step if needed
+                if (currentStep === 4) {
+                    updateReviewStep();
+                }
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                // Hide current step
+                Dokumen.getElementById(`step${currentStep}`).style.display = 'Tidak Ada';
+
+                // Show Sebelumnya step
+                currentStep--;
+                Dokumen.getElementById(`step${currentStep}`).style.display = 'block';
+
+                // Perbarui wizard steps
+                updateWizardSteps();
+            }
+        }
+
+        function updateWizardSteps() {
+            const steps = Dokumen.querySelectorAll('.wizard-step');
+            steps.forEach((step, index) => {
+                const circle = step.querySelector('.step-circle');
+                circle.className = 'step-circle';
+
+                if (index < currentStep - 1) {
+                    circle.classList.add('step-Selesai');
+                } else if (index === currentStep - 1) {
+                    circle.classList.add('step-Aktif');
+                }
+            });
+        }
+
+        function validateStep(step) {
+            switch (step) {
+                case 1:
+                    return validatePersonalInfo();
+                case 2:
+                    return validateLoanDetails();
+                case 3:
+                    return validateDocuments();
+                default:
+                    return true;
+            }
+        }
+
+        function validatePersonalInfo() {
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('Email').value;
+            const phone = document.getElementById('Telepon').value;
+            const dateOfBirth = document.getElementById('dateOfBirth').value;
+            const address = document.getElementById('Alamat').value;
+            const city = document.getElementById('Kota').value;
+            const monthlyIncome = document.getElementById('monthlyIncome').value;
+
+            if (!fullName || !email || !phone || !dateOfBirth || !address || !city || !monthlyIncome) {
+                alert('Please fill in Semua Wajib fields');
+                return false;
+            }
+
+            if (monthlyIncome < 3000000) {
+                alert('Monthly Pendapatan must be at least Rp 3,000,000');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateLoanDetails() {
+            const loanType = document.getElementById('loanType').value;
+            const loanAmount = document.getElementById('loanAmount').value;
+            const loanTerm = document.getElementById('loanTerm').value;
+            const loanPurpose = document.getElementById('loanPurpose').value;
+
+            if (!loanType || !loanAmount || !loanTerm || !loanPurpose) {
+                alert('Please fill in Semua Wajib fields');
+                return false;
+            }
+
+            if (loanAmount < 1000000) {
+                alert('Minimum Pinjaman Jumlah is Rp 1,000,000');
+                return false;
+            }
+
+            if (loanTerm < 6 || loanTerm > 360) {
+                Peringatan('Pinjaman term must be between 6 and 360 months');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateDocuments() {
+            if (uploadedDocuments.length === 0) {
+                Peringatan('Please Unggah at least one Dokumen');
+                return false;
+            }
+
+            return true;
+        }
+
+        function updateReviewStep() {
+            Dokumen.getElementById('reviewName').textContent = Dokumen.getElementById('fullName').value;
+            Dokumen.getElementById('reviewEmail').textContent = Dokumen.getElementById('Email').value;
+            Dokumen.getElementById('reviewPhone').textContent = Dokumen.getElementById('Telepon').value;
+            Dokumen.getElementById('reviewIncome').textContent = formatCurrency(Dokumen.getElementById('monthlyIncome').value);
+            Dokumen.getElementById('reviewLoanType').textContent = Dokumen.getElementById('loanType').value;
+            Dokumen.getElementById('reviewAmount').textContent = formatCurrency(Dokumen.getElementById('loanAmount').value);
+            Dokumen.getElementById('reviewTerm').textContent = Dokumen.getElementById('loanTerm').value + ' months';
+            Dokumen.getElementById('reviewPurpose').textContent = Dokumen.getElementById('loanPurpose').value;
+            Dokumen.getElementById('reviewInterestRate').textContent = calculateInterestRate() + '%';
+            Dokumen.getElementById('reviewPayment').textContent = formatCurrency(calculateMonthlyPayment());
+        }
+
+        function updateLoanCalculation() {
+            const interestRate = calculateInterestRate();
+            const monthlyPayment = calculateMonthlyPayment();
+
+            // Perbarui Review step if visible
+            if (currentStep === 4) {
+                Dokumen.getElementById('reviewInterestRate').textContent = interestRate + '%';
+                Dokumen.getElementById('reviewPayment').textContent = formatCurrency(monthlyPayment);
+            }
+        }
+
+        function calculateInterestRate() {
+            const loanType = Dokumen.getElementById('loanType').value;
+            const loanAmount = parseFloat(Dokumen.getElementById('loanAmount').value) || 0;
+
+            // Base rates
+            const baseRates = {
+                'personal': 12.5,
+                'Bisnis': 14.5,
+                'education': 8.5,
+                'Beranda': 7.5,
+                'vehicle': 11.5
+            };
+
+            let Tarif = baseRates[loanType] || 12.5;
+
+            // Adjust based on Jumlah
+            if (loanAmount > 50000000) Tarif -= 0.5;
+            if (loanAmount > 100000000) Tarif -= 1.0;
+
+            return Math.max(Tarif, 5.0);
+        }
+
+        function calculateMonthlyPayment() {
+            const Pokok = parseFloat(Dokumen.getElementById('loanAmount').value) || 0;
+            const monthlyRate = calculateInterestRate() / 12 / 100;
+            const term = parseInt(Dokumen.getElementById('loanTerm').value) || 12;
+
+            return Pokok * (monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1);
+        }
+
+        function handleDocumentUpload(event) {
+            const files = event.Target.files;
+
+            for (let File of files) {
+                if (File.size > 5242880) { // 5MB limit
+                    Peringatan(`File ${File.Nama} is too large. Maximum size is 5MB.`);
+                    continue;
+                }
+
+                if (!File.Tipe.match(/(PDF|jpg|jpeg|png)$/)) {
+                    Peringatan(`File ${File.Nama} is not a supported format. Please Unggah PDF, JPG, or PNG files.`);
+                    continue;
+                }
+
+                uploadedDocuments.push({
+                    Nama: File.Nama,
+                    size: File.size,
+                    Tipe: File.Tipe,
+                    uploadDate: new Tanggal().toISOString()
+                });
+            }
+
+            updateUploadedDocuments();
+        }
+
+        function updateUploadedDocuments() {
+            const documentsDiv = Dokumen.getElementById('uploadedDocuments');
+
+            documentsDiv.innerHTML = uploadedDocuments.map(doc => `
+                <div class="Dokumen-preview">
+                    <div>
+                        <div class="Dokumen-Nama">${doc.Nama}</div>
+                        <div class="Dokumen-size">${formatFileSize(doc.size)}</div>
+                    </div>
+                    <div class="Dokumen-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewDocument('${doc.Nama}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeDocument('${doc.Nama}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewDocument(fileName) {
+            Peringatan(`View Dokumen: ${fileName}`);
+        }
+
+        function removeDocument(fileName) {
+            uploadedDocuments = uploadedDocuments.Filter(doc => doc.Nama !== fileName);
+            updateUploadedDocuments();
+        }
+
+        function submitApplication() {
+            if (!Konfirmasi('Are you sure you want to Kirim this Pinjaman Aplikasi?')) return;
+
+            // Validate CSRF token
+            const csrfToken = Dokumen.getElementById('csrfToken').value;
+            if (!validateCSRFToken(csrfToken)) {
+                Peringatan('Tidak Valid CSRF token. Please refresh the page and try again.');
+                return;
+            }
+
+            // Collect Formulir Data
+            const formData = {
+                csrf_token: csrfToken,
+                fullName: Dokumen.getElementById('fullName').value,
+                Email: Dokumen.getElementById('Email').value,
+                Telepon: Dokumen.getElementById('Telepon').value,
+                dateOfBirth: Dokumen.getElementById('dateOfBirth').value,
+                Alamat: Dokumen.getElementById('Alamat').value,
+                Kota: Dokumen.getElementById('Kota').value,
+                postalCode: Dokumen.getElementById('postalCode').value,
+                monthlyIncome: Dokumen.getElementById('monthlyIncome').value,
+                loanType: Dokumen.getElementById('loanType').value,
+                loanAmount: Dokumen.getElementById('loanAmount').value,
+                loanTerm: Dokumen.getElementById('loanTerm').value,
+                loanPurpose: Dokumen.getElementById('loanPurpose').value,
+                documents: uploadedDocuments
+            };
+
+            // Send Data to API
+            fetch('/mono/API/crud.php?path=member_applications&action=create', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Tipe': 'Aplikasi/json',
+                    'X-CSRF-Token': csrfToken
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(Data => {
+                    if (Data.Berhasil) {
+                        showSuccess('Aplikasi submitted successfully!');
+                        resetForm();
+                        loadApplications();
+                    } else {
+                        showError('Failed to Kirim Aplikasi: ' + Data.Pesan);
+                    }
+                })
+                .catch(Error => {
+                    console.Error('Error submitting Aplikasi:', Error);
+                    showError('Terjadi kesalahan while submitting Aplikasi');
+                });
+        }
+
+        function resetForm() {
+            Dokumen.getElementById('loanApplicationForm').Reset();
+            currentStep = 1;
+            uploadedDocuments = [];
+
+            // Reset wizard steps
+            Dokumen.querySelectorAll('.wizard-step .step-circle').forEach(circle => {
+                circle.className = 'step-circle';
+            });
+            Dokumen.querySelector('.wizard-step .step-circle').classList.Tambah('step-Aktif');
+
+            // Show first step, hide others
+            Dokumen.getElementById('step1').style.display = 'block';
+            Dokumen.getElementById('step2').style.display = 'Tidak Ada';
+            Dokumen.getElementById('step3').style.display = 'Tidak Ada';
+            Dokumen.getElementById('step4').style.display = 'Tidak Ada';
+
+            updateUploadedDocuments();
+        }
+
+        // Quick action functions
+        function checkEligibility() {
+            const monthlyIncome = prompt('Enter your monthly Pendapatan:');
+            if (monthlyIncome === null) return;
+
+            const Pendapatan = parseFloat(monthlyIncome);
+
+            if (Pendapatan < 3000000) {
+                alert('Based on your Pendapatan, you may qualify for Pinjaman up to Rp 30,000,000');
+            } else if (income < 5000000) {
+                alert('Based on your Pendapatan, you may qualify for Pinjaman up to Rp 50,000,000');
+            } else if (income < 10000000) {
+                alert('Based on your Pendapatan, you may qualify for Pinjaman up to Rp 100,000,000');
+            } else {
+                alert('Based on your Pendapatan, you may qualify for Pinjaman up to Rp 200,000,000');
+            }
+        }
+
+        function loanCalculator() {
+            
+        }
+
+        function contactSupport() {
+            
+        }
+
+        function downloadGuide() {
+            
+        }
+
+        function viewApplicationDetails(applicationId) {
+            const application = applications.find(a => a.id === applicationId);
+            if (!Aplikasi) return;
+
+            const Detail = `
+                Aplikasi Detail:
+                
+                Reference: ${Aplikasi.reference}
+                Purpose: ${Aplikasi.purpose}
+                Tipe: ${Aplikasi.Tipe}
+                Status: ${Aplikasi.Status}
+                Jumlah: ${formatCurrency(Aplikasi.Jumlah)}
+                Term: ${Aplikasi.term} months
+                Bunga Tarif: ${Aplikasi.interest_rate}%
+                Monthly Pembayaran: ${formatCurrency(Aplikasi.monthly_payment)}
+                Applied: ${formatDate(Aplikasi.applied_at)}
+                ${Aplikasi.approved_at ? `Approved: ${formatDate(Aplikasi.approved_at)}` : ''}
+                ${Aplikasi.disbursed_at ? `Disbursed: ${formatDate(Aplikasi.disbursed_at)}` : ''}
+                ${Aplikasi.completed_at ? `Selesai: ${formatDate(Aplikasi.completed_at)}` : ''}
+                ${Aplikasi.rejected_reason ? `Penolakan Reason: ${Aplikasi.rejected_reason}` : ''}
+                Deskripsi: ${Aplikasi.Deskripsi || 'Tidak Deskripsi provided'}
+            `;
+
+            Peringatan(Detail);
+        }
+
+        function downloadApplication(applicationId) {
+            const Aplikasi = applications.find(a => a.id === applicationId);
+            if (!Aplikasi) return;
+
+            showSuccess(`Downloading Aplikasi: ${Aplikasi.reference}`);
+        }
+
+        function acceptLoan(applicationId) {
+            const Aplikasi = applications.find(a => a.id === applicationId);
+            if (!Aplikasi) return;
+
+            if (!Konfirmasi('Are you sure you want to accept this Pinjaman?')) return;
+
+            showSuccess(`Pinjaman accepted: ${Aplikasi.reference}`);
+
+            // Perbarui Aplikasi Status
+            Aplikasi.Status = 'disbursed';
+            Aplikasi.disbursed_at = new Tanggal().toISOString();
+
+            displayApplications();
+        }
+
+        // Filter applications
+        function filterApplications() {
+            displayApplications();
+        }
+
+        // Utility functions
+        function getApplicationIcon(Status) {
+            const icons = {
+                'Menunggu': 'clock',
+                'under_review': 'Cari',
+                'approved': 'check-circle',
+                'rejected': 'times-circle',
+                'disbursed': 'arrow-right',
+                'Selesai': 'check-double'
+            };
+            return icons[Status] || 'clock';
+        }
+
+        function getActivityIcon(Tipe) {
+            const icons = {
+                'Berhasil': 'check',
+                'Info': 'Info-circle',
+                'Peringatan': 'exclamation-triangle',
+                'danger': 'times',
+                'primary': 'Pengguna'
+            };
+            return icons[Tipe] || 'circle';
+        }
+
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.Log(bytes) / Math.Log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo applications
+        function getDemoApplications() {
+            return [
+                {
+                    id: '1',
+                    reference: 'APP-2026-001',
+                    purpose: 'Bisnis Expansion',
+                    Tipe: 'Bisnis',
+                    Jumlah: 50000000,
+                    term: 36,
+                    interest_rate: 14.0,
+                    monthly_payment: 1500000,
+                    Status: 'approved',
+                    applied_at: '2026-03-01T00:00:00Z',
+                    approved_at: '2026-03-05T00:00:00Z',
+                    disbursed_at: '2026-03-07T00:00:00:00Z',
+                    Deskripsi: 'Pinjaman for Bisnis expansion and working capital'
+                },
+                {
+                    id: '2',
+                    reference: 'APP-2026-002',
+                    purpose: 'Beranda Purchase',
+                    Tipe: 'Beranda',
+                    Jumlah: 25000000,
+                    term: 120,
+                    interest_rate: 7.5,
+                    monthly_payment: 250000,
+                    Status: 'under_review',
+                    applied_at: '2026-03-10T00:00:00Z',
+                    Deskripsi: 'Beranda Pinjaman for property purchase'
+                },
+                {
+                    id: '3',
+                    reference: 'APP-2026-003',
+                    purpose: 'Education Fund',
+                    Tipe: 'education',
+                    Jumlah: 15000000,
+                    term: 24,
+                    interest_rate: 8.5,
+                    monthly_payment: 650000,
+                    Status: 'Menunggu',
+                    applied_at: '2026-03-15T00:00:00Z',
+                    Deskripsi: 'Education Pinjaman for university tuition'
+                },
+                {
+                    id: '4',
+                    reference: 'APP-2026-004',
+                    purpose: 'Personal Use',
+                    Tipe: 'personal',
+                    Jumlah: 10000000,
+                    term: 24,
+                    interest_rate: 12.5,
+                    monthly_payment: 450000,
+                    Status: 'Selesai',
+                    applied_at: '2026-02-01T00:00:00Z',
+                    approved_at: '2026-02-05T00:00:00Z',
+                    disbursed_at: '2026-02-08T00:00:00:00Z',
+                    completed_at: '2026-03-01T00:00:00Z',
+                    Deskripsi: 'Personal Pinjaman for emergency expenses'
+                },
+                {
+                    id: '5',
+                    reference: 'APP-2026-005',
+                    purpose: 'Vehicle Purchase',
+                    Tipe: 'vehicle',
+                    Jumlah: 8000000,
+                    term: 48,
+                    interest_rate: 11.5,
+                    monthly_payment: 200000,
+                    Status: 'rejected',
+                    applied_at: '2026-03-12T00:00:00Z',
+                    rejected_at: '2026-03-14T00:00:00Z',
+                    rejected_reason: 'Insufficient Kredit Skor',
+                    Deskripsi: 'Vehicle Pinjaman for car purchase'
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+
+</html>

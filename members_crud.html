@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <link rel="stylesheet" href="/mono/helpers/modal-styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-link {
+            color: white;
+            text-decoration: Tidak Ada;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .container {
+            padding: 2rem;
+        }
+        
+        .Tabel-actions {
+            white-space: nowrap;
+        }
+        
+        .Tabel-actions .btn {
+            margin: 0 2px;
+        }
+        
+        .Status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .Status-Aktif { background-color: #d4edda; color: #155724; }
+        .Status-Tidak Aktif { background-color: #f8d7da; color: #721c24; }
+        
+        .Kredit-Skor-high { color: #155724; font-weight: 600; }
+        .Kredit-Skor-medium { color: #856404; font-weight: 600; }
+        .Kredit-Skor-low { color: #721c24; font-weight: 600; }
+        
+        .Anggota-Foto {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-user"></i> Anggota</h1>
+            <div>
+                <a href="/mono/Dashboard.html" class="btn-link me-2">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <button class="btn-link" onclick="openMemberModal('Tambah')">
+                    <i class="fas fa-user-plus"></i> Tambah Anggota
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="totalMembers">0</h5>
+                        <p class="card-text">Total Anggota</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="activeMembers">0</h5>
+                        <p class="card-text">Anggota Aktif</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="newMembers">0</h5>
+                        <p class="card-text">Anggota Baru (Bulan Ini)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="avgCreditScore">0</h5>
+                        <p class="card-text">Rata-rata Skor Kredit</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" placeholder="Cari anggota..." id="searchInput">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-Pilih" id="statusFilter">
+                            <option value="">Semua Status</option>
+                            <option value="1">Aktif</option>
+                            <option value="0">Tidak Aktif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-Pilih" id="creditFilter">
+                            <option value="">Semua Skor Kredit</option>
+                            <option value="high">Tinggi (>70)</option>
+                            <option value="medium">Sedang (50-70)</option>
+                            <option value="low">Rendah (<50)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary" onclick="filterMembers()">
+                            <i class="fas fa-Filter"></i> Filter
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="Tabel-responsive">
+                    <table class="Tabel Tabel-striped">
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>Tidak. Anggota</th>
+                                <th>Nama</th>
+                                <th>NIK</th>
+                                <th>Telepon</th>
+                                <th>Pekerjaan</th>
+                                <th>Skor Kredit</th>
+                                <th>Status</th>
+                                <th>Tanggal Daftar</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Modal -->
+    <div class="modal fade" id="memberModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul" id="memberModalTitle">Tambah Anggota Baru</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="memberForm">
+                        <input type="hidden" id="memberId" name="id">
+                        
+                        <!-- Personal Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-user"></i> Informasi Pribadi</h6>
+                                <hr>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Tidak. Anggota</label>
+                                    <input type="text" class="form-control" name="member_number" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">NIK</label>
+                                    <input type="text" class="form-control" name="nik" maxlength="16" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Jenis Kelamin</label>
+                                    <select class="form-control" name="gender" required>
+                                        <option value="">Pilih</option>
+                                        <option value="male">Laki-laki</option>
+                                        <option value="female">Perempuan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Lengkap</label>
+                                    <input type="text" class="form-control" name="Nama" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Tempat Lahir</label>
+                                    <input type="text" class="form-control" name="birth_place">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Tanggal Lahir</label>
+                                    <input type="Tanggal" class="form-control" name="birth_date">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-Alamat-book"></i> Informasi Kontak</h6>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Alamat Lengkap</label>
+                                    <textarea class="form-control" name="Alamat" rows="3" required></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Telepon</label>
+                                    <input type="tel" class="form-control" name="Telepon">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employment Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-briefcase"></i> Informasi Pekerjaan</h6>
+                                <hr>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Pekerjaan</label>
+                                    <input type="text" class="form-control" name="occupation">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Perusahaan</label>
+                                    <input type="text" class="form-control" name="company_name">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Penghasilan Bulanan</label>
+                                    <input type="Nomor" class="form-control" name="monthly_income" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Alamat Perusahaan</label>
+                                    <textarea class="form-control" name="company_address" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Status Pernikahan</label>
+                                    <select class="form-control" name="marital_status">
+                                        <option value="">Pilih</option>
+                                        <option value="single">Belum Menikah</option>
+                                        <option value="married">Menikah</option>
+                                        <option value="divorced">Cerai</option>
+                                        <option value="widowed">Duda/Janda</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Skor Kredit</label>
+                                    <input type="Nomor" class="form-control" name="credit_score" min="0" max="100" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Family Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-user"></i> Informasi Keluarga</h6>
+                                <hr>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Pasangan</label>
+                                    <input type="text" class="form-control" name="spouse_name">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Telepon Pasangan</label>
+                                    <input type="tel" class="form-control" name="spouse_phone">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Pekerjaan Pasangan</label>
+                                    <input type="text" class="form-control" name="spouse_occupation">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-Telepon-alt"></i> Kontak Darurat</h6>
+                                <hr>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Kontak Darurat</label>
+                                    <input type="text" class="form-control" name="emergency_contact_name">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Telepon Darurat</label>
+                                    <input type="tel" class="form-control" name="emergency_contact_phone">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Hubungan</label>
+                                    <input type="text" class="form-control" name="emergency_contact_relation">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-toggle-on"></i> Status</h6>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                                        <label class="form-check-label" for="isActive">
+                                            Anggota Aktif
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="is_blacklisted" id="isBlacklisted">
+                                        <label class="form-check-label" for="isBlacklisted">
+                                            Blacklist
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMember()">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/mono/helpers/indonesian-format.js"></script>
+    <script src="/mono/helpers/modal-Sistem.js"></script>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            
+            
+
+            if (!token || !Pengguna) {
+                
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+
+            const userData = JSON.parse(Pengguna);
+            const userNameElement = Dokumen.getElementById("Nama Pengguna");
+            if (userNameElement) {
+                userNameElement.textContent = userData.Nama || "Pengguna";
+            }
+            
+        }
+
+        // Load Anggota
+        function loadMembers() {
+            $.ajax({
+                url: '/mono/API/crud.php?path=Anggota',
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        displayMembers(response.Data);
+                        updateStatistics(response.Data);
+                    }
+                }
+            });
+        }
+
+        // Display Anggota in Tabel
+        function displayMembers(Anggota) {
+            const tbody = $('#membersTableBody');
+            tbody.Kosong();
+            
+            Anggota.forEach(Anggota => {
+                const statusClass = Anggota.is_active ? 'Status-Aktif' : 'Status-Tidak Aktif';
+                const statusText = Anggota.is_active ? 'Aktif' : 'Tidak Aktif';
+                const creditClass = Anggota.credit_score >= 70 ? 'Kredit-Skor-high' : 
+                                  (Anggota.credit_score >= 50 ? 'Kredit-Skor-medium' : 'Kredit-Skor-low');
+                
+                tbody.append(`
+                    <tr>
+                        <td>
+                            <img src="/uploads/avatars/default.png" alt="${Anggota.Nama}" class="Anggota-Foto">
+                        </td>
+                        <td>${Anggota.member_number}</td>
+                        <td>${Anggota.Nama}</td>
+                        <td>${Anggota.nik}</td>
+                        <td>${Anggota.Telepon || '-'}</td>
+                        <td>${Anggota.occupation || '-'}</td>
+                        <td class="${creditClass}">${Anggota.credit_score || '0'}</td>
+                        <td><span class="Status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${formatTanggal(Anggota.registration_date)}</td>
+                        <td class="Tabel-actions">
+                            <button class="btn btn-sm btn-info" onclick="viewMember(${Anggota.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-alert" onclick="editMember(${Anggota.id})">
+                                <i class="fas fa-Edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMember(${Anggota.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(Anggota) {
+            const totalMembers = Anggota.length;
+            const activeMembers = Anggota.Filter(m => m.is_active).length;
+            const currentMonth = new Tanggal().getMonth();
+            const currentYear = new Tanggal().getFullYear();
+            const newMembers = Anggota.Filter(m => {
+                const regDate = new Tanggal(m.registration_date);
+                return regDate.getMonth() === currentMonth && regDate.getFullYear() === currentYear;
+            }).length;
+            const avgCreditScore = Anggota.reduce((sum, m) => sum + parseFloat(m.credit_score || 0), 0) / totalMembers;
+            
+            $('#totalMembers').text(totalMembers);
+            $('#activeMembers').text(activeMembers);
+            $('#newMembers').text(newMembers);
+            $('#avgCreditScore').text(avgCreditScore.toFixed(1));
+        }
+
+        // Open Anggota modal
+        function openMemberModal(mode, memberId = null) {
+            $('#memberModalTitle').text(mode === 'Tambah' ? 'Tambah Anggota Baru' : 'Edit Anggota');
+            $('#memberForm')[0].Reset();
+            
+            if (mode === 'Edit' && memberId) {
+                // Load Anggota Data
+                $.ajax({
+                    url: `/mono/API/crud.php?path=Anggota/${memberId}`,
+                    method: 'GET',
+                    Berhasil: (response) => {
+                        if (response.Berhasil) {
+                            const Anggota = response.Data;
+                            $('#memberId').val(Anggota.id);
+                            $('input[Nama="member_number"]').val(Anggota.member_number);
+                            $('input[Nama="nik"]').val(Anggota.nik);
+                            $('Pilih[Nama="gender"]').val(Anggota.gender);
+                            $('input[Nama="Nama"]').val(Anggota.Nama);
+                            $('input[Nama="birth_place"]').val(Anggota.birth_place);
+                            $('input[Nama="birth_date"]').val(Anggota.birth_date);
+                            $('textarea[Nama="Alamat"]').val(Anggota.Alamat);
+                            $('input[Nama="Telepon"]').val(Anggota.Telepon);
+                            $('input[Nama="Email"]').val(Anggota.Email);
+                            $('input[Nama="occupation"]').val(Anggota.occupation);
+                            $('input[Nama="company_name"]').val(Anggota.company_name);
+                            $('input[Nama="monthly_income"]').val(Anggota.monthly_income);
+                            $('textarea[Nama="company_address"]').val(Anggota.company_address);
+                            $('Pilih[Nama="marital_status"]').val(Anggota.marital_status);
+                            $('input[Nama="credit_score"]').val(Anggota.credit_score);
+                            $('input[Nama="spouse_name"]').val(Anggota.spouse_name);
+                            $('input[Nama="spouse_phone"]').val(Anggota.spouse_phone);
+                            $('input[Nama="spouse_occupation"]').val(Anggota.spouse_occupation);
+                            $('input[Nama="emergency_contact_name"]').val(Anggota.emergency_contact_name);
+                            $('input[Nama="emergency_contact_phone"]').val(Anggota.emergency_contact_phone);
+                            $('input[Nama="emergency_contact_relation"]').val(Anggota.emergency_contact_relation);
+                            $('#isActive').prop('checked', Anggota.is_active);
+                            $('#isBlacklisted').prop('checked', Anggota.is_blacklisted);
+                        }
+                    }
+                });
+            } else {
+                // Generate Anggota Nomor for new Anggota
+                const memberNumber = 'M' + new Tanggal().toISOString().slice(0, 10).replace(/-/g, '') + 
+                                   Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                $('input[Nama="member_number"]').val(memberNumber);
+                $('input[Nama="registration_date"]').val(new Tanggal().toISOString().slice(0, 10));
+            }
+            
+            $('#memberModal').modal('show');
+        }
+
+        // Simpan Anggota
+        function saveMember() {
+            const formData = $('#memberForm').serialize();
+            const memberId = $('#memberId').val();
+            const isEdit = memberId !== '';
+            
+            // Convert checkbox values
+            const formDataObj = new URLSearchParams(formData);
+            formDataObj.set('is_active', $('#isActive').is(':checked') ? '1' : '0');
+            formDataObj.set('is_blacklisted', $('#isBlacklisted').is(':checked') ? '1' : '0');
+            
+            $.ajax({
+                url: `/mono/API/crud.php?path=Anggota${isEdit ? '/' + memberId : ''}`,
+                method: isEdit ? 'PUT' : 'POST',
+                Data: formDataObj.toString(),
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        showAlert('Berhasil', isEdit ? 'Anggota berhasil diupdate' : 'Anggota berhasil ditambahkan');
+                        $('#memberModal').modal('hide');
+                        loadMembers();
+                    } else {
+                        showAlert('Error', response.Pesan);
+                    }
+                },
+                Error: () => {
+                    showAlert('Error', 'Terjadi kesalahan');
+                }
+            });
+        }
+
+        // View Anggota Detail
+        function viewMember(memberId) {
+            $.ajax({
+                url: `/mono/API/crud.php?path=Anggota/${memberId}`,
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const Anggota = response.Data;
+                        const Detail = `
+                            Detail Anggota:
+                            
+                            Informasi Pribadi:
+                            Tidak. Anggota: ${Anggota.member_number}
+                            NIK: ${Anggota.nik}
+                            Nama: ${Anggota.Nama}
+                            Jenis Kelamin: ${Anggota.gender === 'male' ? 'Laki-laki' : 'Perempuan'}
+                            Tempat/Tanggal Lahir: ${Anggota.birth_place || '-'}, ${Anggota.birth_date || '-'}
+                            
+                            Informasi Kontak:
+                            Alamat: ${Anggota.Alamat}
+                            Telepon: ${Anggota.Telepon || '-'}
+                            Email: ${Anggota.Email || '-'}
+                            
+                            Informasi Pekerjaan:
+                            Pekerjaan: ${Anggota.occupation || '-'}
+                            Perusahaan: ${Anggota.company_name || '-'}
+                            Penghasilan: ${Anggota.monthly_income ? formatUang(Anggota.monthly_income) : '-'}
+                            
+                            Status:
+                            Aktif: ${Anggota.is_active ? 'Ya' : 'Tidak'}
+                            Skor Kredit: ${Anggota.credit_score || '0'}
+                            Tanggal Daftar: ${formatTanggal(Anggota.registration_date)}
+                        `;
+                        Peringatan(Detail);
+                    }
+                }
+            });
+        }
+
+        // Edit Anggota
+        function editMember(memberId) {
+            openMemberModal('Edit', memberId);
+        }
+
+        // Hapus Anggota
+        function deleteMember(memberId) {
+            if (Konfirmasi('Apakah Anda yakin ingin menghapus anggota ini?')) {
+                $.ajax({
+                    url: `/mono/API/crud.php?path=Anggota/${memberId}`,
+                    method: 'Hapus',
+                    Berhasil: (response) => {
+                        if (response.Berhasil) {
+                            showAlert('Berhasil', 'Anggota berhasil dihapus');
+                            loadMembers();
+                        } else {
+                            showAlert('Error', response.Pesan);
+                        }
+                    },
+                    Error: () => {
+                        showAlert('Error', 'Terjadi kesalahan');
+                    }
+                });
+            }
+        }
+
+        // Filter Anggota
+        function filterMembers() {
+            const Cari = $('#searchInput').val();
+            const Status = $('#statusFilter').val();
+            const Kredit = $('#creditFilter').val();
+            
+            // Implement filtering logic
+            loadMembers();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            $('#searchInput').val('');
+            $('#statusFilter').val('');
+            $('#creditFilter').val('');
+            loadMembers();
+        }
+
+        // Show Peringatan
+        function showAlert(Tipe, Pesan) {
+            const alertClass = Tipe === 'Berhasil' ? 'Peringatan-Berhasil' : 'Peringatan-danger';
+            const Peringatan = `<div class="alert ${alertClass} alert-dismissible fade show" role="Peringatan">
+                ${Pesan}
+                <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+            </div>`;
+            $('.container').prepend(Peringatan);
+            
+            setTimeout(() => {
+                $('.Peringatan').fadeOut();
+            }, 3000);
+        }
+
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Initialize
+        $(Dokumen).ready(function() {
+            checkAuth();
+            loadMembers();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

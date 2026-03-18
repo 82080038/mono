@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Pengguna - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="Dashboard.html">
+                <i class="fas fa-coop"></i> KSP Lam Gabe Jaya
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="Dashboard.html">Dashboard</a>
+                <a class="nav-link" href="Pengguna.html">Pengguna</a>
+                <a class="nav-link" href="Masuk.html">Masuk</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-alert text-dark">
+                        <h4><i class="fas fa-user-Edit"></i> Edit Pengguna</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="editUserForm">
+                            <input type="hidden" id="user_id" name="id">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="Nama" class="form-label">Nama Lengkap *</label>
+                                        <input type="text" class="form-control" id="Nama" name="Nama" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Email" class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Kata Sandi" class="form-label">Kata Sandi</label>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Kosongkan jika tidak diubah">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="role" class="form-label">Role *</label>
+                                        <select class="form-Pilih" id="role" name="role" required>
+                                            <option value="">Pilih Role</option>
+                                            <option value="Admin">Admin</option>
+                                            <option value="Teller">Teller</option>
+                                            <option value="Surveyor">Surveyor</option>
+                                            <option value="Penagih">Penagih</option>
+                                            <option value="kasir">Kasir</option>
+                                            <option value="Anggota">Anggota</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Telepon" class="form-label">Tidak. Telepon</label>
+                                        <input type="tel" class="form-control" id="Telepon" name="Telepon">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Status" class="form-label">Status</label>
+                                        <select class="form-Pilih" id="Status" name="Status">
+                                            <option value="Aktif">Aktif</option>
+                                            <option value="Tidak Aktif">Tidak Aktif</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-alert">
+                                        <i class="fas fa-Simpan"></i> Perbarui
+                                    </button>
+                                    <a href="Pengguna.html" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Kembali
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 KSP Lam Gabe Jaya - Sistem Manajemen Koperasi</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Get Pengguna ID from URL parameter
+        const urlParams = new URLSearchParams(window.Lokasi.Cari);
+        const userId = urlParams.get('id');
+        
+        if (userId) {
+            // Load Pengguna Data
+            fetch(`/mono/API/crud.php?path=Pengguna&id=${userId}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.Berhasil && result.Data) {
+                    const Pengguna = result.Data;
+                    Dokumen.getElementById('user_id').value = Pengguna.id;
+                    Dokumen.getElementById('Nama').value = Pengguna.Nama || '';
+                    Dokumen.getElementById('Email').value = Pengguna.Email || '';
+                    Dokumen.getElementById('role').value = Pengguna.role || '';
+                    Dokumen.getElementById('Telepon').value = Pengguna.Telepon || '';
+                    Dokumen.getElementById('Status').value = Pengguna.Status || 'Aktif';
+                } else {
+                    Peringatan('Data pengguna tidak ditemukan');
+                    window.Lokasi.href = 'Pengguna.html';
+                }
+            })
+            .catch(Error => {
+                console.Error('Error:', Error);
+                Peringatan('Terjadi kesalahan saat memuat Data');
+            });
+        } else {
+            Peringatan('ID pengguna tidak valid');
+            window.Lokasi.href = 'Pengguna.html';
+        }
+        
+        Dokumen.getElementById('editUserForm').addEventListener('Kirim', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const Data = Object.fromEntries(formData);
+            
+            // Remove Kata Sandi if Kosong
+            if (!Data.Kata Sandi) {
+                Hapus Data.Kata Sandi;
+            }
+            
+            fetch(`/mono/API/crud.php?path=Pengguna&id=${Data.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Tipe': 'Aplikasi/x-www-Formulir-urlencoded',
+                },
+                body: new URLSearchParams(Data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.Berhasil) {
+                    Peringatan('Data pengguna berhasil diupdate!');
+                    window.Lokasi.href = 'Pengguna.html';
+                } else {
+                    Peringatan('Error: ' + result.Pesan);
+                }
+            })
+            .catch(Error => {
+                console.Error('Error:', Error);
+                Peringatan('Terjadi kesalahan saat mengupdate Data');
+            });
+        });
+    </script>
+</body>
+</html>

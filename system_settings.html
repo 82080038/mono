@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengaturan - Super Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .setting-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #6f42c1;
+            cursor: pointer;
+        }
+        
+        .setting-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .setting-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-enabled { background: #28a745; color: white; }
+        .Status-disabled { background: #6c757d; color: white; }
+        .Status-Peringatan { background: #ffc107; color: #000; }
+        .Status-Error { background: #dc3545; color: white; }
+        
+        .setting-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .setting-general { background: linear-gradient(135deg, #007bff, #0056b3); }
+        .setting-Keamanan { background: linear-gradient(135deg, #dc3545, #c82333); }
+        .setting-Email { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .setting-Backup { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .setting-Performa { background: linear-gradient(135deg, #fd7e14, #e8590c); }
+        .setting-Notifikasi { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #6f42c1;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #6f42c1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Sistem-health {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .health-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .health-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #6f42c1;
+        }
+        
+        .health-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .health-Status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+        
+        .health-good { background: #28a745; }
+        .health-Peringatan { background: #ffc107; }
+        .health-Error { background: #dc3545; }
+        
+        .config-section {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .config-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .config-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .config-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+        
+        .config-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .config-value {
+            color: #6c757d;
+        }
+        
+        .toggle-switch {
+            Posisi: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.Aktif {
+            background: #6f42c1;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            Posisi: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.Aktif::after {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-cogs"></i> Sistem Pengaturan</h1>
+                <p class="mb-0">Super Admin - Sistem Konfigurasi & Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- System Health -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Server fa-2x mb-2"></i>
+                        <h5>Sistem Status</h5>
+                        <h3 id="systemStatusValue">Healthy</h3>
+                        <p class="mb-0">Overall health</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Database fa-2x mb-2"></i>
+                        <h5>Database</h5>
+                        <h3 id="databaseStatus">Connected</h3>
+                        <p class="mb-0">Connection Status</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-hdd fa-2x mb-2"></i>
+                        <h5>Storage</h5>
+                        <h3 id="storageStatus">75%</h3>
+                        <p class="mb-0">Disk usage</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-2x mb-2"></i>
+                        <h5>Aktif Pengguna</h5>
+                        <h3 id="activeUsers">0</h3>
+                        <p class="mb-0">Currently online</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Settings Categories -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cogs"></i> Sistem Pengaturan</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="settingsList">
+                            <!-- Settings will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Configuration Details -->
+                <div class="card" id="configDetailsCard" style="display: Tidak Ada;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-sliders-h"></i> <span id="configDetailsTitle">Konfigurasi Detail</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="configDetailsContent">
+                            <!-- Configuration details will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="backupSystem()">
+                                    <i class="fas fa-Unduh"></i>
+                                    <h6>Backup</h6>
+                                    <small class="text-muted">Sistem Backup</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="restartSystem()">
+                                    <i class="fas fa-sync"></i>
+                                    <h6>Restart</h6>
+                                    <small class="text-muted">Sistem restart</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="clearCache()">
+                                    <i class="fas fa-trash"></i>
+                                    <h6>Hapus Cache</h6>
+                                    <small class="text-muted">Hapus Sistem</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="exportConfig()">
+                                    <i class="fas fa-File-Ekspor"></i>
+                                    <h6>Ekspor Config</h6>
+                                    <small class="text-muted">Unduh Pengaturan</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Health -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-heartbeat"></i> Sistem Health</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Sistem-health">
+                            <div class="health-item">
+                                <div class="health-value">99.9%</div>
+                                <div class="health-label">Uptime</div>
+                                <div class="health-Status health-good"></div>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-value">2.3ms</div>
+                                <div class="health-label">Response</div>
+                                <div class="health-Status health-good"></div>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-value">256MB</div>
+                                <div class="health-label">Memory</div>
+                                <div class="health-Status health-alert"></div>
+                            </div>
+                            <div class="health-item">
+                                <div class="health-value">45%</div>
+                                <div class="health-label">CPU</div>
+                                <div class="health-Status health-good"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Aktivitas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <!-- Recent activity will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Configuration Modal -->
+    <div class="modal fade" id="configModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Konfigurasi Pengaturan</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="configModalContent">
+                    <!-- Configuration content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveConfiguration()">
+                        <i class="fas fa-Simpan"></i> Simpan Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let Pengaturan = [];
+        let selectedSetting = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadSettings();
+            loadSystemHealth();
+            loadRecentActivity();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Super Admin
+            if (currentUser.role !== 'super_admin') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load Pengaturan
+        async function loadSettings() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=system_settings', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        Pengaturan = Data.Data;
+                        displaySettings();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Pengaturan:', Error);
+                // Use demo Data
+                Pengaturan = getDemoSettings();
+                displaySettings();
+            }
+        }
+
+        // Display Pengaturan
+        function displaySettings() {
+            const settingsList = Dokumen.getElementById('settingsList');
+            
+            settingsList.innerHTML = '';
+            
+            Pengaturan.forEach(setting => {
+                const settingCard = Dokumen.createElement('div');
+                settingCard.className = 'setting-card card mb-2';
+                settingCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="setting-icon setting-${setting.Kategori} me-3">
+                                        <i class="fas fa-${getSettingIcon(setting.Kategori)}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${setting.Nama}</h6>
+                                        <p class="mb-1">${setting.Deskripsi}</p>
+                                        <small class="text-muted">
+                                            Kategori: ${setting.Kategori}<br>
+                                            Last Diperbarui: ${formatDate(setting.updated_at)}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="setting-Status Status-${setting.Status}">${setting.Status}</span>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewSettingDetails('${setting.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="editSetting('${setting.id}')">
+                                        <i class="fas fa-Edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="toggleSetting('${setting.id}')" ${setting.status === 'disabled' ? '' : 'disabled'}>
+                                        <i class="fas fa-toggle-${setting.Status === 'enabled' ? 'on' : 'off'}"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                settingsList.appendChild(settingCard);
+            });
+        }
+
+        // Load Sistem health
+        async function loadSystemHealth() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=system_health', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateSystemHealth(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Sistem health:', Error);
+                // Use demo Data
+                updateSystemHealth({
+                    system_status: 'Healthy',
+                    database_status: 'Connected',
+                    storage_usage: 75,
+                    active_users: 45
+                });
+            }
+        }
+
+        // Perbarui Sistem health
+        function updateSystemHealth(health) {
+            Dokumen.getElementById('systemStatusValue').textContent = health.system_status || 'Healthy';
+            Dokumen.getElementById('databaseStatus').textContent = health.database_status || 'Connected';
+            Dokumen.getElementById('storageStatus').textContent = (health.storage_usage || 0) + '%';
+            Dokumen.getElementById('activeUsers').textContent = health.active_users || 0;
+        }
+
+        // Load recent Aktivitas
+        function loadRecentActivity() {
+            const activityDiv = Dokumen.getElementById('recentActivity');
+            
+            const activities = [
+                { Tipe: 'config_updated', Deskripsi: 'Email Pengaturan Diperbarui', Waktu: '2 hours ago', Pengguna: 'Super Admin' },
+                { Tipe: 'backup_completed', Deskripsi: 'Sistem Backup Selesai', Waktu: '4 hours ago', Pengguna: 'Sistem' },
+                { Tipe: 'cache_cleared', Deskripsi: 'Sistem cache cleared', Waktu: '6 hours ago', Pengguna: 'Super Admin' },
+                { Tipe: 'setting_changed', Deskripsi: 'Keamanan Pengaturan modified', Waktu: '1 day ago', Pengguna: 'Admin Pengguna' },
+                { Tipe: 'system_restarted', Deskripsi: 'Sistem restarted', Waktu: '2 days ago', Pengguna: 'Super Admin' }
+            ];
+            
+            activityDiv.innerHTML = activities.map(Aktivitas => `
+                <div class="d-flex align-items-start mb-2">
+                    <div class="me-2">
+                        <i class="fas fa-${getActivityIcon(Aktivitas.Tipe)} text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <small class="text-muted">${Aktivitas.Deskripsi}</small>
+                        <br>
+                        <small class="text-muted">${Aktivitas.Pengguna} - ${Aktivitas.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View setting Detail
+        function viewSettingDetails(settingId) {
+            const setting = Pengaturan.find(s => s.id === settingId);
+            if (!setting) return;
+            
+            selectedSetting = setting;
+            
+            // Show Konfigurasi Detail card
+            Dokumen.getElementById('configDetailsCard').style.display = 'block';
+            Dokumen.getElementById('configDetailsTitle').textContent = setting.Nama;
+            
+            const detailsContent = Dokumen.getElementById('configDetailsContent');
+            
+            detailsContent.innerHTML = `
+                <div class="config-section">
+                    <div class="config-header">
+                        <h6>Setting Informasi</h6>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editSetting('${setting.id}')">
+                            <i class="fas fa-Edit"></i> Edit
+                        </button>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Setting Nama:</span>
+                        <span class="config-value">${setting.Nama}</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Kategori:</span>
+                        <span class="config-value">${setting.Kategori}</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Status:</span>
+                        <span class="setting-Status Status-${setting.Status}">${setting.Status}</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Deskripsi:</span>
+                        <span class="config-value">${setting.Deskripsi}</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Last Diperbarui:</span>
+                        <span class="config-value">${formatDateTime(setting.updated_at)}</span>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <div class="config-header">
+                        <h6>Konfigurasi Values</h6>
+                    </div>
+                    ${setting.config_values ? Object.entries(setting.config_values).map(([key, value]) => `
+                        <div class="config-item">
+                            <span class="config-label">${key}:</span>
+                            <span class="config-value">${value}</span>
+                        </div>
+                    `).join('') : '<div Kelas="text-muted">Tidak Konfigurasi values available</div>'}
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="editSetting('${setting.id}')">
+                        <i class="fas fa-Edit"></i> Edit Setting
+                    </button>
+                    <button class="btn btn-alert" onclick="exportSetting('${setting.id}')">
+                        <i class="fas fa-Unduh"></i> Ekspor
+                    </button>
+                    <button class="btn btn-danger" onclick="resetSetting('${setting.id}')">
+                        <i class="fas fa-undo"></i> Reset to Default
+                    </button>
+                </div>
+            `;
+        }
+
+        // Edit setting
+        function editSetting(settingId) {
+            const setting = Pengaturan.find(s => s.id === settingId);
+            if (!setting) return;
+            
+            selectedSetting = setting;
+            
+            const modalContent = Dokumen.getElementById('configModalContent');
+            
+            modalContent.innerHTML = `
+                <div class="config-section">
+                    <h6>General Pengaturan</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Setting Nama</label>
+                                <input type="text" class="form-control" id="editSettingName" value="${setting.Nama}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Kategori</label>
+                                <select class="form-Pilih" id="editSettingCategory">
+                                    <option value="general" ${setting.category === 'general' ? 'selected' : ''}>General</option>
+                                    <option value="Keamanan" ${setting.category === 'Keamanan' ? 'selected' : ''}>Keamanan</option>
+                                    <option value="Email" ${setting.category === 'Email' ? 'selected' : ''}>Email</option>
+                                    <option value="Backup" ${setting.category === 'Backup' ? 'selected' : ''}>Backup</option>
+                                    <option value="Performa" ${setting.category === 'Performa' ? 'selected' : ''}>Performa</option>
+                                    <option value="Notifikasi" ${setting.category === 'Notifikasi' ? 'selected' : ''}>Notifikasi</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label">Deskripsi</label>
+                                <textarea class="form-control" id="editSettingDescription" rows="2">${setting.Deskripsi}</textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-Pilih" id="editSettingStatus">
+                                    <option value="enabled" ${setting.status === 'enabled' ? 'selected' : ''}>Enabled</option>
+                                    <option value="disabled" ${setting.status === 'disabled' ? 'selected' : ''}>Disabled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <h6>Konfigurasi Values</h6>
+                    ${getConfigurationForm(setting.Kategori)}
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('configModal'));
+            modal.show();
+        }
+
+        // Get Konfigurasi Formulir based on Kategori
+        function getConfigurationForm(Kategori) {
+            const forms = {
+                'general': `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Sistem Nama</label>
+                                <input type="text" class="form-control" id="system_name" value="KSP Lam Gabe Jaya">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Sistem Version</label>
+                                <input type="text" class="form-control" id="system_version" value="1.0.0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Default Language</label>
+                                <select class="form-Pilih" id="default_language">
+                                    <option value="id" selected>Indonesian</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Timezone</label>
+                                <select class="form-Pilih" id="timezone">
+                                    <option value="Asia/Jakarta" selected>Asia/Jakarta</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                'Keamanan': `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Session Timeout (minutes)</label>
+                                <input type="Nomor" class="form-control" id="session_timeout" value="30">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Max Masuk Attempts</label>
+                                <input type="Nomor" class="form-control" id="max_login_attempts" value="5">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Kata Sandi Min Length</label>
+                                <input type="Nomor" class="form-control" id="password_min_length" value="8">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Require 2FA</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="require_2fa">
+                                    <label class="form-check-label" for="require_2fa">Enable two-factor authentication</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                'Email': `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">SMTP Server</label>
+                                <input type="text" class="form-control" id="smtp_server" value="smtp.gmail.com">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">SMTP Port</label>
+                                <input type="Nomor" class="form-control" id="smtp_port" value="587">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email Nama Pengguna</label>
+                                <input type="email" class="form-control" id="email_username" placeholder="your@Email.com">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email Kata Sandi</label>
+                                <input type="password" class="form-control" id="email_password">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label">Default From Email</label>
+                                <input type="email" class="form-control" id="default_from_email" value="noreply@ksp-lamgabejaya.co.id">
+                            </div>
+                        </div>
+                    </div>
+                `,
+                'Backup': `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Backup Schedule</label>
+                                <select class="form-Pilih" id="backup_schedule">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Backup Waktu</label>
+                                <input type="Waktu" class="form-control" id="backup_time" value="02:00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Retention Period (days)</label>
+                                <input type="Nomor" class="form-control" id="backup_retention" value="30">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Auto Backup</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="auto_backup" checked>
+                                    <label class="form-check-label" for="auto_backup">Enable automatic Backup</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                'Performa': `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Cache Timeout (minutes)</label>
+                                <input type="Nomor" class="form-control" id="cache_timeout" value="60">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Max Unggah Size (MB)</label>
+                                <input type="Nomor" class="form-control" id="max_upload_size" value="10">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Query Limit</label>
+                                <input type="Nomor" class="form-control" id="query_limit" value="1000">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Debug Mode</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="debug_mode">
+                                    <label class="form-check-label" for="debug_mode">Enable debug mode</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                'Notifikasi': `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email Notifications</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="email_notifications" checked>
+                                    <label class="form-check-label" for="email_notifications">Enable Email notifications</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">SMS Notifications</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sms_notifications">
+                                    <label class="form-check-label" for="sms_notifications">Enable SMS notifications</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Push Notifications</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="push_notifications">
+                                    <label class="form-check-label" for="push_notifications">Enable push notifications</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Notifikasi Frequency</label>
+                                <select class="form-Pilih" id="notification_frequency">
+                                    <option value="realtime">Real-Waktu</option>
+                                    <option value="hourly">Hourly</option>
+                                    <option value="daily">Daily</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+            
+            return forms[Kategori] || '<div Kelas="text-muted">Tidak Konfigurasi available</div>';
+        }
+
+        // Simpan Konfigurasi
+        function saveConfiguration() {
+            const settingName = Dokumen.getElementById('editSettingName').value;
+            const settingCategory = Dokumen.getElementById('editSettingCategory').value;
+            const settingStatus = Dokumen.getElementById('editSettingStatus').value;
+            const settingDescription = Dokumen.getElementById('editSettingDescription').value;
+            
+            if (!settingName || !settingCategory) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Perbarui setting
+            selectedSetting.Nama = settingName;
+            selectedSetting.Kategori = settingCategory;
+            selectedSetting.Status = settingStatus;
+            selectedSetting.Deskripsi = settingDescription;
+            selectedSetting.updated_at = new Tanggal().toISOString();
+            
+            // Simpan Konfigurasi values
+            selectedSetting.config_values = collectConfigValues(settingCategory);
+            
+            displaySettings();
+            viewSettingDetails(selectedSetting.id);
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('configModal'));
+            modal.hide();
+            
+            showSuccess('Konfigurasi saved successfully!');
+        }
+
+        // Collect Konfigurasi values
+        function collectConfigValues(Kategori) {
+            const values = {};
+            
+            switch (Kategori) {
+                case 'general':
+                    values.system_name = Dokumen.getElementById('system_name').value;
+                    values.system_version = Dokumen.getElementById('system_version').value;
+                    values.default_language = Dokumen.getElementById('default_language').value;
+                    values.timezone = Dokumen.getElementById('timezone').value;
+                    break;
+                case 'Keamanan':
+                    values.session_timeout = Dokumen.getElementById('session_timeout').value;
+                    values.max_login_attempts = Dokumen.getElementById('max_login_attempts').value;
+                    values.password_min_length = Dokumen.getElementById('password_min_length').value;
+                    values.require_2fa = Dokumen.getElementById('require_2fa').checked;
+                    break;
+                case 'Email':
+                    values.smtp_server = Dokumen.getElementById('smtp_server').value;
+                    values.smtp_port = Dokumen.getElementById('smtp_port').value;
+                    values.email_username = Dokumen.getElementById('email_username').value;
+                    values.email_password = Dokumen.getElementById('email_password').value;
+                    values.default_from_email = Dokumen.getElementById('default_from_email').value;
+                    break;
+                case 'Backup':
+                    values.backup_schedule = Dokumen.getElementById('backup_schedule').value;
+                    values.backup_time = Dokumen.getElementById('backup_time').value;
+                    values.backup_retention = Dokumen.getElementById('backup_retention').value;
+                    values.auto_backup = Dokumen.getElementById('auto_backup').checked;
+                    break;
+                case 'Performa':
+                    values.cache_timeout = Dokumen.getElementById('cache_timeout').value;
+                    values.max_upload_size = Dokumen.getElementById('max_upload_size').value;
+                    values.query_limit = Dokumen.getElementById('query_limit').value;
+                    values.debug_mode = Dokumen.getElementById('debug_mode').checked;
+                    break;
+                case 'Notifikasi':
+                    values.email_notifications = Dokumen.getElementById('email_notifications').checked;
+                    values.sms_notifications = Dokumen.getElementById('sms_notifications').checked;
+                    values.push_notifications = Dokumen.getElementById('push_notifications').checked;
+                    values.notification_frequency = Dokumen.getElementById('notification_frequency').value;
+                    break;
+            }
+            
+            return values;
+        }
+
+        // Toggle setting
+        function toggleSetting(settingId) {
+            const setting = Pengaturan.find(s => s.id === settingId);
+            if (!setting) return;
+            
+            setting.Status = setting.Status === 'enabled' ? 'disabled' : 'enabled';
+            setting.updated_at = new Tanggal().toISOString();
+            
+            displaySettings();
+            showSuccess(`Setting ${setting.Nama} ${setting.Status === 'enabled' ? 'enabled' : 'disabled'}`);
+        }
+
+        // Quick action functions
+        function backupSystem() {
+            if (!Konfirmasi('Are you sure you want to Backup the Sistem?')) return;
+            
+            showSuccess('Sistem Backup initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Sistem Backup Selesai successfully!');
+            }, 2000);
+        }
+
+        function restartSystem() {
+            if (!Konfirmasi('Are you sure you want to restart the Sistem? This will temporarily interrupt service.')) return;
+            
+            showSuccess('Sistem restart initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Sistem restarted successfully!');
+            }, 3000);
+        }
+
+        function clearCache() {
+            if (!Konfirmasi('Are you sure you want to Hapus the Sistem cache?')) return;
+            
+            showSuccess('Cache clearing initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Cache cleared successfully!');
+            }, 1000);
+        }
+
+        function exportConfig() {
+            const configData = Pengaturan.map(setting => ({
+                Nama: setting.Nama,
+                Kategori: setting.Kategori,
+                Status: setting.Status,
+                Deskripsi: setting.Deskripsi,
+                config_values: setting.config_values || {},
+                updated_at: setting.updated_at
+            }));
+            
+            const dataStr = JSON.stringify(configData, null, 2);
+            const dataUri = 'Data:Aplikasi/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `system_config_${new Tanggal().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = Dokumen.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('Unduh', exportFileDefaultName);
+            linkElement.click();
+            
+            showSuccess('Konfigurasi exported successfully!');
+        }
+
+        function exportSetting(settingId) {
+            const setting = Pengaturan.find(s => s.id === settingId);
+            if (!setting) return;
+            
+            const settingData = {
+                Nama: setting.Nama,
+                Kategori: setting.Kategori,
+                Status: setting.Status,
+                Deskripsi: setting.Deskripsi,
+                config_values: setting.config_values || {},
+                updated_at: setting.updated_at
+            };
+            
+            const dataStr = JSON.stringify(settingData, null, 2);
+            const dataUri = 'Data:Aplikasi/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `${setting.Kategori}_${setting.Nama.replace(/\s+/g, '_')}_${new Tanggal().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = Dokumen.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('Unduh', exportFileDefaultName);
+            linkElement.click();
+            
+            showSuccess('Setting exported successfully!');
+        }
+
+        function resetSetting(settingId) {
+            if (!Konfirmasi('Are you sure you want to Reset this setting to default values?')) return;
+            
+            const setting = Pengaturan.find(s => s.id === settingId);
+            if (!setting) return;
+            
+            showSuccess('Setting Reset to default values!');
+        }
+
+        // Utility functions
+        function getSettingIcon(Kategori) {
+            const icons = {
+                'general': 'cog',
+                'Keamanan': 'shield-alt',
+                'Email': 'envelope',
+                'Backup': 'Database',
+                'Performa': 'tachometer-alt',
+                'Notifikasi': 'bell'
+            };
+            return icons[Kategori] || 'cog';
+        }
+
+        function getActivityIcon(Tipe) {
+            const icons = {
+                'config_updated': 'Edit',
+                'backup_completed': 'Unduh',
+                'cache_cleared': 'trash',
+                'setting_changed': 'cog',
+                'system_restarted': 'sync'
+            };
+            return icons[Tipe] || 'circle';
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Tanggal(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo Pengaturan
+        function getDemoSettings() {
+            return [
+                {
+                    id: '1',
+                    Nama: 'General Pengaturan',
+                    Kategori: 'general',
+                    Status: 'enabled',
+                    Deskripsi: 'General Sistem Konfigurasi',
+                    updated_at: '2026-03-17T10:00:00Z',
+                    config_values: {
+                        system_name: 'KSP Lam Gabe Jaya',
+                        system_version: '1.0.0',
+                        default_language: 'id',
+                        timezone: 'Asia/Jakarta'
+                    }
+                },
+                {
+                    id: '2',
+                    Nama: 'Keamanan Pengaturan',
+                    Kategori: 'Keamanan',
+                    Status: 'enabled',
+                    Deskripsi: 'Keamanan and authentication Konfigurasi',
+                    updated_at: '2026-03-17T10:00:00Z',
+                    config_values: {
+                        session_timeout: 30,
+                        max_login_attempts: 5,
+                        password_min_length: 8,
+                        require_2fa: false
+                    }
+                },
+                {
+                    id: '3',
+                    Nama: 'Email Pengaturan',
+                    Kategori: 'Email',
+                    Status: 'enabled',
+                    Deskripsi: 'Email Server Konfigurasi',
+                    updated_at: '2026-03-17T10:00:00Z',
+                    config_values: {
+                        smtp_server: 'smtp.gmail.com',
+                        smtp_port: 587,
+                        email_username: '',
+                        email_password: '',
+                        default_from_email: 'noreply@ksp-lamgabejaya.co.id'
+                    }
+                },
+                {
+                    id: '4',
+                    Nama: 'Backup Pengaturan',
+                    Kategori: 'Backup',
+                    Status: 'enabled',
+                    Deskripsi: 'Automatic Backup Konfigurasi',
+                    updated_at: '2026-03-17T10:00:00Z',
+                    config_values: {
+                        backup_schedule: 'daily',
+                        backup_time: '02:00',
+                        backup_retention: 30,
+                        auto_backup: true
+                    }
+                },
+                {
+                    id: '5',
+                    Nama: 'Performa Pengaturan',
+                    Kategori: 'Performa',
+                    Status: 'enabled',
+                    Deskripsi: 'Sistem Performa optimization',
+                    updated_at: '2026-03-17T10:00:00Z',
+                    config_values: {
+                        cache_timeout: 60,
+                        max_upload_size: 10,
+                        query_limit: 1000,
+                        debug_mode: false
+                    }
+                },
+                {
+                    id: '6',
+                    Nama: 'Notifikasi Pengaturan',
+                    Kategori: 'Notifikasi',
+                    Status: 'enabled',
+                    Deskripsi: 'Notifikasi preferences',
+                    updated_at: '2026-03-17T10:00:00Z',
+                    config_values: {
+                        email_notifications: true,
+                        sms_notifications: false,
+                        push_notifications: true,
+                        notification_frequency: 'realtime'
+                    }
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

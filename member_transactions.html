@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Transaksi - Anggota Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+
+    <style>
+        .header {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+
+        .btn-Keluar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+
+        .btn-Keluar:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .Transaksi-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #20c997;
+            cursor: pointer;
+        }
+
+        .Transaksi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .Transaksi-Tipe {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .Tipe-Setoran {
+            background: #28a745;
+            color: white;
+        }
+
+        .Tipe-Penarikan {
+            background: #dc3545;
+            color: white;
+        }
+
+        .Tipe-transfer {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .Tipe-Pembayaran {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .Tipe-Biaya {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .Transaksi-Status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .Status-Selesai {
+            background: #28a745;
+            color: white;
+        }
+
+        .Status-Menunggu {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .Status-failed {
+            background: #dc3545;
+            color: white;
+        }
+
+        .Status-Memproses {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .Transaksi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .icon-Setoran {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+
+        .icon-Penarikan {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .icon-transfer {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .icon-Pembayaran {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+
+        .icon-Biaya {
+            background: linear-gradient(135deg, #6f42c1, #5a2d91);
+        }
+
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+
+        .quick-action:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: #20c997;
+            margin-bottom: 0.5rem;
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Transaksi-Jumlah {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .Jumlah-positive {
+            color: #28a745;
+        }
+
+        .Jumlah-negative {
+            color: #dc3545;
+        }
+
+        .Jumlah-neutral {
+            color: #6c757d;
+        }
+
+        .Saldo-Info {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .Saldo-Jumlah {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-transfer {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .transfer-Jumlah {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: Tidak Ada;
+            font-size: 0.875rem;
+            transition: Semua 0.3s;
+        }
+
+        .transfer-Jumlah:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: Tidak Ada;
+        }
+
+        .transfer-Formulir {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .account-Pilih {
+            Posisi: relative;
+        }
+
+        .account-option {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: Semua 0.3s;
+        }
+
+        .account-option:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+        }
+
+        .account-option.selected {
+            border-color: #20c997;
+            background-color: #e8f5f0;
+        }
+
+        .account-Info {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .account-Nama {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .account-Saldo {
+            color: #20c997;
+            font-weight: bold;
+        }
+
+        .account-Nomor {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .Transaksi-Ringkasan {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .Ringkasan-row {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .Ringkasan-row:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        .Ringkasan-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .Ringkasan-value {
+            font-weight: bold;
+            color: #20c997;
+        }
+
+        .recent-Transaksi {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .recent-Transaksi:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        .recent-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .icon-Berhasil {
+            background: #28a745;
+        }
+
+        .icon-danger {
+            background: #dc3545;
+        }
+
+        .icon-Info {
+            background: #17a2b8;
+        }
+
+        .icon-Peringatan {
+            background: #ffc107;
+        }
+
+        .recent-Info {
+            flex-grow: 1;
+        }
+
+        .recent-Judul {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .recent-Tanggal {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .recent-Jumlah {
+            font-weight: bold;
+        }
+
+        .Biaya-Info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .Biaya-Jumlah {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .Biaya-Deskripsi {
+            font-size: 0.875rem;
+            color: #856404;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-exchange-alt"></i> Anggota Transaksi</h1>
+                <p class="mb-0">Anggota - Transaksi Riwayat & Fund Transfer</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Balance Info -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="Saldo-info">
+                    <h5 class="mb-3">Available Saldo</h5>
+                    <div class="Saldo-Jumlah">Rp 15,750,000</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small>Primary Account</small>
+                        <small class="text-white-50">**** **** **** 1234</small>
+                    </div>
+                    <div class="quick-transfer">
+                        <a href="#" class="transfer-Jumlah" onclick="quickTransfer(50000)">Rp 50K</a>
+                        <a href="#" class="transfer-Jumlah" onclick="quickTransfer(100000)">Rp 100K</a>
+                        <a href="#" class="transfer-Jumlah" onclick="quickTransfer(500000)">Rp 500K</a>
+                        <a href="#" class="transfer-Jumlah" onclick="quickTransfer(1000000)">Rp 1M</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <i class="fas fa-exchange-alt fa-2x mb-2"></i>
+                                <h6>Bulan Ini</h6>
+                                <h3 id="monthlyTransactions">0</h3>
+                                <p class="mb-0">Transaksi</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-Berhasil text-white">
+                            <div class="card-body">
+                                <i class="fas fa-arrow-up fa-2x mb-2"></i>
+                                <h6>Deposits</h6>
+                                <h3 id="totalDeposits">0</h3>
+                                <p class="mb-0">Bulan Ini</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-danger text-white">
+                            <div class="card-body">
+                                <i class="fas fa-arrow-down fa-2x mb-2"></i>
+                                <h6>Withdrawals</h6>
+                                <h3 id="totalWithdrawals">0</h3>
+                                <p class="mb-0">Bulan Ini</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-alert text-white">
+                            <div class="card-body">
+                                <i class="fas fa-Persentase fa-2x mb-2"></i>
+                                <h6>Fees</h6>
+                                <h3 id="totalFees">0</h3>
+                                <p class="mb-0">Bulan Ini</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <!-- Transfer Form -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-paper-plane"></i> Quick Transfer</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="transfer-form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-Grup">
+                                        <label>From Account</label>
+                                        <div class="account-option selected" onclick="selectFromAccount('primary')">
+                                            <div class="account-info">
+                                                <div>
+                                                    <div class="account-Nama">Primary Simpanan</div>
+                                                    <div class="account-Nomor">1234-5678-9012</div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="account-Saldo">Rp 15,750,000</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-Grup">
+                                        <label>To Account</label>
+                                        <select class="form-Pilih" id="toAccount">
+                                            <option value="">Pilih account</option>
+                                            <option value="john">John Doe - 9876-5432-1098</option>
+                                            <option value="jane">Jane Smith - 8765-4321-0987</option>
+                                            <option value="bob">Bob Johnson - 7654-3210-9876</option>
+                                            <option value="new">New Recipient</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-Grup">
+                                        <label>Jumlah</label>
+                                        <input type="Nomor" class="form-control" id="transferAmount"
+                                            placeholder="Enter Jumlah" min="10000">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-Grup">
+                                        <label>Deskripsi</label>
+                                        <input type="text" class="form-control" id="transferDescription"
+                                            placeholder="Enter Deskripsi">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-Grup">
+                                        <label>Recipient Detail</label>
+                                        <input type="text" class="form-control" id="recipientDetails"
+                                            placeholder="Enter recipient Detail (if new)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="Transaksi-Ringkasan" id="transactionSummary" style="display: Tidak Ada;">
+                                <div class="Ringkasan-row">
+                                    <span class="Ringkasan-label">Transfer Jumlah:</span>
+                                    <span class="Ringkasan-value" id="summaryAmount">Rp 0</span>
+                                </div>
+                                <div class="Ringkasan-row">
+                                    <span class="Ringkasan-label">Transfer Biaya:</span>
+                                    <span class="Ringkasan-value" id="summaryFee">Rp 0</span>
+                                </div>
+                                <div class="Ringkasan-row">
+                                    <span class="Ringkasan-label">Total Jumlah:</span>
+                                    <span class="Ringkasan-value" id="summaryTotal">Rp 0</span>
+                                </div>
+                            </div>
+                            <div class="Biaya-info" id="feeInfo" style="display: Tidak Ada;">
+                                <div class="Biaya-Jumlah" id="feeAmount">Rp 0</div>
+                                <div class="Biaya-Deskripsi" id="feeDescription">Transfer Biaya applies</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-Berhasil" onclick="processTransfer()">
+                                    <i class="fas fa-paper-plane"></i> Send Money
+                                </button>
+                                <button class="btn btn-secondary" onclick="resetTransferForm()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Riwayat"></i> Transaksi Riwayat</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="typeFilter"
+                                onchange="filterTransactions()">
+                                <option value="">Semua Types</option>
+                                <option value="Setoran">Setoran</option>
+                                <option value="Penarikan">Penarikan</option>
+                                <option value="transfer">Transfer</option>
+                                <option value="Pembayaran">Pembayaran</option>
+                                <option value="Biaya">Biaya</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter"
+                                onchange="filterTransactions()">
+                                <option value="">Semua Status</option>
+                                <option value="Selesai">Selesai</option>
+                                <option value="Menunggu">Menunggu</option>
+                                <option value="failed">Failed</option>
+                                <option value="Memproses">Memproses</option>
+                            </select>
+                            <input type="Tanggal" class="form-control form-control-sm d-inline-block w-auto me-2"
+                                id="dateFilter" onchange="filterTransactions()">
+                            <button class="btn btn-primary btn-sm" onclick="downloadStatement()">
+                                <i class="fas fa-Unduh"></i> Statement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="transactionsList">
+                            <!-- Transactions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="payBills()">
+                                    <i class="fas fa-File-invoice"></i>
+                                    <h6>Pay Bills</h6>
+                                    <small class="text-muted">Utilities</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="topUp()">
+                                    <i class="fas fa-HP-alt"></i>
+                                    <h6>Top Up</h6>
+                                    <small class="text-muted">HP</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="buyVoucher()">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <h6>Voucher</h6>
+                                    <small class="text-muted">Purchase</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="schedulePayment()">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <h6>Schedule</h6>
+                                    <small class="text-muted">Pembayaran</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-clock"></i> Recent Transaksi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentTransactions">
+                            <!-- Recent transactions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-line"></i> Transaksi Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Grafik-container">
+                            <canvas id="transactionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let Transaksi = [];
+        let transactionChart = null;
+        let selectedFromAccount = 'primary';
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function () {
+            initializePage();
+            loadTransactions();
+            loadStatistics();
+            loadRecentTransactions();
+            initializeCharts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+
+            // Check if Pengguna is Anggota
+            const validRoles = ['Anggota'];
+            if (!validRoles.includes(currentUser.role)) {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+
+            // Role-based UI elements
+            updateUIForRole(currentUser.role);
+        }
+
+        // Perbarui UI based on role
+        function updateUIForRole(role) {
+            // Perbarui page Judul based on role
+            const pageTitle = Dokumen.querySelector('h1');
+            if (role === 'Anggota') {
+                pageTitle.innerHTML = '<i Kelas="fas fa-exchange-alt"></i> Anggota Transaksi';
+                Dokumen.querySelector('p').textContent = 'Anggota - Transaksi Riwayat & Fund Transfer';
+            }
+
+            // Show/hide role-specific features
+            const memberFeatures = Dokumen.querySelectorAll('.Anggota-only');
+            memberFeatures.forEach(element => {
+                element.style.display = role === 'Anggota' ? 'block' : 'Tidak Ada';
+            });
+
+            // Perbarui quick actions based on role
+            updateQuickActions(role);
+        }
+
+        // Perbarui quick actions based on role
+        function updateQuickActions(role) {
+            const quickActionsDiv = Dokumen.querySelector('.quick-actions');
+            if (role === 'Anggota') {
+                // Tambah Anggota specific actions
+                quickActionsDiv.innerHTML += `
+                    <div class="col-6 mb-2">
+                        <div class="quick-action" onclick="viewAccounts()">
+                            <i class="fas fa-university"></i>
+                            <h6>Accounts</h6>
+                            <small class="text-muted">View Semua</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Load Transaksi
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_transactions', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Tipe': 'Aplikasi/json'
+                    }
+                });
+
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        Transaksi = Data.Data;
+                        displayTransactions();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Transaksi:', Error);
+                // Use demo Data
+                Transaksi = getDemoTransactions();
+                displayTransactions();
+            }
+        }
+
+        // Display Transaksi
+        function displayTransactions() {
+            const transactionsList = Dokumen.getElementById('transactionsList');
+            const typeFilter = Dokumen.getElementById('typeFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            const dateFilter = Dokumen.getElementById('dateFilter').value;
+
+            let filteredTransactions = Transaksi;
+
+            // Filter by Tipe
+            if (typeFilter) {
+                filteredTransactions = filteredTransactions.Filter(t => t.Tipe === typeFilter);
+            }
+
+            // Filter by Status
+            if (statusFilter) {
+                filteredTransactions = filteredTransactions.Filter(t => t.Status === statusFilter);
+            }
+
+            // Filter by Tanggal
+            if (dateFilter) {
+                filteredTransactions = filteredTransactions.Filter(t =>
+                    new Tanggal(t.Tanggal).toISOString().split('T')[0] === dateFilter
+                );
+            }
+
+            transactionsList.innerHTML = '';
+
+            if (filteredTransactions.length === 0) {
+                transactionsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak Transaksi found</div>';
+                return;
+            }
+
+            filteredTransactions.forEach(Transaksi => {
+                const transactionCard = Dokumen.createElement('div');
+                transactionCard.className = 'Transaksi-card card mb-2';
+                transactionCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="Transaksi-icon icon-${getTransactionIconType(Transaksi.Tipe)} me-3">
+                                        <i class="fas fa-${getTransactionIcon(Transaksi.Tipe)}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${Transaksi.Deskripsi}</h6>
+                                        <p class="mb-1">${Transaksi.recipient || Transaksi.account}</p>
+                                        <small class="text-muted">
+                                            <span class="Transaksi-Tipe Tipe-${Transaksi.Tipe}">${Transaksi.Tipe}</span>
+                                            <span class="Transaksi-Status Status-${Transaksi.Status}">${Transaksi.Status}</span>
+                                            | ${formatDate(Transaksi.Tanggal)} | 
+                                            Ref: ${Transaksi.reference}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="Transaksi-Jumlah ${getTransactionAmountClass(Transaksi.Tipe)}">${formatCurrency(Transaksi.Jumlah)}</div>
+                                ${Transaksi.Biaya ? `
+                                    <small class="text-muted">Biaya: ${formatCurrency(Transaksi.Biaya)}</small>
+                                ` : ''}
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewTransactionDetails('${Transaksi.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="downloadReceipt('${Transaksi.id}')" ${transaction.status !== 'Selesai' ? 'disabled' : ''}>
+                                        <i class="fas fa-Unduh"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                transactionsList.appendChild(transactionCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_transaction_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    monthly_transactions: 28,
+                    total_deposits: 8500000,
+                    total_withdrawals: 3200000,
+                    total_fees: 150000
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('monthlyTransactions').textContent = stats.monthly_transactions || 0;
+            Dokumen.getElementById('totalDeposits').textContent = formatCurrency(stats.total_deposits || 0);
+            Dokumen.getElementById('totalWithdrawals').textContent = formatCurrency(stats.total_withdrawals || 0);
+            Dokumen.getElementById('totalFees').textContent = formatCurrency(stats.total_fees || 0);
+        }
+
+        // Load recent Transaksi
+        function loadRecentTransactions() {
+            const recentDiv = Dokumen.getElementById('recentTransactions');
+
+            const recentTransactions = Transaksi.slice(0, 5);
+
+            recentDiv.innerHTML = recentTransactions.map(Transaksi => `
+                <div class="recent-Transaksi">
+                    <div class="d-flex align-items-center">
+                        <div class="recent-icon icon-${getTransactionIconType(Transaksi.Tipe)} me-2">
+                            <i class="fas fa-${getTransactionIcon(Transaksi.Tipe)}"></i>
+                        </div>
+                        <div class="recent-info">
+                            <div class="recent-Judul">${Transaksi.Deskripsi}</div>
+                            <div class="recent-Tanggal">${formatDate(Transaksi.Tanggal)}</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="recent-Jumlah ${getTransactionAmountClass(Transaksi.Tipe)}">${formatCurrency(Transaksi.Jumlah)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            const ctx = Dokumen.getElementById('transactionChart').getContext('2d');
+            transactionChart = new Grafik(ctx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Transaksi',
+                        Data: [1200000, 800000, 1500000, 900000, 2000000, 500000, 300000],
+                        borderColor: '#20c997',
+                        backgroundColor: 'rgba(32, 201, 151, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Transfer functions
+        function selectFromAccount(accountId) {
+            selectedFromAccount = accountId;
+
+            // Perbarui UI
+            Dokumen.querySelectorAll('.account-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.Tambah('selected');
+        }
+
+        function quickTransfer(Jumlah) {
+            Dokumen.getElementById('transferAmount').value = Jumlah;
+            updateTransactionSummary();
+
+            // Scroll to transfer Formulir
+            Dokumen.querySelector('.transfer-Formulir').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function processTransfer() {
+            const toAccount = Dokumen.getElementById('toAccount').value;
+            const Jumlah = Dokumen.getElementById('transferAmount').value;
+            const Deskripsi = Dokumen.getElementById('transferDescription').value;
+            const recipientDetails = Dokumen.getElementById('recipientDetails').value;
+
+            if (!toAccount || !Jumlah) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+
+            if (Jumlah < 10000) {
+                alert('Minimum transfer Jumlah is Rp 10,000');
+                return;
+            }
+
+            if (amount > 15750000) {
+                Peringatan('Insufficient Saldo');
+                return;
+            }
+
+            if (!Konfirmasi(`Transfer ${formatCurrency(Jumlah)} to ${toAccount}?`)) return;
+
+            showSuccess('Transfer processed successfully!');
+            resetTransferForm();
+
+            // Reload Transaksi
+            loadTransactions();
+        }
+
+        function resetTransferForm() {
+            Dokumen.getElementById('toAccount').value = '';
+            Dokumen.getElementById('transferAmount').value = '';
+            Dokumen.getElementById('transferDescription').value = '';
+            Dokumen.getElementById('recipientDetails').value = '';
+            Dokumen.getElementById('transactionSummary').style.display = 'Tidak Ada';
+            Dokumen.getElementById('feeInfo').style.display = 'Tidak Ada';
+        }
+
+        function updateTransactionSummary() {
+            const Jumlah = parseFloat(Dokumen.getElementById('transferAmount').value) || 0;
+            const Biaya = calculateTransferFee(Jumlah);
+            const Total = Jumlah + Biaya;
+
+            if (Jumlah > 0) {
+                Dokumen.getElementById('transactionSummary').style.display = 'block';
+                Dokumen.getElementById('summaryAmount').textContent = formatCurrency(Jumlah);
+                Dokumen.getElementById('summaryFee').textContent = formatCurrency(Biaya);
+                Dokumen.getElementById('summaryTotal').textContent = formatCurrency(Total);
+
+                if (Biaya > 0) {
+                    Dokumen.getElementById('feeInfo').style.display = 'block';
+                    Dokumen.getElementById('feeAmount').textContent = formatCurrency(Biaya);
+                    Dokumen.getElementById('feeDescription').textContent = `Transfer Biaya applies (${Biaya > 50000 ? '1%' : 'Free'})`;
+                } else {
+                    Dokumen.getElementById('feeInfo').style.display = 'Tidak Ada';
+                }
+            } else {
+                Dokumen.getElementById('transactionSummary').style.display = 'Tidak Ada';
+                Dokumen.getElementById('feeInfo').style.display = 'Tidak Ada';
+            }
+        }
+
+        function calculateTransferFee(Jumlah) {
+            // 1% Biaya for transfers above Rp 50,000
+            return Jumlah > 50000 ? Jumlah * 0.01 : 0;
+        }
+
+        // Quick action functions
+        function payBills() {
+            
+        }
+
+        function topUp() {
+            
+        }
+
+        function buyVoucher() {
+            
+        }
+
+        function schedulePayment() {
+            
+        }
+
+        function viewTransactionDetails(transactionId) {
+            const Transaksi = Transaksi.find(t => t.id === transactionId);
+            if (!Transaksi) return;
+
+            const Detail = `
+                Transaksi Detail:
+                
+                Deskripsi: ${Transaksi.Deskripsi}
+                Tipe: ${Transaksi.Tipe}
+                Status: ${Transaksi.Status}
+                Jumlah: ${formatCurrency(Transaksi.Jumlah)}
+                Tanggal: ${formatDate(Transaksi.Tanggal)}
+                Reference: ${Transaksi.reference}
+                Account: ${Transaksi.account}
+                Recipient: ${Transaksi.recipient || 'N/A'}
+                ${Transaksi.Biaya ? `Biaya: ${formatCurrency(Transaksi.Biaya)}` : ''}
+                ${Transaksi.Deskripsi ? `Deskripsi: ${Transaksi.Deskripsi}` : ''}
+            `;
+
+            Peringatan(Detail);
+        }
+
+        function downloadReceipt(transactionId) {
+            const Transaksi = Transaksi.find(t => t.id === transactionId);
+            if (!Transaksi) return;
+
+            showSuccess(`Downloading receipt for Transaksi: ${Transaksi.reference}`);
+        }
+
+        function downloadStatement() {
+            const dateFilter = Dokumen.getElementById('dateFilter').value;
+            const typeFilter = Dokumen.getElementById('typeFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+
+            showSuccess('Statement Unduh initiated...');
+        }
+
+        // Filter Transaksi
+        function filterTransactions() {
+            displayTransactions();
+        }
+
+        // Utility functions
+        function getTransactionIcon(Tipe) {
+            const icons = {
+                'Setoran': 'arrow-down',
+                'Penarikan': 'arrow-up',
+                'transfer': 'exchange-alt',
+                'Pembayaran': 'Kredit-card',
+                'Biaya': 'receipt'
+            };
+            return icons[Tipe] || 'exchange-alt';
+        }
+
+        function getTransactionIconType(Tipe) {
+            const types = {
+                'Setoran': 'Berhasil',
+                'Penarikan': 'danger',
+                'transfer': 'Info',
+                'Pembayaran': 'Peringatan',
+                'Biaya': 'primary'
+            };
+            return types[Tipe] || 'Info';
+        }
+
+        function getTransactionAmountClass(Tipe) {
+            const classes = {
+                'Setoran': 'Jumlah-positive',
+                'Penarikan': 'Jumlah-negative',
+                'transfer': 'Jumlah-negative',
+                'Pembayaran': 'Jumlah-negative',
+                'Biaya': 'Jumlah-neutral'
+            };
+            return classes[Tipe] || 'Jumlah-neutral';
+        }
+
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo Transaksi
+        function getDemoTransactions() {
+            return [
+                {
+                    id: '1',
+                    Tipe: 'Setoran',
+                    Deskripsi: 'Monthly Simpanan Setoran',
+                    Jumlah: 500000,
+                    Tanggal: '2026-03-17',
+                    Status: 'Selesai',
+                    reference: 'DEP-001',
+                    account: 'Primary Simpanan',
+                    Biaya: 0
+                },
+                {
+                    id: '2',
+                    Tipe: 'Penarikan',
+                    Deskripsi: 'ATM Penarikan',
+                    Jumlah: 200000,
+                    Tanggal: '2026-03-16',
+                    Status: 'Selesai',
+                    reference: 'WD-001',
+                    account: 'Primary Checking',
+                    Biaya: 0
+                },
+                {
+                    id: '3',
+                    Tipe: 'transfer',
+                    Deskripsi: 'Transfer to John Doe',
+                    Jumlah: 1000000,
+                    Tanggal: '2026-03-15',
+                    Status: 'Selesai',
+                    reference: 'TRF-001',
+                    account: 'Primary Checking',
+                    recipient: 'John Doe',
+                    Biaya: 10000
+                },
+                {
+                    id: '4',
+                    Tipe: 'Pembayaran',
+                    Deskripsi: 'Pinjaman Pembayaran',
+                    Jumlah: 2500000,
+                    Tanggal: '2026-03-14',
+                    Status: 'Selesai',
+                    reference: 'Pinjaman-001',
+                    account: 'Primary Checking',
+                    Biaya: 0
+                },
+                {
+                    id: '5',
+                    Tipe: 'Setoran',
+                    Deskripsi: 'Salary Setoran',
+                    Jumlah: 8000000,
+                    Tanggal: '2026-03-10',
+                    Status: 'Selesai',
+                    reference: 'SAL-001',
+                    account: 'Primary Checking',
+                    Biaya: 0
+                },
+                {
+                    id: '6',
+                    Tipe: 'Biaya',
+                    Deskripsi: 'Monthly Account Biaya',
+                    Jumlah: 5000,
+                    Tanggal: '2026-03-01',
+                    Status: 'Selesai',
+                    reference: 'Biaya-001',
+                    account: 'Primary Checking',
+                    Biaya: 0
+                },
+                {
+                    id: '7',
+                    Tipe: 'transfer',
+                    Deskripsi: 'Transfer to Jane Smith',
+                    Jumlah: 750000,
+                    Tanggal: '2026-03-08',
+                    Status: 'Selesai',
+                    reference: 'TRF-002',
+                    account: 'Primary Simpanan',
+                    recipient: 'Jane Smith',
+                    Biaya: 7500
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+
+        // Tambah event listener for Jumlah input
+        Dokumen.addEventListener('DOMContentLoaded', function () {
+            const amountInput = Dokumen.getElementById('transferAmount');
+            if (amountInput) {
+                amountInput.addEventListener('input', updateTransactionSummary);
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Laporan - Super Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-Tanggal-fns/dist/chartjs-adapter-Tanggal-fns.bundle.min.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Laporan-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #17a2b8;
+            cursor: pointer;
+        }
+        
+        .Laporan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Laporan-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-generated { background: #17a2b8; color: white; }
+        .Status-scheduled { background: #ffc107; color: #000; }
+        .Status-sent { background: #28a745; color: white; }
+        .Status-draft { background: #6c757d; color: white; }
+        .Status-Memproses { background: #fd7e14; color: white; }
+        
+        .Laporan-Tipe {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .Tipe-Sistem { background: #6f42c1; color: white; }
+        .Tipe-Performa { background: #28a745; color: white; }
+        .Tipe-Keamanan { background: #dc3545; color: white; }
+        .Tipe-usage { background: #17a2b8; color: white; }
+        .Tipe-financial { background: #fd7e14; color: white; }
+        .Tipe-Audit { background: #6c757d; color: white; }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #17a2b8;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #17a2b8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+        
+        .Laporan-preview {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .Laporan-Ringkasan {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .Ringkasan-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .Ringkasan-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        
+        .Ringkasan-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .Laporan-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .icon-Sistem { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
+        .icon-Performa { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .icon-Keamanan { background: linear-gradient(135deg, #dc3545, #c82333); }
+        .icon-usage { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .icon-financial { background: linear-gradient(135deg, #fd7e14, #e8590c); }
+        .icon-Audit { background: linear-gradient(135deg, #6c757d, #545b62); }
+        
+        .Ekspor-options {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .schedule-preview {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .schedule-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .schedule-Waktu {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .File-size {
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        
+        .Laporan-timeline {
+            Posisi: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            Posisi: relative;
+            padding-bottom: 1rem;
+            border-left: 2px solid #dee2e6;
+            padding-left: 1rem;
+            margin-left: -1px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            Posisi: absolute;
+            left: -6px;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #17a2b8;
+            border: 2px solid white;
+        }
+        
+        .timeline-item.Selesai::before {
+            background: #28a745;
+        }
+        
+        .timeline-item.Memproses::before {
+            background: #ffc107;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .Laporan-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .metric-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-Grafik-line"></i> Sistem Laporan</h1>
+                <p class="mb-0">Super Admin - Comprehensive Sistem Analytics & Reporting</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Report Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-File-alt fa-2x mb-2"></i>
+                        <h5>Total Laporan</h5>
+                        <h3 id="totalReports">0</h3>
+                        <p class="mb-0">Generated</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                        <h5>Bulan Ini</h5>
+                        <h3 id="monthlyReports">0</h3>
+                        <p class="mb-0">Laporan</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h5>Scheduled</h5>
+                        <h3 id="scheduledReports">0</h3>
+                        <p class="mb-0">Menunggu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-paper-plane fa-2x mb-2"></i>
+                        <h5>Sent Hari Ini</h5>
+                        <h3 id="sentToday">0</h3>
+                        <p class="mb-0">Laporan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Reports List -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> Sistem Laporan</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="typeFilter" onchange="filterReports()">
+                                <option value="">Semua Types</option>
+                                <option value="Sistem">Sistem</option>
+                                <option value="Performa">Performa</option>
+                                <option value="Keamanan">Keamanan</option>
+                                <option value="usage">Usage</option>
+                                <option value="financial">Financial</option>
+                                <option value="Audit">Audit</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter" onchange="filterReports()">
+                                <option value="">Semua Status</option>
+                                <option value="generated">Generated</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="sent">Sent</option>
+                                <option value="draft">Draft</option>
+                                <option value="Memproses">Memproses</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="createNewReport()">
+                                <i class="fas fa-plus"></i> New Laporan
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="reportsList">
+                            <!-- Reports will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-bar"></i> Sistem Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Sistem Performa</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Pengguna Aktivitas</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="activityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="generateSystemReport()">
+                                    <i class="fas fa-Server"></i>
+                                    <h6>Sistem</h6>
+                                    <small class="text-muted">Sistem overview</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="generatePerformanceReport()">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <h6>Performa</h6>
+                                    <small class="text-muted">Performa metrics</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="generateSecurityReport()">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <h6>Keamanan</h6>
+                                    <small class="text-muted">Keamanan Analisis</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="generateUsageReport()">
+                                    <i class="fas fa-user"></i>
+                                    <h6>Usage</h6>
+                                    <small class="text-muted">Pengguna Statistik</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Report Schedule -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calendar-alt"></i> Laporan Schedule</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="reportSchedule">
+                            <!-- Schedule items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Report Metrics -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-pie"></i> Laporan Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Laporan-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value" id="systemReportsCount">0</div>
+                                <div class="metric-label">Sistem</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="performanceReportsCount">0</div>
+                                <div class="metric-label">Performa</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="securityReportsCount">0</div>
+                                <div class="metric-label">Keamanan</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="usageReportsCount">0</div>
+                                <div class="metric-label">Usage</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Aktivitas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Laporan-timeline" id="recentActivity">
+                            <!-- Recent activity will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Report Modal -->
+    <div class="modal fade" id="newReportModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Generate Sistem Laporan</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newReportForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Laporan Tipe *</label>
+                                    <select class="form-Pilih" id="reportType" required onchange="updateReportOptions()">
+                                        <option value="">Pilih Laporan Tipe</option>
+                                        <option value="Sistem">Sistem Overview</option>
+                                        <option value="Performa">Performa Analisis</option>
+                                        <option value="Keamanan">Keamanan Laporan</option>
+                                        <option value="usage">Usage Statistik</option>
+                                        <option value="financial">Financial Ringkasan</option>
+                                        <option value="Audit">Audit Laporan</option>
+                                        <option value="custom">Custom Laporan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Laporan Period *</label>
+                                    <select class="form-Pilih" id="reportPeriod" required>
+                                        <option value="">Pilih period</option>
+                                        <option value="Hari Ini">Hari Ini</option>
+                                        <option value="Kemarin">Kemarin</option>
+                                        <option value="this_week">Minggu Ini</option>
+                                        <option value="last_week">Last Week</option>
+                                        <option value="this_month">Bulan Ini</option>
+                                        <option value="last_month">Last Month</option>
+                                        <option value="this_quarter">This Quarter</option>
+                                        <option value="last_quarter">Last Quarter</option>
+                                        <option value="this_year">Tahun Ini</option>
+                                        <option value="last_year">Last Year</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Start Tanggal</label>
+                                    <input type="Tanggal" class="form-control" id="startDate">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">End Tanggal</label>
+                                    <input type="Tanggal" class="form-control" id="endDate">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Laporan Nama</label>
+                                    <input type="text" class="form-control" id="reportName" placeholder="Enter Laporan Nama...">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Include Sections</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeSummary" checked>
+                                        <label class="form-check-label" for="includeSummary">
+                                            Executive Ringkasan
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeCharts" checked>
+                                        <label class="form-check-label" for="includeCharts">
+                                            Charts and Graphs
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeDetails" checked>
+                                        <label class="form-check-label" for="includeDetails">
+                                            Detailed Analisis
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeRecommendations">
+                                        <label class="form-check-label" for="includeRecommendations">
+                                            Recommendations
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Recipients</label>
+                                    <textarea class="form-control" id="recipients" rows="2" placeholder="Enter Email addresses (comma separated)..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Schedule</label>
+                                    <select class="form-Pilih" id="schedule">
+                                        <option value="once">Generate Once</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="quarterly">Quarterly</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Format</label>
+                                    <select class="form-Pilih" id="format">
+                                        <option value="PDF">PDF</option>
+                                        <option value="Excel">Excel</option>
+                                        <option value="csv">CSV</option>
+                                        <option value="html">HTML</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-alert" onclick="saveDraft()">
+                        <i class="fas fa-Simpan"></i> Simpan Draft
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="generateReport()">
+                        <i class="fas fa-File-alt"></i> Generate Laporan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Preview Modal -->
+    <div class="modal fade" id="reportPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Laporan Preview</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="reportPreview">
+                    <!-- Report preview will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <div class="Ekspor-options">
+                        <button class="btn btn-outline-primary" onclick="exportReport('PDF')">
+                            <i class="fas fa-File-PDF"></i> PDF
+                        </button>
+                        <button class="btn btn-outline-Berhasil" onclick="exportReport('Excel')">
+                            <i class="fas fa-File-Excel"></i> Excel
+                        </button>
+                        <button class="btn btn-outline-info" onclick="exportReport('csv')">
+                            <i class="fas fa-File-csv"></i> CSV
+                        </button>
+                        <button class="btn btn-outline-alert" onclick="emailReport()">
+                            <i class="fas fa-envelope"></i> Email
+                        </button>
+                        <button class="btn btn-primary" onclick="printReport()">
+                            <i class="fas fa-Cetak"></i> Cetak
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let Laporan = [];
+        let schedules = [];
+        let performanceChart = null;
+        let activityChart = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadReports();
+            loadStatistics();
+            loadReportSchedule();
+            loadRecentActivity();
+            initializeCharts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Super Admin
+            if (currentUser.role !== 'super_admin') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load Laporan
+        async function loadReports() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=system_reports', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        Laporan = Data.Data;
+                        displayReports();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Laporan:', Error);
+                // Use demo Data
+                Laporan = getDemoReports();
+                displayReports();
+            }
+        }
+
+        // Display Laporan
+        function displayReports() {
+            const reportsList = Dokumen.getElementById('reportsList');
+            const typeFilter = Dokumen.getElementById('typeFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            
+            let filteredReports = Laporan;
+            
+            // Filter by Tipe
+            if (typeFilter) {
+                filteredReports = filteredReports.Filter(Laporan => Laporan.Tipe === typeFilter);
+            }
+            
+            // Filter by Status
+            if (statusFilter) {
+                filteredReports = filteredReports.Filter(Laporan => Laporan.Status === statusFilter);
+            }
+            
+            reportsList.innerHTML = '';
+            
+            if (filteredReports.length === 0) {
+                reportsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak Laporan found</div>';
+                return;
+            }
+            
+            filteredReports.forEach(Laporan => {
+                const reportCard = Dokumen.createElement('div');
+                reportCard.className = 'Laporan-card card mb-2';
+                reportCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="Laporan-icon icon-${Laporan.Tipe} me-3">
+                                        <i class="fas fa-${getReportIcon(Laporan.Tipe)}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${Laporan.Nama}</h6>
+                                        <p class="mb-1">${Laporan.Deskripsi}</p>
+                                        <small class="text-muted">
+                                            <span class="Laporan-Tipe Tipe-${Laporan.Tipe}">${Laporan.Tipe}</span>
+                                            Period: ${Laporan.period} | 
+                                            Generated: ${formatDate(Laporan.generated_at)}<br>
+                                            Size: ${Laporan.file_size || 'N/A'} | 
+                                            Pages: ${Laporan.pages || 'N/A'}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="Laporan-Status Status-${Laporan.Status} me-2">${Laporan.Status}</span>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="previewReport('${Laporan.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="downloadReport('${Laporan.id}')" ${report.status !== 'generated' ? 'disabled' : ''}>
+                                        <i class="fas fa-Unduh"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="emailReport('${Laporan.id}')" ${report.status !== 'generated' ? 'disabled' : ''}>
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="editReport('${Laporan.id}')">
+                                        <i class="fas fa-Edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                reportsList.appendChild(reportCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=report_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_reports: 68,
+                    monthly_reports: 15,
+                    scheduled_reports: 4,
+                    sent_today: 8
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalReports').textContent = stats.total_reports || 0;
+            Dokumen.getElementById('monthlyReports').textContent = stats.monthly_reports || 0;
+            Dokumen.getElementById('scheduledReports').textContent = stats.scheduled_reports || 0;
+            Dokumen.getElementById('sentToday').textContent = stats.sent_today || 0;
+            
+            // Perbarui Laporan distribution
+            const systemReports = Laporan.Filter(r => r.Tipe === 'Sistem').length;
+            const performanceReports = Laporan.Filter(r => r.Tipe === 'Performa').length;
+            const securityReports = Laporan.Filter(r => r.Tipe === 'Keamanan').length;
+            const usageReports = Laporan.Filter(r => r.Tipe === 'usage').length;
+            
+            Dokumen.getElementById('systemReportsCount').textContent = systemReports;
+            Dokumen.getElementById('performanceReportsCount').textContent = performanceReports;
+            Dokumen.getElementById('securityReportsCount').textContent = securityReports;
+            Dokumen.getElementById('usageReportsCount').textContent = usageReports;
+        }
+
+        // Load Laporan schedule
+        function loadReportSchedule() {
+            const scheduleDiv = Dokumen.getElementById('reportSchedule');
+            
+            schedules = [
+                { Tipe: 'Sistem Overview', schedule: 'Daily at 8:00 AM', next_run: 'Tomorrow 8:00 AM', enabled: true },
+                { Tipe: 'Performa Laporan', schedule: 'Weekly on Monday', next_run: 'Monday 8:00 AM', enabled: true },
+                { Tipe: 'Keamanan Laporan', schedule: 'Daily at 6:00 PM', next_run: 'Hari Ini 6:00 PM', enabled: true },
+                { Tipe: 'Usage Statistik', schedule: 'Monthly on 1st', next_run: 'April 1 8:00 AM', enabled: false }
+            ];
+            
+            scheduleDiv.innerHTML = schedules.map(schedule => `
+                <div class="schedule-preview">
+                    <div class="schedule-header">
+                        <h6 class="mb-0">${schedule.Tipe}</h6>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" ${schedule.enabled ? 'checked' : ''} onchange="toggleSchedule('${schedule.Tipe}')">
+                        </div>
+                    </div>
+                    <div class="schedule-Waktu">
+                        <small class="text-muted">
+                            Schedule: ${schedule.schedule}<br>
+                            Lanjut run: ${schedule.next_run}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load recent Aktivitas
+        function loadRecentActivity() {
+            const activityDiv = Dokumen.getElementById('recentActivity');
+            
+            const activities = [
+                { Tipe: 'report_generated', Deskripsi: 'Sistem Overview Laporan generated', Waktu: '2 hours ago', Pengguna: 'Super Admin' },
+                { Tipe: 'report_sent', Deskripsi: 'Performa Laporan sent to recipients', Waktu: '4 hours ago', Pengguna: 'Sistem' },
+                { Tipe: 'report_scheduled', Deskripsi: 'Keamanan Laporan scheduled for daily generation', Waktu: '6 hours ago', Pengguna: 'Super Admin' },
+                { Tipe: 'report_downloaded', Deskripsi: 'Usage Statistik Laporan downloaded', Waktu: '1 day ago', Pengguna: 'Admin Pengguna' },
+                { Tipe: 'report_created', Deskripsi: 'Custom Laporan template Dibuat', Waktu: '2 days ago', Pengguna: 'Super Admin' }
+            ];
+            
+            activityDiv.innerHTML = activities.map(Aktivitas => `
+                <div class="timeline-item">
+                    <div>
+                        <strong>${Aktivitas.Deskripsi}</strong>
+                        <br>
+                        <small class="text-muted">${Aktivitas.Pengguna} - ${Aktivitas.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Performa Grafik
+            const performanceCtx = Dokumen.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Grafik(performanceCtx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'CPU Usage (%)',
+                        Data: [45, 52, 48, 58, 62, 55, 50],
+                        borderColor: '#17a2b8',
+                        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                        tension: 0.1
+                    }, {
+                        label: 'Memory Usage (%)',
+                        Data: [65, 68, 62, 70, 75, 72, 68],
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Aktivitas Grafik
+            const activityCtx = Dokumen.getElementById('activityChart').getContext('2d');
+            activityChart = new Grafik(activityCtx, {
+                Tipe: 'bar',
+                Data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Aktif Pengguna',
+                        Data: [120, 135, 125, 140, 155, 85, 65],
+                        backgroundColor: '#28a745'
+                    }, {
+                        label: 'Logins',
+                        Data: [180, 195, 185, 200, 215, 105, 85],
+                        backgroundColor: '#17a2b8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Preview Laporan
+        function previewReport(reportId) {
+            const Laporan = Laporan.find(r => r.id === reportId);
+            if (!Laporan) return;
+            
+            const preview = Dokumen.getElementById('reportPreview');
+            
+            preview.innerHTML = `
+                <div class="Laporan-preview">
+                    <div class="text-center mb-4">
+                        <h4>${Laporan.Nama}</h4>
+                        <p class="text-muted">Generated on ${formatDate(Laporan.generated_at)}</p>
+                    </div>
+                    
+                    <div class="Laporan-Ringkasan mb-4">
+                        <div class="Ringkasan-item">
+                            <div class="Ringkasan-value">${Laporan.total_records || 0}</div>
+                            <div class="Ringkasan-label">Total Records</div>
+                        </div>
+                        <div class="Ringkasan-item">
+                            <div class="Ringkasan-value">${Laporan.period}</div>
+                            <div class="Ringkasan-label">Period</div>
+                        </div>
+                        <div class="Ringkasan-item">
+                            <div class="Ringkasan-value">${Laporan.pages || 0}</div>
+                            <div class="Ringkasan-label">Pages</div>
+                        </div>
+                        <div class="Ringkasan-item">
+                            <div class="Ringkasan-value">${formatFileSize(Laporan.file_size || 0)}</div>
+                            <div class="Ringkasan-label">File Size</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Executive Ringkasan</h5>
+                        <p>${Laporan.Ringkasan || 'This Laporan provides a comprehensive overview of Sistem Performa and usage metrics for the selected period.'}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Key Metrics</h5>
+                        <canvas id="previewChart" height="200"></canvas>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Detailed Analisis</h5>
+                        <table class="Tabel Tabel-sm">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sistem Uptime</td>
+                                    <td>${Laporan.uptime || '99.9%'}</td>
+                                    <td><span class="text-Berhasil">+0.1%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Average Response Waktu</td>
+                                    <td>${Laporan.response_time || '2.3ms'}</td>
+                                    <td><span class="text-Berhasil">-0.2ms</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Aktif Pengguna</td>
+                                    <td>${Laporan.active_users || 156}</td>
+                                    <td><span class="text-Berhasil">+12</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Storage Usage</td>
+                                    <td>${Laporan.storage_usage || '75%'}</td>
+                                    <td><span class="text-alert">+2%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h5>Recommendations</h5>
+                        <ul>
+                            <li>Monitor storage usage and plan for expansion</li>
+                            <li>Optimize Database queries for better Performa</li>
+                            <li>Review Pengguna access patterns for Keamanan improvements</li>
+                            <li>Consider implementing caching for frequently accessed Data</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            // Create preview Grafik
+            setTimeout(() => {
+                const ctx = Dokumen.getElementById('previewChart');
+                if (ctx) {
+                    new Grafik(ctx.getContext('2d'), {
+                        Tipe: 'bar',
+                        Data: {
+                            labels: ['CPU', 'Memory', 'Storage', 'Jaringan', 'Pengguna'],
+                            datasets: [{
+                                label: 'Usage (%)',
+                                Data: [65, 72, 75, 45, 82],
+                                backgroundColor: '#17a2b8'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+            }, 100);
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('reportPreviewModal'));
+            modal.show();
+        }
+
+        // Unduh Laporan
+        function downloadReport(reportId) {
+            const Laporan = Laporan.find(r => r.id === reportId);
+            if (!Laporan) return;
+            
+            showSuccess(`Downloading Laporan: ${Laporan.Nama}`);
+        }
+
+        // Email Laporan
+        function emailReport(reportId) {
+            const Laporan = Laporan.find(r => r.id === reportId);
+            if (!Laporan) return;
+            
+            showSuccess(`Email sent for Laporan: ${Laporan.Nama}`);
+        }
+
+        // Edit Laporan
+        function editReport(reportId) {
+            const Laporan = Laporan.find(r => r.id === reportId);
+            if (!Laporan) return;
+            
+            
+        }
+
+        // Create new Laporan
+        function createNewReport() {
+            // Set Hari Ini's Tanggal as default
+            Dokumen.getElementById('startDate').value = new Tanggal().toISOString().split('T')[0];
+            Dokumen.getElementById('endDate').value = new Tanggal().toISOString().split('T')[0];
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newReportModal'));
+            modal.show();
+        }
+
+        // Perbarui Laporan options
+        function updateReportOptions() {
+            const reportType = Dokumen.getElementById('reportType').value;
+            const reportPeriod = Dokumen.getElementById('reportPeriod').value;
+            
+            // Perbarui Tanggal fields based on period
+            if (reportPeriod === 'custom') {
+                Dokumen.getElementById('startDate').disabled = false;
+                Dokumen.getElementById('endDate').disabled = false;
+            } else {
+                Dokumen.getElementById('startDate').disabled = true;
+                Dokumen.getElementById('endDate').disabled = true;
+                
+                // Set dates based on period
+                const Hari Ini = new Tanggal();
+                let startDate, endDate;
+                
+                switch (reportPeriod) {
+                    case 'Hari Ini':
+                        startDate = endDate = Hari Ini;
+                        break;
+                    case 'Kemarin':
+                        startDate = endDate = new Tanggal(Hari Ini.getTime() - 24 * 60 * 60 * 1000);
+                        break;
+                    case 'this_week':
+                        startDate = new Tanggal(Hari Ini.getTime() - (Hari Ini.getDay() - 1) * 24 * 60 * 60 * 1000);
+                        endDate = Hari Ini;
+                        break;
+                    case 'last_week':
+                        startDate = new Tanggal(Hari Ini.getTime() - (Hari Ini.getDay() + 6) * 24 * 60 * 60 * 1000);
+                        endDate = new Tanggal(Hari Ini.getTime() - (Hari Ini.getDay()) * 24 * 60 * 60 * 1000);
+                        break;
+                    case 'this_month':
+                        startDate = new Tanggal(Hari Ini.getFullYear(), Hari Ini.getMonth(), 1);
+                        endDate = Hari Ini;
+                        break;
+                    case 'last_month':
+                        startDate = new Tanggal(Hari Ini.getFullYear(), Hari Ini.getMonth() - 1, 1);
+                        endDate = new Tanggal(Hari Ini.getFullYear(), Hari Ini.getMonth(), 0);
+                        break;
+                    case 'this_quarter':
+                        const quarter = Math.floor(Hari Ini.getMonth() / 3);
+                        startDate = new Tanggal(Hari Ini.getFullYear(), quarter * 3, 1);
+                        endDate = Hari Ini;
+                        break;
+                    case 'last_quarter':
+                        const lastQuarter = Math.floor(Hari Ini.getMonth() / 3) - 1;
+                        startDate = new Tanggal(Hari Ini.getFullYear(), lastQuarter * 3, 1);
+                        endDate = new Tanggal(Hari Ini.getFullYear(), (lastQuarter + 1) * 3, 0);
+                        break;
+                    case 'this_year':
+                        startDate = new Tanggal(Hari Ini.getFullYear(), 0, 1);
+                        endDate = Hari Ini;
+                        break;
+                    case 'last_year':
+                        startDate = new Tanggal(Hari Ini.getFullYear() - 1, 0, 1);
+                        endDate = new Tanggal(Hari Ini.getFullYear() - 1, 11, 31);
+                        break;
+                }
+                
+                if (startDate && endDate) {
+                    Dokumen.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+                    Dokumen.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+                }
+            }
+            
+            // Generate Laporan Nama
+            if (reportType && reportPeriod) {
+                const reportName = `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Laporan - ${reportPeriod.replace('_', ' ').charAt(0).toUpperCase() + reportPeriod.replace('_', ' ').slice(1)}`;
+                Dokumen.getElementById('reportName').value = reportName;
+            }
+        }
+
+        // Generate Laporan
+        function generateReport() {
+            const reportType = Dokumen.getElementById('reportType').value;
+            const reportPeriod = Dokumen.getElementById('reportPeriod').value;
+            const reportName = Dokumen.getElementById('reportName').value;
+            
+            if (!reportType || !reportPeriod) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Create new Laporan
+            const newReport = {
+                id: 'RPT-' + Tanggal.now(),
+                Nama: reportName || `${reportType} Laporan`,
+                Tipe: reportType,
+                period: reportPeriod,
+                Status: 'Memproses',
+                generated_at: new Tanggal().toISOString(),
+                file_size: null,
+                pages: null,
+                total_records: Math.floor(Math.random() * 1000) + 100,
+                uptime: '99.9%',
+                response_time: '2.3ms',
+                active_users: 156,
+                storage_usage: '75%'
+            };
+            
+            Laporan.unshift(newReport);
+            displayReports();
+            
+            // Simulate Laporan generation
+            setTimeout(() => {
+                newReport.Status = 'generated';
+                newReport.file_size = Math.floor(Math.random() * 5000000) + 1000000;
+                newReport.pages = Math.floor(Math.random() * 20) + 5;
+                newReport.completed_at = new Tanggal().toISOString();
+                
+                displayReports();
+                updateStatistics({
+                    total_reports: parseInt(Dokumen.getElementById('totalReports').textContent) + 1,
+                    monthly_reports: parseInt(Dokumen.getElementById('monthlyReports').textContent) + 1,
+                    scheduled_reports: parseInt(Dokumen.getElementById('scheduledReports').textContent),
+                    sent_today: parseInt(Dokumen.getElementById('sentToday').textContent)
+                });
+                
+                showSuccess('Laporan generated successfully!');
+            }, 2000);
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newReportModal'));
+            modal.hide();
+            Dokumen.getElementById('newReportForm').Reset();
+        }
+
+        // Simpan draft
+        function saveDraft() {
+            const reportName = Dokumen.getElementById('reportName').value;
+            
+            if (!reportName) {
+                Peringatan('Please enter Laporan Nama');
+                return;
+            }
+            
+            // Create draft Laporan
+            const draftReport = {
+                id: 'DRAFT-' + Tanggal.now(),
+                Nama: reportName,
+                Tipe: Dokumen.getElementById('reportType').value,
+                period: Dokumen.getElementById('reportPeriod').value,
+                Status: 'draft',
+                generated_at: new Tanggal().toISOString(),
+                file_size: 'N/A',
+                pages: 'N/A'
+            };
+            
+            Laporan.unshift(draftReport);
+            displayReports();
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newReportModal'));
+            modal.hide();
+            Dokumen.getElementById('newReportForm').Reset();
+            
+            showSuccess('Laporan saved as draft!');
+        }
+
+        // Quick action functions
+        function generateSystemReport() {
+            Dokumen.getElementById('reportType').value = 'Sistem';
+            Dokumen.getElementById('reportPeriod').value = 'this_month';
+            updateReportOptions();
+            createNewReport();
+        }
+
+        function generatePerformanceReport() {
+            Dokumen.getElementById('reportType').value = 'Performa';
+            Dokumen.getElementById('reportPeriod').value = 'this_week';
+            updateReportOptions();
+            createNewReport();
+        }
+
+        function generateSecurityReport() {
+            Dokumen.getElementById('reportType').value = 'Keamanan';
+            Dokumen.getElementById('reportPeriod').value = 'this_month';
+            updateReportOptions();
+            createNewReport();
+        }
+
+        function generateUsageReport() {
+            Dokumen.getElementById('reportType').value = 'usage';
+            Dokumen.getElementById('reportPeriod').value = 'this_month';
+            updateReportOptions();
+            createNewReport();
+        }
+
+        // Toggle schedule
+        function toggleSchedule(scheduleType) {
+            const schedule = schedules.find(s => s.Tipe === scheduleType);
+            if (schedule) {
+                schedule.enabled = !schedule.enabled;
+                showSuccess(`Schedule ${schedule.enabled ? 'enabled' : 'disabled'}: ${scheduleType}`);
+            }
+        }
+
+        // Ekspor functions
+        function exportReport(format) {
+            showSuccess(`Exporting Laporan as ${format.toUpperCase()}`);
+        }
+
+        function printReport() {
+            window.Cetak();
+        }
+
+        // Filter Laporan
+        function filterReports() {
+            displayReports();
+        }
+
+        // Utility functions
+        function getReportIcon(Tipe) {
+            const icons = {
+                'Sistem': 'Server',
+                'Performa': 'tachometer-alt',
+                'Keamanan': 'shield-alt',
+                'usage': 'Pengguna',
+                'financial': 'dollar-sign',
+                'Audit': 'clipboard-check',
+                'custom': 'cog'
+            };
+            return icons[Tipe] || 'File-alt';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.Log(bytes) / Math.Log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Tanggal(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo Laporan
+        function getDemoReports() {
+            return [
+                {
+                    id: '1',
+                    Nama: 'Sistem Overview Laporan - March 2026',
+                    Tipe: 'Sistem',
+                    period: 'this_month',
+                    Status: 'generated',
+                    Deskripsi: 'Comprehensive Sistem overview for March 2026',
+                    generated_at: '2026-03-17T08:00:00Z',
+                    completed_at: '2026-03-17T08:05:00Z',
+                    file_size: 2456789,
+                    pages: 12,
+                    total_records: 156,
+                    uptime: '99.9%',
+                    response_time: '2.3ms',
+                    active_users: 156,
+                    storage_usage: '75%'
+                },
+                {
+                    id: '2',
+                    Nama: 'Performa Analisis Laporan - Minggu Ini',
+                    Tipe: 'Performa',
+                    period: 'this_week',
+                    Status: 'generated',
+                    Deskripsi: 'Weekly Performa Analisis and metrics',
+                    generated_at: '2026-03-17T09:00:00Z',
+                    completed_at: '2026-03-17T09:03:00Z',
+                    file_size: 1856789,
+                    pages: 8,
+                    total_records: 7,
+                    uptime: '99.8%',
+                    response_time: '2.5ms',
+                    active_users: 142,
+                    storage_usage: '73%'
+                },
+                {
+                    id: '3',
+                    Nama: 'Keamanan Laporan - March 2026',
+                    Tipe: 'Keamanan',
+                    period: 'this_month',
+                    Status: 'generated',
+                    Deskripsi: 'Monthly Keamanan Analisis and threat assessment',
+                    generated_at: '2026-03-17T10:00:00Z',
+                    completed_at: '2026-03-17T10:04:00Z',
+                    file_size: 3234567,
+                    pages: 15,
+                    total_records: 45,
+                    uptime: '99.9%',
+                    response_time: '2.1ms',
+                    active_users: 156,
+                    storage_usage: '75%'
+                },
+                {
+                    id: '4',
+                    Nama: 'Usage Statistik Laporan - Bulan Ini',
+                    Tipe: 'usage',
+                    period: 'this_month',
+                    Status: 'scheduled',
+                    Deskripsi: 'Pengguna Aktivitas and usage Statistik',
+                    generated_at: '2026-03-17T11:00:00Z',
+                    file_size: 'N/A',
+                    pages: 'N/A',
+                    total_records: 0
+                },
+                {
+                    id: '5',
+                    Nama: 'Financial Ringkasan Laporan - Q1 2026',
+                    Tipe: 'financial',
+                    period: 'this_quarter',
+                    Status: 'draft',
+                    Deskripsi: 'Quarterly financial Ringkasan and Analisis',
+                    generated_at: '2026-03-17T12:00:00Z',
+                    file_size: 'N/A',
+                    pages: 'N/A',
+                    total_records: 0
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

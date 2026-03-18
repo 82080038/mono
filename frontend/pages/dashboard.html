@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+
+    <style>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+
+        .nav-card {
+            border: Tidak Ada;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card {
+            border: Tidak Ada;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-Keluar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+
+        .btn-Keluar:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>🏢 Dashboard</h1>
+                <p class="mb-0">Sistem Manajemen Koperasi KSP Lam Gabe Jaya</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-2x text-primary mb-2"></i>
+                        <h5>Total Anggota</h5>
+                        <h3 class="text-primary" id="totalMembers">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-hand-holding-usd fa-2x text-Berhasil mb-2"></i>
+                        <h5>Total Pinjaman</h5>
+                        <h3 class="text-Berhasil" id="totalLoans">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-piggy-bank fa-2x text-info mb-2"></i>
+                        <h5>Total Simpanan</h5>
+                        <h3 class="text-info" id="totalSavings">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-Grafik-line fa-2x text-alert mb-2"></i>
+                        <h5>Pendapatan Bulan Ini</h5>
+                        <h3 class="text-alert" id="monthlyRevenue">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Cards -->
+        <div class="row" id="navigationCards">
+            <div class="col-12">
+                <h4 class="mb-3">Menu Navigasi</h4>
+            </div>
+            <!-- Cards will be populated based on user role -->
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📋 Aktivitas Terkini</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <div class="text-center">Memuat aktivitas...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📊 Ringkasan Cepat</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="quickSummary">
+                            <div class="text-center">Memuat ringkasan...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Check authentication and load Pengguna Data
+        function checkAuth() {
+            
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+
+            
+            
+
+            if (!token || !Pengguna) {
+                
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+
+            const userData = JSON.parse(Pengguna);
+            Dokumen.getElementById("Nama Pengguna").textContent = userData.Nama || "Pengguna";
+            
+
+            // Load role-based navigation
+            loadRoleBasedNavigation(userData.role);
+
+            // Redirect Super Admin to dedicated Dashboard
+            if (userData.role === 'super_admin') {
+                window.Lokasi.href = '/mono/super_admin_dashboard.html';
+                return;
+            }
+
+            // Load Dashboard Data
+            loadDashboardData();
+        }
+
+        // Load role-based navigation
+        function loadRoleBasedNavigation(role) {
+            const navigationCards = Dokumen.getElementById('navigationCards');
+
+            const roleMenus = {
+                'super_admin': [
+                    { icon: 'fas fa-user', Judul: 'Manajemen Pengguna', desc: 'Kelola pengguna sistem', url: '/mono/users_crud.html', color: 'primary' },
+                    { icon: 'fas fa-user-friends', Judul: 'Manajemen Anggota', desc: 'Kelola Data anggota', url: '/mono/members_crud.html', color: 'Berhasil' },
+                    { icon: 'fas fa-hand-holding-usd', Judul: 'Manajemen Pinjaman', desc: 'Kelola pinjaman', url: '/mono/loans_crud.html', color: 'Peringatan' },
+                    { icon: 'fas fa-piggy-bank', Judul: 'Manajemen Simpanan', desc: 'Kelola simpanan', url: '/mono/savings_crud.html', color: 'Info' },
+                    { icon: 'fas fa-Grafik-bar', Judul: 'Laporan', desc: 'Lihat laporan keuangan', url: '/mono/Laporan.html', color: 'secondary' },
+                    { icon: 'fas fa-cog', Judul: 'Pengaturan', desc: 'Pengaturan sistem', url: '/mono/Pengaturan.html', color: 'dark' },
+                    { icon: 'fas fa-Riwayat', Judul: 'Log Audit', desc: 'Lihat Log aktivitas', url: '/mono/audit_logs.html', color: 'danger' },
+                    { icon: 'fas fa-bell', Judul: 'Notifikasi', desc: 'Kelola notifikasi', url: '/mono/notifications.html', color: 'primary' },
+                    { icon: 'fas fa-exclamation-triangle', Judul: 'Penilaian Risiko', desc: 'Analisis risiko', url: '/mono/risk_assessment.html', color: 'Peringatan' }
+                ],
+                'Admin': [
+                    { icon: 'fas fa-user-friends', Judul: 'Manajemen Anggota', desc: 'Kelola Data anggota', url: '/mono/members_crud.html', color: 'Berhasil' },
+                    { icon: 'fas fa-hand-holding-usd', Judul: 'Manajemen Pinjaman', desc: 'Kelola pinjaman', url: '/mono/loans_crud.html', color: 'Peringatan' },
+                    { icon: 'fas fa-piggy-bank', Judul: 'Manajemen Simpanan', desc: 'Kelola simpanan', url: '/mono/savings_crud.html', color: 'Info' },
+                    { icon: 'fas fa-Grafik-bar', Judul: 'Laporan', desc: 'Lihat laporan keuangan', url: '/mono/Laporan.html', color: 'secondary' },
+                    { icon: 'fas fa-bell', Judul: 'Notifikasi', desc: 'Kelola notifikasi', url: '/mono/notifications.html', color: 'primary' }
+                ],
+                'mantri': [
+                    { icon: 'fas fa-user-friends', Judul: 'Manajemen Anggota', desc: 'Kelola Data anggota', url: '/mono/members_crud.html', color: 'Berhasil' },
+                    { icon: 'fas fa-hand-holding-usd', Judul: 'Manajemen Pinjaman', desc: 'Kelola pinjaman', url: '/mono/loans_crud.html', color: 'Peringatan' },
+                    { icon: 'fas fa-piggy-bank', Judul: 'Manajemen Simpanan', desc: 'Kelola simpanan', url: '/mono/savings_crud.html', color: 'Info' }
+                ],
+                'Anggota': [
+                    { icon: 'fas fa-user', Judul: 'Profil Saya', desc: 'Lihat dan Edit profil', url: '#', color: 'primary' },
+                    { icon: 'fas fa-Riwayat', Judul: 'Riwayat Transaksi', desc: 'Lihat riwayat simpanan dan pinjaman', url: '#', color: 'Info' },
+                    { icon: 'fas fa-File-invoice', Judul: 'Tagihan', desc: 'Lihat tagihan dan pembayaran', url: '#', color: 'Peringatan' },
+                    { icon: 'fas fa-cog', Judul: 'Pengaturan', desc: 'Pengaturan akun', url: '#', color: 'secondary' }
+                ]
+            };
+
+            const menus = roleMenus[role] || [];
+            let cardsHTML = '';
+
+            menus.forEach(menu => {
+                cardsHTML += `
+                    <div class="col-md-4 mb-3">
+                        <div class="card nav-card" onclick="window.Lokasi.href='${menu.url}'">
+                            <div class="card-body text-center">
+                                <i class="${menu.icon} fa-3x text-${menu.color} mb-3"></i>
+                                <h5 class="card-Judul">${menu.Judul}</h5>
+                                <p class="card-text text-muted">${menu.desc}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            navigationCards.innerHTML = '<div Kelas="col-12"><h4 Kelas="mb-3">Menu Navigasi</h4></div>' + cardsHTML;
+        }
+
+        // Load Dashboard Data
+        function loadDashboardData() {
+            // Mock Data for development
+            const mockData = {
+                totalUsers: 156,
+                activeLoans: 45,
+                totalSavings: 2500000,
+                todayTransactions: 28
+            };
+            
+            // Perbarui Statistik
+            if (Dokumen.getElementById('totalUsers')) {
+                Dokumen.getElementById('totalUsers').textContent = mockData.totalUsers;
+            }
+            if (Dokumen.getElementById('activeLoans')) {
+                Dokumen.getElementById('activeLoans').textContent = mockData.activeLoans;
+            }
+            if (Dokumen.getElementById('totalSavings')) {
+                Dokumen.getElementById('totalSavings').textContent = 'Rp ' + mockData.totalSavings.toLocaleString('id-ID');
+            }
+            if (Dokumen.getElementById('todayTransactions')) {
+                Dokumen.getElementById('todayTransactions').textContent = mockData.todayTransactions;
+            }
+            
+            console.Log('Dashboard Data loaded with mock Data');
+
+            // Load quick Ringkasan
+            loadQuickSummary();
+        }
+
+        // Load recent Aktivitas
+        function loadRecentActivity() {
+            const activities = [
+                { icon: 'fas fa-plus', text: 'Anggota baru ditambahkan', Waktu: '2 jam yang lalu' },
+                { icon: 'fas fa-hand-holding-usd', text: 'Pinjaman disetujui', Waktu: '4 jam yang lalu' },
+                { icon: 'fas fa-piggy-bank', text: 'Simpanan masuk', Waktu: '6 jam yang lalu' },
+                { icon: 'fas fa-user', text: 'Pengguna Masuk', Waktu: '8 jam yang lalu' }
+            ];
+
+            let html = '';
+            activities.forEach(Aktivitas => {
+                html += `
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="${Aktivitas.icon} me-2"></i>
+                        <div class="flex-grow-1">
+                            <small>${Aktivitas.text}</small>
+                            <div class="text-muted small">${Aktivitas.Waktu}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            Dokumen.getElementById('recentActivity').innerHTML = html;
+        }
+
+        // Load quick Ringkasan
+        function loadQuickSummary() {
+            const Ringkasan = `
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted">Pinjaman Menunggu</small>
+                        <h4 class="text-alert">12</h4>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Jatuh Tempo Bulan Ini</small>
+                        <h4 class="text-danger">8</h4>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted">Anggota Aktif</small>
+                        <h4 class="text-Berhasil">142</h4>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Simpanan Hari Ini</small>
+                        <h4 class="text-info">Rp 2.500.000</h4>
+                    </div>
+                </div>
+            `;
+
+            Dokumen.getElementById('quickSummary').innerHTML = Ringkasan;
+        }
+
+        // Format currency
+        function formatUang(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+
+        // Advanced analytics and Monitoring
+        function loadAdvancedAnalytics() {
+            // Real-Waktu Data Memuat
+            // Performa Monitoring
+            // Sistem health checks
+        }
+
+        // Sistem health Monitoring
+        function monitorSystemHealth() {
+            // Monitor API response times
+            // Database connection Status
+            // Server Performa metrics
+        }
+
+        // Real-Waktu updates
+        function setupRealTimeUpdates() {
+            // WebSocket connection for real-Waktu Data
+            // Auto-refresh Dashboard Data
+        }
+
+        // Initialize
+
+        $(Dokumen).ready(function () {
+            checkAuth();
+        });
+    </script>
+</body>
+
+</html>

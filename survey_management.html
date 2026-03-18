@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survei Manajemen - Surveyor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Survei-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #17a2b8;
+            cursor: pointer;
+        }
+        
+        .Survei-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Prioritas-high { border-left-color: #dc3545; }
+        .Prioritas-medium { border-left-color: #ffc107; }
+        .Prioritas-low { border-left-color: #28a745; }
+        
+        .Status-scheduled { background-color: #e3f2fd; }
+        .Status-in-progress { background-color: #fff3e0; }
+        .Status-Selesai { background-color: #e8f5e8; }
+        .Status-Dibatalkan { background-color: #ffebee; }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .timeline-item {
+            Posisi: relative;
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            Posisi: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #17a2b8;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            Posisi: absolute;
+            left: 5px;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% - 1rem);
+            background: #dee2e6;
+        }
+        
+        .timeline-item:last-child::after {
+            display: Tidak Ada;
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #17a2b8;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #17a2b8;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-clipboard-Daftar"></i> Survei Manajemen</h1>
+                <p class="mb-0">Surveyor - Field Survei Planning & Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Survey Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-tasks fa-2x mb-2"></i>
+                        <h5>Total Surveys</h5>
+                        <h3 id="totalSurveys">0</h3>
+                        <p class="mb-0">Assigned to you</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h5>Menunggu</h5>
+                        <h3 id="pendingSurveys">0</h3>
+                        <p class="mb-0">Awaiting completion</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h5>Selesai</h5>
+                        <h3 id="completedSurveys">0</h3>
+                        <p class="mb-0">Bulan Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-route fa-2x mb-2"></i>
+                        <h5>Hari Ini's Route</h5>
+                        <h3 id="todayRoute">0</h3>
+                        <p Kelas="mb-0">Surveys scheduled</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div Kelas="row">
+            <!-- Survei Calendar & Map -->
+            <div Kelas="col-md-8">
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-calendar-alt"></i> Survei Calendar</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="row">
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Pilih Tanggal</label>
+                                    <input Tipe="Tanggal" Kelas="form-control" id="surveyDate" onchange="loadSurveysForDate()">
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Filter by Status</label>
+                                    <Pilih Kelas="Formulir-Pilih" id="statusFilter" onchange="filterSurveys()">
+                                        <option value="">Semua Status</option>
+                                        <option value="scheduled">Scheduled</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="Selesai">Selesai</option>
+                                        <option value="Dibatalkan">Dibatalkan</option>
+                                    </Pilih>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Survei Daftar -->
+                        <div id="surveyList">
+                            <!-- Survei items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map View -->
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-map-marked-alt"></i> Survei Locations</h5>
+                    </div>
+                    <div Kelas="card-body p-0">
+                        <div id="surveyMap" Kelas="map-container"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div Kelas="col-md-4">
+                <!-- Quick Actions -->
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="row">
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="startNewSurvey()">
+                                    <i Kelas="fas fa-plus-circle"></i>
+                                    <h6>New Survei</h6>
+                                    <small Kelas="text-muted">Start Survei</small>
+                                </div>
+                            </div>
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="viewTodayRoute()">
+                                    <i Kelas="fas fa-route"></i>
+                                    <h6>Hari Ini's Route</h6>
+                                    <small class="text-muted">View route</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="openSurveyReports()">
+                                    <i class="fas fa-File-alt"></i>
+                                    <h6>Laporan</h6>
+                                    <small class="text-muted">View Laporan</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="openSurveyTemplates()">
+                                    <i class="fas fa-clipboard"></i>
+                                    <h6>Templates</h6>
+                                    <small class="text-muted">Survei forms</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Survey Details -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle"></i> Survei Detail</h5>
+                    </div>
+                    <div class="card-body" id="surveyDetails">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-clipboard-Daftar fa-3x mb-3"></i>
+                            <p>Pilih a Survei to view Detail</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Timeline -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Aktivitas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="activityTimeline">
+                            <!-- Timeline items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Survey Modal -->
+    <div class="modal fade" id="newSurveyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Start New Survei</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newSurveyForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Anggota *</label>
+                                    <select class="form-Pilih" id="memberSelect" required>
+                                        <option value="">Pilih Anggota</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Survei Tipe *</label>
+                                    <select class="form-Pilih" id="surveyType" required>
+                                        <option value="">Pilih Survei Tipe</option>
+                                        <option value="Verifikasi">Anggota Verifikasi</option>
+                                        <option value="assessment">Property Assessment</option>
+                                        <option value="follow_up">Follow-up Visit</option>
+                                        <option value="Penagihan">Penagihan Visit</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Scheduled Tanggal *</label>
+                                    <input type="Tanggal" class="form-control" id="scheduledDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Scheduled Waktu *</label>
+                                    <input type="Waktu" class="form-control" id="scheduledTime" required>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Alamat</label>
+                                    <textarea class="form-control" id="surveyAddress" rows="2" readonly></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Survei Notes</label>
+                                    <textarea class="form-control" id="surveyNotes" rows="3" placeholder="Enter any notes Tentang this Survei..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="createSurvey()">
+                        <i class="fas fa-plus"></i> Create Survei
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Survey Form Modal -->
+    <div class="modal fade" id="surveyFormModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Survei Formulir</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="surveyFormContent">
+                    <!-- Survey form will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-alert" onclick="saveAsDraft()">
+                        <i class="fas fa-Simpan"></i> Simpan as Draft
+                    </button>
+                    <button type="button" class="btn btn-Berhasil" onclick="submitSurvey()">
+                        <i class="fas fa-check"></i> Kirim Survei
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let surveys = [];
+        let map = null;
+        let markers = [];
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadSurveys();
+            loadStatistics();
+            initializeMap();
+            loadActivityTimeline();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Surveyor
+            if (currentUser.role !== 'Surveyor') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+            
+            // Set Hari Ini's Tanggal
+            Dokumen.getElementById('surveyDate').value = new Tanggal().toISOString().split('T')[0];
+        }
+
+        // Load surveys
+        async function loadSurveys() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=surveys', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        surveys = Data.Data;
+                        displaySurveys();
+                        updateMapMarkers();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat surveys:', Error);
+                // Use demo Data
+                surveys = getDemoSurveys();
+                displaySurveys();
+                updateMapMarkers();
+            }
+        }
+
+        // Display surveys
+        function displaySurveys() {
+            const surveyList = Dokumen.getElementById('surveyList');
+            const selectedDate = Dokumen.getElementById('surveyDate').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            
+            let filteredSurveys = surveys;
+            
+            // Filter by Tanggal
+            if (selectedDate) {
+                filteredSurveys = filteredSurveys.Filter(Survei => 
+                    Survei.scheduled_date === selectedDate
+                );
+            }
+            
+            // Filter by Status
+            if (statusFilter) {
+                filteredSurveys = filteredSurveys.Filter(Survei => 
+                    Survei.Status === statusFilter
+                );
+            }
+            
+            surveyList.innerHTML = '';
+            
+            if (filteredSurveys.length === 0) {
+                surveyList.innerHTML = '<div class="text-center text-muted py-4">Tidak surveys found</div>';
+                return;
+            }
+            
+            filteredSurveys.forEach(Survei => {
+                const surveyCard = Dokumen.createElement('div');
+                surveyCard.className = `Survei-card card mb-2 Prioritas-${Survei.Prioritas} Status-${Survei.Status}`;
+                surveyCard.innerHTML = `
+                    <div Kelas="card-body">
+                        <div Kelas="row align-items-center">
+                            <div Kelas="col-md-8">
+                                <div Kelas="d-flex align-items-center">
+                                    <div Kelas="me-3">
+                                        <i Kelas="fas fa-clipboard-Daftar fa-2x text-Info"></i>
+                                    </div>
+                                    <div>
+                                        <h6 Kelas="mb-1">${Survei.member_name}</h6>
+                                        <p Kelas="mb-1">${Survei.survey_type}</p>
+                                        <small Kelas="text-muted">
+                                            <i Kelas="fas fa-calendar"></i> ${formatDate(Survei.scheduled_date)} at ${Survei.scheduled_time}
+                                            <br>
+                                            <i Kelas="fas fa-map-marker-alt"></i> ${Survei.Alamat}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-4 text-end">
+                                <span Kelas="badge bg-${getStatusColor(Survei.Status)} me-2">${Survei.Status.replace('_', ' ')}</span>
+                                <div Kelas="mt-2">
+                                    <button Kelas="btn btn-sm btn-outline-primary" onclick="viewSurveyDetails('${Survei.id}')">
+                                        <i Kelas="fas fa-eye"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="startSurvey('${Survei.id}')" ${Survei.Status !== 'scheduled' ? 'disabled' : ''}>
+                                        <i Kelas="fas fa-play"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="editSurvey('${Survei.id}')">
+                                        <i Kelas="fas fa-Edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                surveyList.appendChild(surveyCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=surveyor_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_surveys: 15,
+                    pending_surveys: 5,
+                    completed_surveys: 8,
+                    today_route: 3
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalSurveys').textContent = stats.total_surveys || 0;
+            Dokumen.getElementById('pendingSurveys').textContent = stats.pending_surveys || 0;
+            Dokumen.getElementById('completedSurveys').textContent = stats.completed_surveys || 0;
+            Dokumen.getElementById('todayRoute').textContent = stats.today_route || 0;
+        }
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('surveyMap').setView([-6.2088, 106.8456], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Perbarui map markers
+        function updateMapMarkers() {
+            // Hapus existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            // Tambah markers for surveys
+            surveys.forEach(Survei => {
+                if (Survei.latitude && Survei.longitude) {
+                    const marker = L.marker([Survei.latitude, Survei.longitude])
+                        .addTo(map)
+                        .bindPopup(`
+                            <strong>${Survei.member_name}</strong><br>
+                            ${Survei.survey_type}<br>
+                            ${formatDate(Survei.scheduled_date)} ${Survei.scheduled_time}<br>
+                            <span Kelas="badge bg-${getStatusColor(Survei.Status)}">${Survei.Status.replace('_', ' ')}</span>
+                        `);
+                    
+                    markers.push(marker);
+                }
+            });
+            
+            // Fit map to show Semua markers
+            if (markers.length > 0) {
+                const Grup = new L.featureGroup(markers);
+                map.fitBounds(Grup.getBounds().pad(0.1));
+            }
+        }
+
+        // Load Aktivitas timeline
+        function loadActivityTimeline() {
+            const timeline = Dokumen.getElementById('activityTimeline');
+            
+            const activities = [
+                { Tipe: 'survey_completed', Deskripsi: 'Selesai Survei for Ahmad Wijaya', Waktu: '2 hours ago' },
+                { Tipe: 'survey_started', Deskripsi: 'Started Survei for Siti Nurhaliza', Waktu: '3 hours ago' },
+                { Tipe: 'survey_scheduled', Deskripsi: 'Scheduled Survei for Budi Santoso', Waktu: '5 hours ago' },
+                { Tipe: 'report_submitted', Deskripsi: 'Submitted Verifikasi Laporan', Waktu: '1 day ago' }
+            ];
+            
+            timeline.innerHTML = activities.map(Aktivitas => `
+                <div Kelas="timeline-item">
+                    <div>
+                        <strong>${Aktivitas.Deskripsi}</strong>
+                        <br>
+                        <small Kelas="text-muted">${Aktivitas.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View Survei Detail
+        function viewSurveyDetails(surveyId) {
+            const Survei = surveys.find(s => s.id === surveyId);
+            if (!Survei) return;
+            
+            const detailsHtml = `
+                <div Kelas="mb-3">
+                    <h6>${Survei.member_name}</h6>
+                    <p Kelas="text-muted mb-2">${Survei.survey_type}</p>
+                    <span Kelas="badge bg-${getStatusColor(Survei.Status)}">${Survei.Status.replace('_', ' ')}</span>
+                </div>
+                
+                <h6>Survei Informasi</h6>
+                <Tabel Kelas="Tabel Tabel-sm">
+                    <tr><td>Scheduled Tanggal:</td><td>${formatDate(Survei.scheduled_date)}</td></tr>
+                    <tr><td>Scheduled Waktu:</td><td>${Survei.scheduled_time}</td></tr>
+                    <tr><td>Alamat:</td><td>${Survei.Alamat}</td></tr>
+                    <tr><td>Prioritas:</td><td><span Kelas="badge bg-${getPriorityColor(Survei.Prioritas)}">${Survei.Prioritas}</span></td></tr>
+                    <tr><td>Assigned:</td><td>${formatDate(Survei.created_at)}</td></tr>
+                </Tabel>
+                
+                <h6>Anggota Informasi</h6>
+                <Tabel Kelas="Tabel Tabel-sm">
+                    <tr><td>Anggota ID:</td><td>${Survei.member_id}</td></tr>
+                    <tr><td>Telepon:</td><td>${Survei.phone_number}</td></tr>
+                    <tr><td>Pinjaman Account:</td><td>${Survei.loan_account || 'N/A'}</td></tr>
+                </Tabel>
+                
+                ${Survei.notes ? `
+                    <h6>Notes</h6>
+                    <p>${Survei.notes}</p>
+                ` : ''}
+                
+                <div Kelas="d-grid gap-2">
+                    <button Kelas="btn btn-primary" onclick="startSurvey('${Survei.id}')" ${Survei.Status !== 'scheduled' ? 'disabled' : ''}>
+                        <i Kelas="fas fa-play"></i> Start Survei
+                    </button>
+                    <button Kelas="btn btn-Info" onclick="viewOnMap('${Survei.id}')">
+                        <i Kelas="fas fa-map"></i> View on Map
+                    </button>
+                    <button Kelas="btn btn-Peringatan" onclick="editSurvey('${Survei.id}')">
+                        <i Kelas="fas fa-Edit"></i> Edit Survei
+                    </button>
+                </div>
+            `;
+            
+            Dokumen.getElementById('surveyDetails').innerHTML = detailsHtml;
+        }
+
+        // Start Survei
+        function startSurvey(surveyId) {
+            const Survei = surveys.find(s => s.id === surveyId);
+            if (!Survei) return;
+            
+            // Load Survei Formulir
+            loadSurveyForm(Survei);
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('surveyFormModal'));
+            modal.show();
+        }
+
+        // Load Survei Formulir
+        function loadSurveyForm(Survei) {
+            const formContent = Dokumen.getElementById('surveyFormContent');
+            
+            // Different Formulir based on Survei Tipe
+            let formHtml = '';
+            
+            switch (Survei.survey_type) {
+                case 'Verifikasi':
+                    formHtml = getVerificationForm(Survei);
+                    break;
+                case 'assessment':
+                    formHtml = getAssessmentForm(Survei);
+                    break;
+                case 'follow_up':
+                    formHtml = getFollowUpForm(Survei);
+                    break;
+                case 'Penagihan':
+                    formHtml = getCollectionForm(Survei);
+                    break;
+                default:
+                    formHtml = '<p>Survei Formulir not available</p>';
+            }
+            
+            formContent.innerHTML = formHtml;
+        }
+
+        // Get Verifikasi Formulir
+        function getVerificationForm(Survei) {
+            return `
+                <div Kelas="row">
+                    <div Kelas="col-md-12">
+                        <h6>Anggota Verifikasi Survei</h6>
+                        <p Kelas="text-muted">Anggota: ${Survei.member_name} (${Survei.member_id})</p>
+                    </div>
+                    
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Residence Status</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih Status</option>
+                                <option value="owner">Owner</option>
+                                <option value="renter">Renter</option>
+                                <option value="family">Family</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Length of Stay</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih duration</option>
+                                <option value="<1_year">Less than 1 year</option>
+                                <option value="1-3_years">1-3 years</option>
+                                <option value="3-5_years">3-5 years</option>
+                                <option value=">5_years">More than 5 years</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Property Condition</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih condition</option>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Verifikasi Notes</label>
+                            <textarea Kelas="form-control" rows="4" placeholder="Enter Verifikasi notes..."></textarea>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Photos</label>
+                            <div Kelas="border rounded p-3 text-center">
+                                <i Kelas="fas fa-camera fa-2x mb-2"></i>
+                                <p>Click to Unggah photos</p>
+                                <small Kelas="text-muted">JPG, PNG (Max 5MB)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get assessment Formulir
+        function getAssessmentForm(Survei) {
+            return `
+                <div Kelas="row">
+                    <div Kelas="col-md-12">
+                        <h6>Property Assessment Survei</h6>
+                        <p Kelas="text-muted">Anggota: ${Survei.member_name} (${Survei.member_id})</p>
+                    </div>
+                    
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Property Tipe</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih Tipe</option>
+                                <option value="house">House</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="shop">Shop</option>
+                                <option value="land">Land</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Property Size (m²)</label>
+                            <input Tipe="Nomor" Kelas="form-control" placeholder="Enter size">
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Estimated Value</label>
+                            <div Kelas="input-group">
+                                <span Kelas="input-group-text">Rp</span>
+                                <input Tipe="Nomor" Kelas="form-control" placeholder="Enter value">
+                            </div>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Market Value</label>
+                            <div Kelas="input-group">
+                                <span Kelas="input-group-text">Rp</span>
+                                <input Tipe="Nomor" Kelas="form-control" placeholder="Enter value">
+                            </div>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Assessment Notes</label>
+                            <textarea Kelas="form-control" rows="4" placeholder="Enter assessment notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get follow-up Formulir
+        function getFollowUpForm(Survei) {
+            return `
+                <div Kelas="row">
+                    <div Kelas="col-md-12">
+                        <h6>Follow-up Visit Survei</h6>
+                        <p Kelas="text-muted">Anggota: ${Survei.member_name} (${Survei.member_id})</p>
+                    </div>
+                    
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Follow-up Purpose</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih purpose</option>
+                                <option value="payment_reminder">Pembayaran Pengingat</option>
+                                <option value="document_collection">Dokumen Penagihan</option>
+                                <option value="service_inquiry">Service Inquiry</option>
+                                <option value="complaint_resolution">Complaint Resolution</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Visit Outcome</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih outcome</option>
+                                <option value="successful">Successful</option>
+                                <option value="partial">Partial Berhasil</option>
+                                <option value="unsuccessful">Unsuccessful</option>
+                                <option value="rescheduled">Rescheduled</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Follow-up Notes</label>
+                            <textarea Kelas="form-control" rows="4" placeholder="Enter follow-up notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get Penagihan Formulir
+        function getCollectionForm(Survei) {
+            return `
+                <div Kelas="row">
+                    <div Kelas="col-md-12">
+                        <h6>Penagihan Visit Survei</h6>
+                        <p Kelas="text-muted">Anggota: ${Survei.member_name} (${Survei.member_id})</p>
+                    </div>
+                    
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Kontak Made</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih option</option>
+                                <option value="Ya">Ya</option>
+                                <option value="Tidak">Tidak</option>
+                                <option value="left_message">Left Pesan</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Pembayaran Promise</label>
+                            <Pilih Kelas="Formulir-Pilih">
+                                <option value="">Pilih option</option>
+                                <option value="full_payment">Full Pembayaran</option>
+                                <option value="partial_payment">Partial Pembayaran</option>
+                                <option value="payment_plan">Pembayaran Plan</option>
+                                <option value="no_commitment">Tidak Commitment</option>
+                            </Pilih>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Promised Jumlah</label>
+                            <div Kelas="input-group">
+                                <span Kelas="input-group-text">Rp</span>
+                                <input Tipe="Nomor" Kelas="form-control" placeholder="Enter Jumlah">
+                            </div>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Promised Tanggal</label>
+                            <input Tipe="Tanggal" Kelas="form-control">
+                        </div>
+                    </div>
+                    <div Kelas="col-md-12">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Penagihan Notes</label>
+                            <textarea Kelas="form-control" rows="4" placeholder="Enter Penagihan notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Quick action functions
+        function startNewSurvey() {
+            loadMembers();
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newSurveyModal'));
+            modal.show();
+        }
+
+        function viewTodayRoute() {
+            const Hari Ini = new Tanggal().toISOString().split('T')[0];
+            Dokumen.getElementById('surveyDate').value = Hari Ini;
+            displaySurveys();
+        }
+
+        function openSurveyReports() {
+            
+        }
+
+        function openSurveyTemplates() {
+            
+        }
+
+        // Load Anggota for new Survei
+        function loadMembers() {
+            const Anggota = [
+                { id: 'M-001', Nama: 'Ahmad Wijaya', Alamat: 'Jl. Merdeka Tidak. 123, Jakarta' },
+                { id: 'M-002', Nama: 'Siti Nurhaliza', Alamat: 'Jl. Sudirman Tidak. 456, Jakarta' },
+                { id: 'M-003', Nama: 'Budi Santoso', Alamat: 'Jl. Thamrin Tidak. 789, Jakarta' }
+            ];
+            
+            const memberSelect = Dokumen.getElementById('memberSelect');
+            memberSelect.innerHTML = '<option value="">Pilih Anggota</option>';
+            Anggota.forEach(Anggota => {
+                memberSelect.innerHTML += `<option value="${Anggota.id}" Data-Alamat="${Anggota.Alamat}">${Anggota.Nama} (${Anggota.id})</option>`;
+            });
+            
+            // Perbarui Alamat when Anggota is selected
+            memberSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const Alamat = selectedOption.getAttribute('Data-Alamat');
+                Dokumen.getElementById('surveyAddress').value = Alamat || '';
+            });
+        }
+
+        // Create Survei
+        function createSurvey() {
+            const memberId = Dokumen.getElementById('memberSelect').value;
+            const surveyType = Dokumen.getElementById('surveyType').value;
+            const scheduledDate = Dokumen.getElementById('scheduledDate').value;
+            const scheduledTime = Dokumen.getElementById('scheduledTime').value;
+            
+            if (!memberId || !surveyType || !scheduledDate || !scheduledTime) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Create new Survei
+            const newSurvey = {
+                id: 'SV-' + Tanggal.now(),
+                member_id: memberId,
+                member_name: getMemberName(memberId),
+                survey_type: surveyType,
+                scheduled_date: scheduledDate,
+                scheduled_time: scheduledTime,
+                Alamat: Dokumen.getElementById('surveyAddress').value,
+                Status: 'scheduled',
+                Prioritas: 'medium',
+                created_at: new Tanggal().toISOString(),
+                notes: Dokumen.getElementById('surveyNotes').value,
+                latitude: -6.2088 + (Math.random() - 0.5) * 0.1,
+                longitude: 106.8456 + (Math.random() - 0.5) * 0.1
+            };
+            
+            surveys.push(newSurvey);
+            displaySurveys();
+            updateMapMarkers();
+            updateStatistics({
+                total_surveys: surveys.length,
+                pending_surveys: surveys.Filter(s => s.Status === 'scheduled').length
+            });
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newSurveyModal'));
+            modal.hide();
+            
+            // Reset Formulir
+            Dokumen.getElementById('newSurveyForm').Reset();
+            
+            showSuccess('Survei Dibuat successfully!');
+        }
+
+        // Kirim Survei
+        function submitSurvey() {
+            showSuccess('Survei submitted successfully!');
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('surveyFormModal'));
+            modal.hide();
+            
+            // Reload surveys
+            loadSurveys();
+        }
+
+        // Simpan as draft
+        function saveAsDraft() {
+            showSuccess('Survei saved as draft!');
+        }
+
+        // Edit Survei
+        function editSurvey(surveyId) {
+            
+        }
+
+        // View on map
+        function viewOnMap(surveyId) {
+            const Survei = surveys.find(s => s.id === surveyId);
+            if (Survei && Survei.latitude && Survei.longitude) {
+                map.setView([Survei.latitude, Survei.longitude], 15);
+                
+                // Open popup
+                markers.forEach(marker => {
+                    const popup = marker.getPopup();
+                    if (popup && popup.getContent().includes(Survei.member_name)) {
+                        marker.openPopup();
+                    }
+                });
+            }
+        }
+
+        // Filter surveys
+        function filterSurveys() {
+            displaySurveys();
+        }
+
+        // Load surveys for Tanggal
+        function loadSurveysForDate() {
+            displaySurveys();
+        }
+
+        // Utility functions
+        function getStatusColor(Status) {
+            const colors = {
+                'scheduled': 'primary',
+                'in_progress': 'Peringatan',
+                'Selesai': 'Berhasil',
+                'Dibatalkan': 'danger'
+            };
+            return colors[Status] || 'secondary';
+        }
+
+        function getPriorityColor(Prioritas) {
+            const colors = {
+                'high': 'danger',
+                'medium': 'Peringatan',
+                'low': 'Berhasil'
+            };
+            return colors[Prioritas] || 'secondary';
+        }
+
+        function getMemberName(memberId) {
+            const Anggota = {
+                'M-001': 'Ahmad Wijaya',
+                'M-002': 'Siti Nurhaliza',
+                'M-003': 'Budi Santoso'
+            };
+            return Anggota[memberId] || 'Unknown';
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo surveys
+        function getDemoSurveys() {
+            return [
+                {
+                    id: '1',
+                    member_id: 'M-001',
+                    member_name: 'Ahmad Wijaya',
+                    survey_type: 'Verifikasi',
+                    scheduled_date: new Tanggal().toISOString().split('T')[0],
+                    scheduled_time: '10:00',
+                    Alamat: 'Jl. Merdeka Tidak. 123, Jakarta',
+                    Status: 'scheduled',
+                    Prioritas: 'high',
+                    created_at: '2026-03-17T08:00:00Z',
+                    phone_number: '08123456789',
+                    loan_account: 'LN-001',
+                    notes: 'Initial Verifikasi for new Pinjaman Aplikasi',
+                    latitude: -6.2088,
+                    longitude: 106.8456
+                },
+                {
+                    id: '2',
+                    member_id: 'M-002',
+                    member_name: 'Siti Nurhaliza',
+                    survey_type: 'assessment',
+                    scheduled_date: new Tanggal().toISOString().split('T')[0],
+                    scheduled_time: '14:00',
+                    Alamat: 'Jl. Sudirman Tidak. 456, Jakarta',
+                    Status: 'scheduled',
+                    Prioritas: 'medium',
+                    created_at: '2026-03-17T08:30:00Z',
+                    phone_number: '08234567890',
+                    loan_account: 'LN-002',
+                    notes: 'Property assessment for collateral',
+                    latitude: -6.2150,
+                    longitude: 106.8500
+                },
+                {
+                    id: '3',
+                    member_id: 'M-003',
+                    member_name: 'Budi Santoso',
+                    survey_type: 'Penagihan',
+                    scheduled_date: new Tanggal().toISOString().split('T')[0],
+                    scheduled_time: '16:00',
+                    Alamat: 'Jl. Thamrin Tidak. 789, Jakarta',
+                    Status: 'in_progress',
+                    Prioritas: 'high',
+                    created_at: '2026-03-17T09:00:00Z',
+                    phone_number: '08345678901',
+                    loan_account: 'LN-003',
+                    notes: 'Follow-up on Telat Pembayaran',
+                    latitude: -6.2000,
+                    longitude: 106.8400
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

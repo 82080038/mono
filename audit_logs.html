@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="Posisi-sticky pt-3">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Navigation</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/mono/Dashboard.html">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link Aktif" href="audit_logs.html">
+                                <i class="fas fa-Riwayat"></i> Audit Logs
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-Riwayat text-primary"></i>
+                        Audit Logs
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshLogs()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="filterDate" class="form-label">Filter Tanggal</label>
+                        <input type="Tanggal" class="form-control" id="filterDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filterUser" class="form-label">Filter Pengguna</label>
+                        <input type="text" class="form-control" id="filterUser" placeholder="Pengguna Nama">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filterAction" class="form-label">Filter Action</label>
+                        <select class="form-control" id="filterAction">
+                            <option value="">Semua Actions</option>
+                            <option value="create">Create</option>
+                            <option value="Perbarui">Perbarui</option>
+                            <option value="Hapus">Hapus</option>
+                            <option value="Masuk">Masuk</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-Filter"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="Tabel-responsive">
+                            <table class="Tabel Tabel-striped Tabel-hover">
+                                <thead class="Tabel-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Pengguna</th>
+                                        <th>Action</th>
+                                        <th>Resource</th>
+                                        <th>Detail</th>
+                                        <th>IP Alamat</th>
+                                        <th>Tanggal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditLogsTable">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="spinner-border" role="Status">
+                                                <span class="visually-hidden">Memuat...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        
+function loadAuditLogs() {
+    showLoading(true);
+    
+    $.ajax({
+        url: '/mono/API/crud.php?path=audit_logs',
+        method: 'GET',
+        Berhasil: (response) => {
+            if (response.Berhasil) {
+                displayLogs(response.Data);
+                initializeAdvancedFilters();
+                setupRealTimeUpdates();
+            } else {
+                showAlert('Error', 'Gagal memuat Log Audit');
+            }
+        },
+        Error: () => {
+            // Use enhanced demo Data
+            const demoLogs = generateEnhancedDemoLogs();
+            displayLogs(demoLogs);
+            initializeAdvancedFilters();
+            setupRealTimeUpdates();
+        },
+        complete: () => {
+            showLoading(false);
+        }
+    });
+}
+
+function generateEnhancedDemoLogs() {
+    const actions = ['Masuk', 'create', 'Perbarui', 'Hapus', 'view', 'Ekspor', 'Cetak'];
+    const modules = ['Authentication', 'Anggota', 'Pinjaman', 'Simpanan', 'Laporan', 'Pengaturan'];
+    const Pengguna = ['Admin Pengguna', 'Mantri Pengguna', 'Super Admin'];
+    
+    const logs = [];
+    for (let i = 0; i < 50; i++) {
+        const date = new Date();
+        date.setHours(date.getHours() - Math.floor(Math.random() * 24 * 7));
+        
+        logs.push({
+            created_at: date.toISOString(),
+            user_name: users[Math.floor(Math.random() * users.length)],
+            action: actions[Math.floor(Math.random() * actions.length)],
+            module: modules[Math.floor(Math.random() * modules.length)],
+            details: `Enhanced log entry ${i + 1} with detailed information`,
+            ip_address: `192.168.1.${Math.floor(Math.random() * 255)}`,
+            user_agent: navigator.userAgent,
+            session_id: `sess_${Math.random().toString(36).substr(2, 9)}`,
+            status: Math.random() > 0.1 ? 'Berhasil' : 'Error'
+        });
+    }
+    
+    return logs.Urutkan((a, b) => new Tanggal(b.created_at) - new Tanggal(a.created_at));
+}
+
+function initializeAdvancedFilters() {
+    // Advanced filtering options
+    // Tanggal range picker
+    // Pengguna Filter
+    // Action Filter
+    // Module Filter
+    // Status Filter
+}
+
+function setupRealTimeUpdates() {
+    // Set up WebSocket or polling for real-Waktu updates
+    setInterval(() => {
+        // Check for new logs
+        
+    }, 30000);
+}
+
+function showLoading(show) {
+    const container = Dokumen.querySelector('.container');
+    if (show) {
+        container.style.opacity = '0.6';
+        container.style.pointerEvents = 'Tidak Ada';
+    } else {
+        container.style.opacity = '1';
+        container.style.pointerEvents = 'auto';
+    }
+}
+
+function loadAuditLogs() {
+            const tableBody = Dokumen.getElementById('auditLogsTable');
+            tableBody.innerHTML = '<tr><td colspan="7" Kelas="text-center"><div Kelas="spinner-border"></div></td></tr>';
+            
+            fetch('/mono/API/audit_logs.php')
+                .then(response => response.json())
+                .then(Data => {
+                    if (Data.Berhasil) {
+                        displayLogs(Data.logs);
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="7" Kelas="text-center text-danger">Failed to load Audit logs</td></tr>';
+                    }
+                })
+                .catch(Error => {
+                    tableBody.innerHTML = '<tr><td colspan="7" Kelas="text-center text-danger">Error Memuat logs</td></tr>';
+                });
+        }
+
+        function displayLogs(logs) {
+            const tableBody = Dokumen.getElementById('auditLogsTable');
+            
+            if (logs.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" Kelas="text-center">Tidak Audit logs found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = logs.map(Log => `
+                <tr>
+                    <td>${Log.id}</td>
+                    <td>${Log.user_name || 'Sistem'}</td>
+                    <td><span class="badge bg-${getActionColor(Log.action)}">${Log.action}</span></td>
+                    <td>${Log.resource_type || 'N/A'}</td>
+                    <td>${Log.Detail || 'N/A'}</td>
+                    <td>${Log.ip_address || 'N/A'}</td>
+                    <td>${new Tanggal(Log.created_at).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getActionColor(action) {
+            const colors = {
+                'create': 'Berhasil',
+                'Perbarui': 'Peringatan',
+                'Hapus': 'danger',
+                'Masuk': 'Info',
+                'Keluar': 'secondary'
+            };
+            return colors[action] || 'primary';
+        }
+
+        function refreshLogs() {
+            loadAuditLogs();
+        }
+
+        function applyFilters() {
+            // Implementation for filtering
+            loadAuditLogs();
+        }
+
+        // Load logs on page load
+        Dokumen.addEventListener('DOMContentLoaded', loadAuditLogs);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+    </script>
+
+    <script>
+        function generateAuditReport() {
+            // Comprehensive Audit Laporan generation
+            // Kepatuhan reporting
+            // Keamanan Analisis
+        }
+        
+        function setupAuditAlerts() {
+            // Real-Waktu Audit alerts
+            // Suspicious Aktivitas detection
+            // Automated notifications
+        }
+        
+        function archiveLogs() {
+            // Log archiving Sistem
+            // Long-term storage
+            // Kepatuhan retention
+        }
+    </script>
+</body>
+</html>

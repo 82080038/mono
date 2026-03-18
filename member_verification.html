@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Verifikasi - Surveyor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Verifikasi-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #17a2b8;
+            cursor: pointer;
+        }
+        
+        .Verifikasi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Prioritas-high { border-left-color: #dc3545; }
+        .Prioritas-medium { border-left-color: #ffc107; }
+        .Prioritas-low { border-left-color: #28a745; }
+        
+        .Status-Menunggu { background-color: #fff3cd; }
+        .Status-in-progress { background-color: #cce5ff; }
+        .Status-Selesai { background-color: #d4edda; }
+        .Status-rejected { background-color: #f8d7da; }
+        
+        .Verifikasi-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .Verifikasi-step.Selesai {
+            background: #d4edda;
+        }
+        
+        .Verifikasi-step.Aktif {
+            background: #cce5ff;
+        }
+        
+        .step-Nomor {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #17a2b8;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        
+        .step-Nomor.Selesai {
+            background: #28a745;
+        }
+        
+        .map-container {
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .Dokumen-Unggah {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+        }
+        
+        .Dokumen-Unggah:hover {
+            border-color: #17a2b8;
+            background-color: #f8f9fa;
+        }
+        
+        .Dokumen-Unggah.has-File {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .Verifikasi-checklist {
+            Daftar-style: Tidak Ada;
+            padding: 0;
+        }
+        
+        .Verifikasi-checklist li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .Verifikasi-checklist li:last-child {
+            border-bottom: Tidak Ada;
+        }
+        
+        .Verifikasi-checklist input[Tipe="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        .Foto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .Foto-item {
+            Posisi: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 150px;
+        }
+        
+        .Foto-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .Foto-item .Foto-overlay {
+            Posisi: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .Foto-item:hover .Foto-overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-user-check"></i> Anggota Verifikasi</h1>
+                <p class="mb-0">Surveyor - Anggota Identity & Dokumen Verifikasi</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Verification Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clipboard-check fa-2x mb-2"></i>
+                        <h5>Total Verifications</h5>
+                        <h3 id="totalVerifications">0</h3>
+                        <p class="mb-0">Bulan Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h5>Menunggu</h5>
+                        <h3 id="pendingVerifications">0</h3>
+                        <p class="mb-0">Awaiting Verifikasi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h5>Verified</h5>
+                        <h3 id="verifiedCount">0</h3>
+                        <p class="mb-0">Successfully verified</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-danger text-white">
+                    <div class="card-body">
+                        <i class="fas fa-times-circle fa-2x mb-2"></i>
+                        <h5>Rejected</h5>
+                        <h3 id="rejectedCount">0</h3>
+                        <p class="mb-0">Verifikasi failed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Verification Queue -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> Verifikasi Queue</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter" onchange="filterVerifications()">
+                                <option value="">Semua Status</option>
+                                <option value="Menunggu">Menunggu</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="Selesai">Selesai</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto" id="priorityFilter" onchange="filterVerifications()">
+                                <option value="">Semua Prioritas</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="verificationQueue">
+                            <!-- Verification items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Verification Form -->
+                <div class="card" id="verificationFormCard" style="display: Tidak Ada;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user-check"></i> Anggota Verifikasi Formulir</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                    <img src="https://picsum.photos/seed/member1/150/150" alt="Anggota Foto" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                    <h6 id="verificationMemberName">Memuat...</h6>
+                                    <p class="text-muted" id="verificationMemberId">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h6>Verifikasi Progress</h6>
+                                <div id="verificationSteps">
+                                    <!-- Verification steps will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Verification Details -->
+                        <div id="verificationDetails">
+                            <!-- Verification details will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="startNewVerification()">
+                                <i class="fas fa-plus"></i> New Verifikasi
+                            </button>
+                            <button class="btn btn-info" onclick="viewVerificationHistory()">
+                                <i class="fas fa-Riwayat"></i> Verifikasi Riwayat
+                            </button>
+                            <button class="btn btn-alert" onclick="openVerificationTemplates()">
+                                <i class="fas fa-clipboard"></i> Verifikasi Templates
+                            </button>
+                            <button class="btn btn-Berhasil" onclick="generateVerificationReport()">
+                                <i class="fas fa-File-alt"></i> Generate Laporan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Member Information -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user"></i> Anggota Informasi</h5>
+                    </div>
+                    <div class="card-body" id="memberInfo">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-user fa-3x mb-3"></i>
+                            <p>Pilih a Verifikasi to view Anggota Detail</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location Map -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-map-marked-alt"></i> Verifikasi Lokasi</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="verificationMap" class="map-container"></div>
+                    </div>
+                </div>
+                
+                <!-- Verification Checklist -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-check-square"></i> Verifikasi Checklist</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="Verifikasi-checklist" id="verificationChecklist">
+                            <li><input type="checkbox" id="checkIdentity"> Identity Dokumen Verified</li>
+                            <li><input type="checkbox" id="checkAddress"> Alamat Confirmed</li>
+                            <li><input type="checkbox" id="checkPhone"> Telepon Nomor Verified</li>
+                            <li><input type="checkbox" id="checkFamily"> Family Informasi Valid</li>
+                            <li><input type="checkbox" id="checkEmployment"> Employment Status Confirmed</li>
+                            <li><input type="checkbox" id="checkIncome"> Pendapatan Informasi Verified</li>
+                            <li><input type="checkbox" id="checkCollateral"> Collateral Assessed</li>
+                            <li><input type="checkbox" id="checkReferences"> References Contacted</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Verification Modal -->
+    <div class="modal fade" id="newVerificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Start New Verifikasi</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newVerificationForm">
+                        <div class="mb-3">
+                            <label class="form-label">Anggota *</label>
+                            <select class="form-Pilih" id="memberSelect" required>
+                                <option value="">Pilih Anggota</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Verifikasi Tipe *</label>
+                            <select class="form-Pilih" id="verificationType" required>
+                                <option value="">Pilih Tipe</option>
+                                <option value="identity">Identity Verifikasi</option>
+                                <option value="Alamat">Alamat Verifikasi</option>
+                                <option value="employment">Employment Verifikasi</option>
+                                <option value="collateral">Collateral Verifikasi</option>
+                                <option value="comprehensive">Comprehensive Verifikasi</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prioritas</label>
+                            <select class="form-Pilih" id="verificationPriority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Scheduled Tanggal</label>
+                            <input type="Tanggal" class="form-control" id="scheduledDate">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" id="verificationNotes" rows="3" placeholder="Enter Verifikasi notes..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="createVerification()">
+                        <i class="fas fa-plus"></i> Create Verifikasi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Document Verification Modal -->
+    <div class="modal fade" id="documentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Dokumen Verifikasi</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="documentContent">
+                    <!-- Document content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="rejectDocument()">
+                        <i class="fas fa-times"></i> Reject Dokumen
+                    </button>
+                    <button type="button" class="btn btn-Berhasil" onclick="approveDocument()">
+                        <i class="fas fa-check"></i> Approve Dokumen
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let verifications = [];
+        let selectedVerification = null;
+        let map = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadVerifications();
+            loadStatistics();
+            initializeMap();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Surveyor
+            if (currentUser.role !== 'Surveyor') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load verifications
+        async function loadVerifications() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_verifications', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        verifications = Data.Data;
+                        displayVerifications();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat verifications:', Error);
+                // Use demo Data
+                verifications = getDemoVerifications();
+                displayVerifications();
+            }
+        }
+
+        // Display verifications
+        function displayVerifications() {
+            const queue = Dokumen.getElementById('verificationQueue');
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            const priorityFilter = Dokumen.getElementById('priorityFilter').value;
+            
+            let filteredVerifications = verifications;
+            
+            // Filter by Status
+            if (statusFilter) {
+                filteredVerifications = filteredVerifications.Filter(v => v.Status === statusFilter);
+            }
+            
+            // Filter by Prioritas
+            if (priorityFilter) {
+                filteredVerifications = filteredVerifications.Filter(v => v.Prioritas === priorityFilter);
+            }
+            
+            queue.innerHTML = '';
+            
+            if (filteredVerifications.length === 0) {
+                queue.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak verifications found</div>';
+                return;
+            }
+            
+            filteredVerifications.forEach(Verifikasi => {
+                const verificationCard = Dokumen.createElement('div');
+                verificationCard.className = `Verifikasi-card card mb-2 Prioritas-${Verifikasi.Prioritas} Status-${Verifikasi.Status}`;
+                verificationCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <img src="https://picsum.photos/seed/${Verifikasi.member_id}/50/50" alt="Anggota" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${Verifikasi.member_name}</h6>
+                                        <p class="mb-1">${Verifikasi.verification_type}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> ${formatDate(Verifikasi.created_at)}
+                                            <br>
+                                            <i class="fas fa-map-marker-alt"></i> ${Verifikasi.Alamat}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-${getStatusColor(Verifikasi.Status)} me-2">${Verifikasi.Status.replace('_', ' ')}</span>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewVerification('${Verifikasi.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="startVerification('${Verifikasi.id}')" ${verification.status !== 'Menunggu' ? 'disabled' : ''}>
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="editVerification('${Verifikasi.id}')">
+                                        <i class="fas fa-Edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                queue.appendChild(verificationCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=verification_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_verifications: 24,
+                    pending_verifications: 8,
+                    verified_count: 14,
+                    rejected_count: 2
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalVerifications').textContent = stats.total_verifications || 0;
+            Dokumen.getElementById('pendingVerifications').textContent = stats.pending_verifications || 0;
+            Dokumen.getElementById('verifiedCount').textContent = stats.verified_count || 0;
+            Dokumen.getElementById('rejectedCount').textContent = stats.rejected_count || 0;
+        }
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('verificationMap').setView([-6.2088, 106.8456], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // View Verifikasi
+        function viewVerification(verificationId) {
+            const Verifikasi = verifications.find(v => v.id === verificationId);
+            if (!Verifikasi) return;
+            
+            selectedVerification = Verifikasi;
+            
+            // Show Verifikasi Formulir
+            Dokumen.getElementById('verificationFormCard').style.display = 'block';
+            
+            // Perbarui Anggota Info
+            Dokumen.getElementById('verificationMemberName').textContent = Verifikasi.member_name;
+            Dokumen.getElementById('verificationMemberId').textContent = Verifikasi.member_id;
+            
+            // Load Verifikasi steps
+            loadVerificationSteps(Verifikasi);
+            
+            // Load Verifikasi Detail
+            loadVerificationDetails(Verifikasi);
+            
+            // Perbarui Anggota Informasi
+            updateMemberInfo(Verifikasi);
+            
+            // Perbarui map
+            updateVerificationMap(Verifikasi);
+        }
+
+        // Load Verifikasi steps
+        function loadVerificationSteps(Verifikasi) {
+            const steps = Dokumen.getElementById('verificationSteps');
+            
+            const verificationSteps = [
+                { Nama: 'Dokumen Review', Status: 'Selesai' },
+                { Nama: 'Identity Check', Status: Verifikasi.identity_verified ? 'Selesai' : 'Menunggu' },
+                { Nama: 'Alamat Verifikasi', Status: Verifikasi.address_verified ? 'Selesai' : 'Menunggu' },
+                { Nama: 'Reference Check', Status: Verifikasi.references_checked ? 'Selesai' : 'Menunggu' },
+                { Nama: 'Final Review', Status: Verifikasi.Status === 'Selesai' ? 'Selesai' : 'Menunggu' }
+            ];
+            
+            steps.innerHTML = verificationSteps.map((step, index) => `
+                <div class="Verifikasi-step ${step.Status}">
+                    <div class="step-Nomor ${step.Status}">${index + 1}</div>
+                    <div class="flex-grow-1">
+                        <strong>${step.Nama}</strong>
+                        <br>
+                        <small class="text-muted">${step.Status === 'Selesai' ? 'Selesai' : 'Menunggu'}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Verifikasi Detail
+        function loadVerificationDetails(Verifikasi) {
+            const Detail = Dokumen.getElementById('verificationDetails');
+            
+            Detail.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Personal Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Full Nama:</td><td>${Verifikasi.member_name}</td></tr>
+                            <tr><td>ID Nomor:</td><td>${Verifikasi.id_number}</td></tr>
+                            <tr><td>Tanggal of Birth:</td><td>${formatDate(Verifikasi.date_of_birth)}</td></tr>
+                            <tr><td>Telepon:</td><td>${Verifikasi.phone_number}</td></tr>
+                            <tr><td>Email:</td><td>${Verifikasi.Email || 'N/A'}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Alamat Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Alamat:</td><td>${Verifikasi.Alamat}</td></tr>
+                            <tr><td>Kota:</td><td>${Verifikasi.Kota}</td></tr>
+                            <tr><td>Provinsi:</td><td>${Verifikasi.Provinsi}</td></tr>
+                            <tr><td>Kode Pos:</td><td>${Verifikasi.postal_code}</td></tr>
+                            <tr><td>Residence Tipe:</td><td>${Verifikasi.residence_type || 'N/A'}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>Documents</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="Dokumen-Unggah ${Verifikasi.ktp_verified ? 'has-File' : ''}" onclick="viewDocument('ktp')">
+                                        <i class="fas fa-id-card fa-2x mb-2"></i>
+                                        <p>KTP</p>
+                                        <small class="text-muted">${Verifikasi.ktp_verified ? 'Verified' : 'Click to view'}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="Dokumen-Unggah ${Verifikasi.kk_verified ? 'has-File' : ''}" onclick="viewDocument('kk')">
+                                        <i class="fas fa-user fa-2x mb-2"></i>
+                                        <p>KK</p>
+                                        <small class="text-muted">${Verifikasi.kk_verified ? 'Verified' : 'Click to view'}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="Dokumen-Unggah ${Verifikasi.photo_verified ? 'has-File' : ''}" onclick="viewDocument('Foto')">
+                                        <i class="fas fa-camera fa-2x mb-2"></i>
+                                        <p>Foto</p>
+                                        <small class="text-muted">${Verifikasi.photo_verified ? 'Verified' : 'Click to view'}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="Dokumen-Unggah ${Verifikasi.address_proof_verified ? 'has-File' : ''}" onclick="viewDocument('address_proof')">
+                                        <i class="fas fa-Beranda fa-2x mb-2"></i>
+                                        <p>Alamat Proof</p>
+                                        <small class="text-muted">${Verifikasi.address_proof_verified ? 'Verified' : 'Click to view'}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>Verifikasi Photos</h6>
+                        <div class="Foto-grid">
+                            ${Verifikasi.verification_photos ? Verifikasi.verification_photos.map((Foto, index) => `
+                                <div class="Foto-item">
+                                    <img src="${Foto}" alt="Verifikasi Foto ${index + 1}">
+                                    <div class="Foto-overlay">
+                                        <button class="btn btn-sm btn-light" onclick="viewPhoto('${Foto}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('') : '<p>Tidak Verifikasi photos available</p>'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>Verifikasi Notes</h6>
+                        <textarea class="form-control" rows="3" placeholder="Enter Verifikasi notes...">${Verifikasi.notes || ''}</textarea>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-Berhasil" onclick="completeVerification('${Verifikasi.id}')" ${verification.status === 'Selesai' ? 'disabled' : ''}>
+                                <i class="fas fa-check"></i> Complete Verifikasi
+                            </button>
+                            <button class="btn btn-danger" onclick="rejectVerification('${Verifikasi.id}')" ${verification.status === 'Selesai' ? 'disabled' : ''}>
+                                <i class="fas fa-times"></i> Reject Verifikasi
+                            </button>
+                            <button class="btn btn-info" onclick="requestAdditionalInfo('${Verifikasi.id}')">
+                                <i class="fas fa-info-circle"></i> Request Additional Info
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Perbarui Anggota Informasi
+        function updateMemberInfo(Verifikasi) {
+            const memberInfo = Dokumen.getElementById('memberInfo');
+            
+            memberInfo.innerHTML = `
+                <div class="text-center mb-3">
+                    <img src="https://picsum.photos/seed/${Verifikasi.member_id}/100/100" alt="Anggota" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+                <h6>${Verifikasi.member_name}</h6>
+                <p class="text-muted">${Verifikasi.member_id}</p>
+                
+                <table class="Tabel Tabel-sm">
+                    <tr><td>Telepon:</td><td>${Verifikasi.phone_number}</td></tr>
+                    <tr><td>Email:</td><td>${Verifikasi.Email || 'N/A'}</td></tr>
+                    <tr><td>Alamat:</td><td>${Verifikasi.Alamat}</td></tr>
+                    <tr><td>Kota:</td><td>${Verifikasi.Kota}</td></tr>
+                    <tr><td>Anggota Since:</td><td>${formatDate(Verifikasi.member_since)}</td></tr>
+                </table>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewMemberProfile('${Verifikasi.member_id}')">
+                        <i class="fas fa-user"></i> View Profil
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="contactMember('${Verifikasi.member_id}')">
+                        <i class="fas fa-Telepon"></i> Kontak Anggota
+                    </button>
+                </div>
+            `;
+        }
+
+        // Perbarui Verifikasi map
+        function updateVerificationMap(Verifikasi) {
+            if (Verifikasi.latitude && Verifikasi.longitude) {
+                map.setView([Verifikasi.latitude, Verifikasi.longitude], 15);
+                
+                // Tambah marker
+                L.marker([Verifikasi.latitude, Verifikasi.longitude])
+                    .addTo(map)
+                    .bindPopup(`<strong>${Verifikasi.member_name}</strong><br>${Verifikasi.Alamat}`)
+                    .openPopup();
+            }
+        }
+
+        // Start Verifikasi
+        function startVerification(verificationId) {
+            const Verifikasi = verifications.find(v => v.id === verificationId);
+            if (!Verifikasi) return;
+            
+            // Perbarui Status
+            Verifikasi.Status = 'in_progress';
+            displayVerifications();
+            
+            // View Verifikasi
+            viewVerification(verificationId);
+            
+            showSuccess('Verifikasi started!');
+        }
+
+        // Complete Verifikasi
+        function completeVerification(verificationId) {
+            if (!Konfirmasi('Are you sure you want to complete this Verifikasi?')) return;
+            
+            const Verifikasi = verifications.find(v => v.id === verificationId);
+            if (Verifikasi) {
+                Verifikasi.Status = 'Selesai';
+                Verifikasi.completed_at = new Tanggal().toISOString();
+                
+                displayVerifications();
+                loadStatistics();
+                
+                showSuccess('Verifikasi Selesai successfully!');
+            }
+        }
+
+        // Reject Verifikasi
+        function rejectVerification(verificationId) {
+            const reason = prompt('Please enter Penolakan reason:');
+            if (!reason) return;
+            
+            const Verifikasi = verifications.find(v => v.id === verificationId);
+            if (Verifikasi) {
+                Verifikasi.Status = 'rejected';
+                Verifikasi.rejection_reason = reason;
+                Verifikasi.rejected_at = new Tanggal().toISOString();
+                
+                displayVerifications();
+                loadStatistics();
+                
+                showSuccess('Verifikasi rejected!');
+            }
+        }
+
+        // Request additional Info
+        function requestAdditionalInfo(verificationId) {
+            const Info = prompt('What additional Informasi is needed?');
+            if (!Info) return;
+            
+            showSuccess('Additional Informasi requested!');
+        }
+
+        // View Dokumen
+        function viewDocument(documentType) {
+            const documentContent = Dokumen.getElementById('documentContent');
+            
+            documentContent.innerHTML = `
+                <div class="text-center">
+                    <img src="https://picsum.photos/seed/${documentType}/600/400" alt="${documentType}" class="img-fluid">
+                    <h6 class="mt-3">${documentType.toUpperCase()} Dokumen</h6>
+                    <p class="text-muted">Dokumen Verifikasi in progress</p>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('documentModal'));
+            modal.show();
+        }
+
+        // Approve Dokumen
+        function approveDocument() {
+            showSuccess('Dokumen approved!');
+            
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('documentModal'));
+            modal.hide();
+        }
+
+        // Reject Dokumen
+        function rejectDocument() {
+            const reason = prompt('Please enter Penolakan reason:');
+            if (!reason) return;
+            
+            showSuccess('Dokumen rejected!');
+            
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('documentModal'));
+            modal.hide();
+        }
+
+        // View Foto
+        function viewPhoto(photoUrl) {
+            window.open(photoUrl, '_blank');
+        }
+
+        // Quick action functions
+        function startNewVerification() {
+            loadMembers();
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newVerificationModal'));
+            modal.show();
+        }
+
+        function viewVerificationHistory() {
+            
+        }
+
+        function openVerificationTemplates() {
+            
+        }
+
+        function generateVerificationReport() {
+            
+        }
+
+        // Load Anggota for new Verifikasi
+        function loadMembers() {
+            const Anggota = [
+                { id: 'M-001', Nama: 'Ahmad Wijaya' },
+                { id: 'M-002', Nama: 'Siti Nurhaliza' },
+                { id: 'M-003', Nama: 'Budi Santoso' }
+            ];
+            
+            const memberSelect = Dokumen.getElementById('memberSelect');
+            memberSelect.innerHTML = '<option value="">Pilih Anggota</option>';
+            Anggota.forEach(Anggota => {
+                memberSelect.innerHTML += `<option value="${Anggota.id}">${Anggota.Nama} (${Anggota.id})</option>`;
+            });
+        }
+
+        // Create Verifikasi
+        function createVerification() {
+            const memberId = Dokumen.getElementById('memberSelect').value;
+            const verificationType = Dokumen.getElementById('verificationType').value;
+            const Prioritas = Dokumen.getElementById('verificationPriority').value;
+            
+            if (!memberId || !verificationType) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Create new Verifikasi
+            const newVerification = {
+                id: 'VER-' + Tanggal.now(),
+                member_id: memberId,
+                member_name: getMemberName(memberId),
+                verification_type: verificationType,
+                Prioritas: Prioritas,
+                Status: 'Menunggu',
+                created_at: new Tanggal().toISOString(),
+                scheduled_date: Dokumen.getElementById('scheduledDate').value,
+                notes: Dokumen.getElementById('verificationNotes').value
+            };
+            
+            verifications.unshift(newVerification);
+            displayVerifications();
+            loadStatistics();
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newVerificationModal'));
+            modal.hide();
+            
+            // Reset Formulir
+            Dokumen.getElementById('newVerificationForm').Reset();
+            
+            showSuccess('Verifikasi Dibuat successfully!');
+        }
+
+        // Edit Verifikasi
+        function editVerification(verificationId) {
+            
+        }
+
+        // View Anggota Profil
+        function viewMemberProfile(memberId) {
+            
+        }
+
+        // Kontak Anggota
+        function contactMember(memberId) {
+            
+        }
+
+        // Filter verifications
+        function filterVerifications() {
+            displayVerifications();
+        }
+
+        // Utility functions
+        function getStatusColor(Status) {
+            const colors = {
+                'Menunggu': 'Peringatan',
+                'in_progress': 'Info',
+                'Selesai': 'Berhasil',
+                'rejected': 'danger'
+            };
+            return colors[Status] || 'secondary';
+        }
+
+        function getMemberName(memberId) {
+            const Anggota = {
+                'M-001': 'Ahmad Wijaya',
+                'M-002': 'Siti Nurhaliza',
+                'M-003': 'Budi Santoso'
+            };
+            return Anggota[memberId] || 'Unknown';
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo verifications
+        function getDemoVerifications() {
+            return [
+                {
+                    id: '1',
+                    member_id: 'M-001',
+                    member_name: 'Ahmad Wijaya',
+                    verification_type: 'Identity Verifikasi',
+                    Prioritas: 'high',
+                    Status: 'Menunggu',
+                    created_at: '2026-03-17T08:00:00Z',
+                    Alamat: 'Jl. Merdeka Tidak. 123, Jakarta',
+                    Kota: 'Jakarta',
+                    Provinsi: 'DKI Jakarta',
+                    postal_code: '12345',
+                    phone_number: '08123456789',
+                    Email: 'ahmad@example.com',
+                    id_number: '1234567890123456',
+                    date_of_birth: '1980-01-15',
+                    member_since: '2020-01-01',
+                    latitude: -6.2088,
+                    longitude: 106.8456,
+                    identity_verified: false,
+                    address_verified: false,
+                    references_checked: false,
+                    ktp_verified: false,
+                    kk_verified: false,
+                    photo_verified: false,
+                    address_proof_verified: false,
+                    verification_photos: [
+                        'https://picsum.photos/seed/ver1/300/200',
+                        'https://picsum.photos/seed/ver2/300/200'
+                    ]
+                },
+                {
+                    id: '2',
+                    member_id: 'M-002',
+                    member_name: 'Siti Nurhaliza',
+                    verification_type: 'Alamat Verifikasi',
+                    Prioritas: 'medium',
+                    Status: 'in_progress',
+                    created_at: '2026-03-17T09:00:00Z',
+                    Alamat: 'Jl. Sudirman Tidak. 456, Jakarta',
+                    Kota: 'Jakarta',
+                    Provinsi: 'DKI Jakarta',
+                    postal_code: '12346',
+                    phone_number: '08234567890',
+                    Email: 'siti@example.com',
+                    id_number: '2345678901234567',
+                    date_of_birth: '1985-05-20',
+                    member_since: '2021-03-15',
+                    latitude: -6.2150,
+                    longitude: 106.8500,
+                    identity_verified: true,
+                    address_verified: false,
+                    references_checked: false,
+                    ktp_verified: true,
+                    kk_verified: true,
+                    photo_verified: true,
+                    address_proof_verified: false,
+                    verification_photos: [
+                        'https://picsum.photos/seed/ver3/300/200'
+                    ]
+                },
+                {
+                    id: '3',
+                    member_id: 'M-003',
+                    member_name: 'Budi Santoso',
+                    verification_type: 'Comprehensive Verifikasi',
+                    Prioritas: 'low',
+                    Status: 'Selesai',
+                    created_at: '2026-03-16T10:00:00Z',
+                    completed_at: '2026-03-16T15:30:00Z',
+                    Alamat: 'Jl. Thamrin Tidak. 789, Jakarta',
+                    Kota: 'Jakarta',
+                    Provinsi: 'DKI Jakarta',
+                    postal_code: '12347',
+                    phone_number: '08345678901',
+                    Email: 'budi@example.com',
+                    id_number: '3456789012345678',
+                    date_of_birth: '1978-12-10',
+                    member_since: '2019-06-01',
+                    latitude: -6.2000,
+                    longitude: 106.8400,
+                    identity_verified: true,
+                    address_verified: true,
+                    references_checked: true,
+                    ktp_verified: true,
+                    kk_verified: true,
+                    photo_verified: true,
+                    address_proof_verified: true,
+                    verification_photos: [
+                        'https://picsum.photos/seed/ver4/300/200',
+                        'https://picsum.photos/seed/ver5/300/200',
+                        'https://picsum.photos/seed/ver6/300/200'
+                    ]
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

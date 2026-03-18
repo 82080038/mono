@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mantri Dashboard - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6b35;
+            --secondary-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #17a2b8;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--primary-color);
+            padding-top: 70px;
+            z-index: 999;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 16px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 260px;
+        }
+
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .top-nav-menu {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .top-nav-item {
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .top-nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--dark-color);
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-card .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .stats-card.primary .icon {
+            background: var(--primary-color);
+        }
+
+        .stats-card.success .icon {
+            background: var(--success-color);
+        }
+
+        .stats-card.warning .icon {
+            background: var(--warning-color);
+        }
+
+        .stats-card.danger .icon {
+            background: var(--danger-color);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 16px;
+            color: white;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-time {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .badge-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .badge-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                transform: translateX(-100%);
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-navbar">
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="top-nav-menu">
+                <a href="#" class="top-nav-item">
+                    <i class="fas fa-home"></i> Beranda
+                </a>
+                <a href="#" class="top-nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="fw-bold" id="userName">Mantri User</div>
+                    <small class="text-muted">Field Officer</small>
+                </div>
+                <a href="login.html" class="btn btn-sm btn-outline-danger ms-3" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="text-center p-3">
+            <h5 class="text-white">KSP Lam Gabe Jaya</h5>
+            <small class="text-white-50">Sistem Koperasi</small>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="mantri_dashboard.html">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="field_data.html">
+                    <i class="fas fa-clipboard-list"></i> Data Lapangan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gps_tracking.html">
+                    <i class="fas fa-map-marker-alt"></i> GPS Tracking
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="route_planning.html">
+                    <i class="fas fa-route"></i> Perencanaan Rute
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="collection_management.html">
+                    <i class="fas fa-hand-holding-usd"></i> Manajemen Penagihan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="member_verification.html">
+                    <i class="fas fa-user-check"></i> Verifikasi Anggota
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="reports.html">
+                    <i class="fas fa-chart-bar"></i> Laporan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="settings.html">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="text-white">
+                        <i class="fas fa-tachometer-alt"></i> Mantri Dashboard
+                    </h2>
+                    <p class="text-white-50">Selamat datang di dashboard Mantri KSP Lam Gabe Jaya</p>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-card primary">
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="mb-1">45</h3>
+                        <p class="text-muted mb-0">Total Anggota</p>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up"></i> +5 bulan ini
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card success">
+                        <div class="icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <h3 class="mb-1">Rp 8.5Jt</h3>
+                        <p class="text-muted mb-0">Penagihan Hari Ini</p>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up"></i> 85% target
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card warning">
+                        <div class="icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <h3 class="mb-1">12</h3>
+                        <p class="text-muted mb-0">Kunjungan Hari Ini</p>
+                        <small class="text-warning">
+                            <i class="fas fa-clock"></i> 8 selesai
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card danger">
+                        <div class="icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3 class="mb-1">3</h3>
+                        <p class="text-muted mb-0">Telat Bayar</p>
+                        <small class="text-danger">
+                            <i class="fas fa-arrow-up"></i> Perlu follow-up
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Activities -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="chart-container">
+                        <h5 class="mb-3">Grafik Penagihan Mingguan</h5>
+                        <canvas id="collectionChart" height="100"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h5 class="mb-3">Aktivitas Terbaru</h5>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon bg-success">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="fw-bold">Penagihan Berhasil</div>
+                                    <div class="text-muted">Budi Santoso - Rp 1.5Jt</div>
+                                    <div class="activity-time">10 menit yang lalu</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon bg-warning">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="fw-bold">Kunjungan Lapangan</div>
+                                    <div class="text-muted">Siti Rahayu - Jakarta Pusat</div>
+                                    <div class="activity-time">30 menit yang lalu</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon bg-info">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="fw-bold">Verifikasi Anggota</div>
+                                    <div class="text-muted">Ahmad Wijaya - Dokumen lengkap</div>
+                                    <div class="activity-time">1 jam yang lalu</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon bg-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="fw-bold">Jatuh Tempo</div>
+                                    <div class="text-muted">Dewi Lestari - 3 hari telat</div>
+                                    <div class="activity-time">2 jam yang lalu</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Schedule -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="chart-container">
+                        <h5 class="mb-3">Jadwal Hari Ini</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Anggota</th>
+                                        <th>Alamat</th>
+                                        <th>Tujuan</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>09:00</td>
+                                        <td>Budi Santoso</td>
+                                        <td>Jakarta Pusat</td>
+                                        <td>Penagihan</td>
+                                        <td><span class="badge-status badge-success">Selesai</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>10:30</td>
+                                        <td>Siti Rahayu</td>
+                                        <td>Jakarta Utara</td>
+                                        <td>Penagihan</td>
+                                        <td><span class="badge-status badge-warning">Proses</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>13:00</td>
+                                        <td>Ahmad Wijaya</td>
+                                        <td>Jakarta Barat</td>
+                                        <td>Verifikasi</td>
+                                        <td><span class="badge-status badge-secondary">Menunggu</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>14:30</td>
+                                        <td>Dewi Lestari</td>
+                                        <td>Jakarta Selatan</td>
+                                        <td>Survei</td>
+                                        <td><span class="badge-status badge-secondary">Menunggu</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize user data
+        let currentUser = null;
+        let authToken = null;
+
+        // Check authentication
+        function checkAuth() {
+            currentUser = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'));
+            authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!currentUser || !authToken) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            if (currentUser.role !== 'mantri') {
+                alert('Anda tidak memiliki akses ke halaman ini');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            // Update UI
+            document.getElementById('userName').textContent = currentUser.name;
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('show');
+            mainContent.classList.toggle('sidebar-open');
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('currentUser');
+            sessionStorage.removeItem('auth_token');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize collection chart
+        function initCollectionChart() {
+            const ctx = document.getElementById('collectionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    datasets: [{
+                        label: 'Target',
+                        data: [10, 10, 10, 10, 10, 5, 0],
+                        borderColor: '#ff6b35',
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Actual',
+                        data: [9, 11, 8, 12, 10, 0, 0],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/mono/../../core/api/crud.php/field_data', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Dashboard data loaded:', data);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            initCollectionChart();
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html>

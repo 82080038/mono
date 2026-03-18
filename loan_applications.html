@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinjaman Applications - Mantri Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .Status-Menunggu { background-color: #ffc107; }
+        .Status-approved { background-color: #28a745; }
+        .Status-rejected { background-color: #dc3545; }
+        .Status-Review { background-color: #17a2b8; }
+        
+        .Prioritas-high { border-left: 4px solid #dc3545; }
+        .Prioritas-medium { border-left: 4px solid #ffc107; }
+        .Prioritas-low { border-left: 4px solid #28a745; }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Aplikasi-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        
+        .Aplikasi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-File-Kontrak"></i> Pinjaman Applications</h1>
+                <p class="mb-0">Mantri - Kredit Analisis & Pinjaman Memproses</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-Berhasil" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x text-alert mb-2"></i>
+                        <h5>Menunggu Review</h5>
+                        <h3 id="pendingCount">0</h3>
+                        <small class="text-muted">Awaiting Analisis</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-Cari fa-2x text-info mb-2"></i>
+                        <h5>In Review</h5>
+                        <h3 id="reviewCount">0</h3>
+                        <small class="text-muted">Being analyzed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x text-Berhasil mb-2"></i>
+                        <h5>Approved</h5>
+                        <h3 id="approvedCount">0</h3>
+                        <small class="text-muted">Bulan Ini</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                        <h5>Rejected</h5>
+                        <h3 id="rejectedCount">0</h3>
+                        <small class="text-muted">Bulan Ini</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filters and Actions -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <select class="form-Pilih" id="statusFilter">
+                                    <option value="">Semua Status</option>
+                                    <option value="Menunggu">Menunggu Review</option>
+                                    <option value="Review">In Review</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-Pilih" id="priorityFilter">
+                                    <option value="">Semua Prioritas</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Cari applications...">
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary" onclick="filterApplications()">
+                                    <i class="fas fa-Filter"></i> Filter
+                                </button>
+                                <button class="btn btn-secondary" onclick="resetFilters()">
+                                    <i class="fas fa-redo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-end">
+                        <button class="btn btn-Berhasil" onclick="openNewApplication()">
+                            <i class="fas fa-plus"></i> New Aplikasi
+                        </button>
+                        <button class="btn btn-info" onclick="exportApplications()">
+                            <i class="fas fa-Unduh"></i> Ekspor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Applications List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> Pinjaman Applications</h5>
+                        <span class="badge bg-primary" id="totalCount">0 applications</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="Tabel-responsive">
+                            <table class="Tabel Tabel-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Aplikasi ID</th>
+                                        <th>Applicant</th>
+                                        <th>Jumlah</th>
+                                        <th>Purpose</th>
+                                        <th>Status</th>
+                                        <th>Prioritas</th>
+                                        <th>Applied Tanggal</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="applicationsTable">
+                                    <!-- Applications will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav aria-label="Applications pagination">
+                            <ul class="pagination justify-content-center" id="pagination">
+                                <!-- Pagination will be loaded here -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Application Detail Modal -->
+    <div class="modal fade" id="applicationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Aplikasi Detail</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="applicationDetails">
+                    <!-- Application details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="editApplication()">Edit</button>
+                    <button type="button" class="btn btn-Berhasil" onclick="approveApplication()">Approve</button>
+                    <button type="button" class="btn btn-danger" onclick="rejectApplication()">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Credit Analysis Modal -->
+    <div class="modal fade" id="creditAnalysisModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Kredit Analisis</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="creditAnalysisContent">
+                    <!-- Credit analysis form will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCreditAnalysis()">Simpan Analisis</button>
+                    <button type="button" class="btn btn-Berhasil" onclick="submitRecommendation()">Kirim Recommendation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let applications = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadApplications();
+            loadStatistics();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is mantri
+            if (currentUser.role !== 'mantri') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load applications
+        async function loadApplications() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=loan_applications', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        applications = Data.Data;
+                        displayApplications();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat applications:', Error);
+                // Use demo Data
+                applications = getDemoApplications();
+                displayApplications();
+            }
+        }
+
+        // Display applications
+        function displayApplications() {
+            const tbody = Dokumen.getElementById('applicationsTable');
+            tbody.innerHTML = '';
+            
+            const filteredApps = filterApplicationsList();
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageApps = filteredApps.slice(startIndex, endIndex);
+            
+            pageApps.forEach(app => {
+                const row = Dokumen.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${app.application_id}</strong></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="me-2">
+                                <i class="fas fa-user-circle fa-2x text-muted"></i>
+                            </div>
+                            <div>
+                                <div>${app.applicant_name}</div>
+                                <small class="text-muted">${app.member_id}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><strong>${formatCurrency(app.Jumlah)}</strong></td>
+                    <td>${app.purpose}</td>
+                    <td><span class="badge Status-${app.Status}">${app.Status}</span></td>
+                    <td><span class="badge Prioritas-${app.Prioritas}">${app.Prioritas}</span></td>
+                    <td>${formatDate(app.applied_date)}</td>
+                    <td>
+                        <div class="btn-Grup" role="Grup">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewApplication('${app.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" onclick="openCreditAnalysis('${app.id}')" ${app.status !== 'Menunggu' ? 'disabled' : ''}>
+                                <i class="fas fa-Cari"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-Berhasil" onclick="approveApplication('${app.id}')" ${app.status !== 'Review' ? 'disabled' : ''}>
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="rejectApplication('${app.id}')" ${app.status !== 'Review' ? 'disabled' : ''}>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            updatePagination(filteredApps.length);
+            Dokumen.getElementById('totalCount').textContent = `${filteredApps.length} applications`;
+        }
+
+        // Filter applications Daftar
+        function filterApplicationsList() {
+            let filtered = applications;
+            
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            const priorityFilter = Dokumen.getElementById('priorityFilter').value;
+            const searchInput = Dokumen.getElementById('searchInput').value.toLowerCase();
+            
+            if (statusFilter) {
+                filtered = filtered.Filter(app => app.Status === statusFilter);
+            }
+            
+            if (priorityFilter) {
+                filtered = filtered.Filter(app => app.Prioritas === priorityFilter);
+            }
+            
+            if (searchInput) {
+                filtered = filtered.Filter(app => 
+                    app.application_id.toLowerCase().includes(searchInput) ||
+                    app.applicant_name.toLowerCase().includes(searchInput) ||
+                    app.purpose.toLowerCase().includes(searchInput)
+                );
+            }
+            
+            return filtered;
+        }
+
+        // Perbarui pagination
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pagination = Dokumen.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // Sebelumnya button
+            const prevLi = Dokumen.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Sebelumnya</a>`;
+            pagination.appendChild(prevLi);
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'Aktif' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+                pagination.appendChild(li);
+            }
+            
+            // Lanjut button
+            const nextLi = Dokumen.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Lanjut</a>`;
+            pagination.appendChild(nextLi);
+        }
+
+        // Change page
+        function changePage(page) {
+            currentPage = page;
+            displayApplications();
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=mantri_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    pending_applications: 12,
+                    in_review: 8,
+                    approved_this_month: 15,
+                    rejected_this_month: 3
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('pendingCount').textContent = stats.pending_applications || 0;
+            Dokumen.getElementById('reviewCount').textContent = stats.in_review || 0;
+            Dokumen.getElementById('approvedCount').textContent = stats.approved_this_month || 0;
+            Dokumen.getElementById('rejectedCount').textContent = stats.rejected_this_month || 0;
+        }
+
+        // View Aplikasi Detail
+        function viewApplication(applicationId) {
+            const Aplikasi = applications.find(app => app.id === applicationId);
+            if (!Aplikasi) return;
+            
+            const detailsHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Aplikasi Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Aplikasi ID:</td><td><strong>${Aplikasi.application_id}</strong></td></tr>
+                            <tr><td>Anggota ID:</td><td>${Aplikasi.member_id}</td></tr>
+                            <tr><td>Applied Tanggal:</td><td>${formatDate(Aplikasi.applied_date)}</td></tr>
+                            <tr><td>Status:</td><td><span class="badge Status-${Aplikasi.Status}">${Aplikasi.Status}</span></td></tr>
+                            <tr><td>Prioritas:</td><td><span class="badge Prioritas-${Aplikasi.Prioritas}">${Aplikasi.Prioritas}</span></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Pinjaman Detail</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Jumlah:</td><td><strong>${formatCurrency(Aplikasi.Jumlah)}</strong></td></tr>
+                            <tr><td>Purpose:</td><td>${Aplikasi.purpose}</td></tr>
+                            <tr><td>Term:</td><td>${Aplikasi.term} months</td></tr>
+                            <tr><td>Bunga Tarif:</td><td>${Aplikasi.interest_rate}%</td></tr>
+                            <tr><td>Monthly Pembayaran:</td><td>${formatCurrency(Aplikasi.monthly_payment)}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Documents</h6>
+                        <div class="Daftar-Grup">
+                            ${Aplikasi.documents ? Aplikasi.documents.map(doc => `
+                                <div class="Daftar-Grup-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-File-alt me-2"></i>
+                                        ${doc.Nama}
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-${doc.Status === 'verified' ? 'Berhasil' : 'alert'}">${doc.Status}</span>
+                                        <button class="btn btn-sm btn-outline-primary ms-2">View</button>
+                                    </div>
+                                </div>
+                            `).join('') : '<p>Tidak documents uploaded</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            Dokumen.getElementById('applicationDetails').innerHTML = detailsHtml;
+            const modal = new bootstrap.Modal(Dokumen.getElementById('applicationModal'));
+            modal.show();
+        }
+
+        // Open Kredit Analisis
+        function openCreditAnalysis(applicationId) {
+            const Aplikasi = applications.find(app => app.id === applicationId);
+            if (!Aplikasi) return;
+            
+            const analysisHtml = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>Aplikasi Ringkasan</h6>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Aplikasi ID:</strong> ${Aplikasi.application_id}</p>
+                                        <p><strong>Applicant:</strong> ${Aplikasi.applicant_name}</p>
+                                        <p><strong>Jumlah:</strong> ${formatCurrency(Aplikasi.Jumlah)}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Purpose:</strong> ${Aplikasi.purpose}</p>
+                                        <p><strong>Term:</strong> ${Aplikasi.term} months</p>
+                                        <p><strong>Applied Tanggal:</strong> ${formatDate(Aplikasi.applied_date)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h6>Kredit Analisis</h6>
+                        <form id="creditAnalysisForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Kredit Skor</label>
+                                        <input type="Nomor" class="form-control" name="credit_score" min="300" max="850" value="650">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Debt-to-Pendapatan Rasio (%)</label>
+                                        <input type="Nomor" class="form-control" name="debt_to_income" min="0" max="100" step="0.1" value="35">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Collateral Value</label>
+                                        <input type="Nomor" class="form-control" name="collateral_value" value="${Aplikasi.Jumlah * 1.5}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Monthly Pendapatan</label>
+                                        <input type="Nomor" class="form-control" name="monthly_income" value="5000000">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Risiko Assessment</label>
+                                <select class="form-Pilih" name="risk_level">
+                                    <option value="low">Low Risiko</option>
+                                    <option value="medium">Medium Risiko</option>
+                                    <option value="high">High Risiko</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Analisis Notes</label>
+                                <textarea class="form-control" name="analysis_notes" rows="4" placeholder="Enter your Analisis notes..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Recommendation</label>
+                                <select class="form-Pilih" name="recommendation">
+                                    <option value="">Pilih Recommendation</option>
+                                    <option value="approve">Approve</option>
+                                    <option value="reject">Reject</option>
+                                    <option value="request_more_info">Request More Informasi</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Quick Calculations</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Pinjaman-to-Value Rasio</label>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: 67%">67%</div>
+                                    </div>
+                                    <small class="text-muted">Jumlah / Collateral Value</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Pembayaran Capacity</label>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-Berhasil" style="width: 85%">85%</div>
+                                    </div>
+                                    <small class="text-muted">Monthly Pembayaran / Monthly Pendapatan</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Kredit Riwayat</label>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: 75%">75%</div>
+                                    </div>
+                                    <small class="text-muted">Based on Kredit Skor</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h6 class="mt-3">Checklist</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="docVerified">
+                            <label class="form-check-label" for="docVerified">
+                                Documents Verified
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="creditChecked">
+                            <label class="form-check-label" for="creditChecked">
+                                Kredit Riwayat Checked
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="incomeVerified">
+                            <label class="form-check-label" for="incomeVerified">
+                                Pendapatan Verified
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="collateralVerified">
+                            <label class="form-check-label" for="collateralVerified">
+                                Collateral Verified
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            Dokumen.getElementById('creditAnalysisContent').innerHTML = analysisHtml;
+            const modal = new bootstrap.Modal(Dokumen.getElementById('creditAnalysisModal'));
+            modal.show();
+        }
+
+        // Approve Aplikasi
+        async function approveApplication(applicationId) {
+            if (!Konfirmasi('Are you sure you want to approve this Aplikasi?')) return;
+            
+            try {
+                const response = await fetch('/mono/API/crud.php?path=Pinjaman&action=approve', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Tipe': 'Aplikasi/json'
+                    },
+                    body: JSON.stringify({ application_id: applicationId })
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        showSuccess('Aplikasi approved successfully');
+                        loadApplications();
+                        loadStatistics();
+                    } else {
+                        showError(Data.Pesan || 'Failed to approve Aplikasi');
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error approving Aplikasi:', Error);
+                showError('Failed to approve Aplikasi');
+            }
+        }
+
+        // Reject Aplikasi
+        async function rejectApplication(applicationId) {
+            const reason = prompt('Please enter Penolakan reason:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch('/mono/API/crud.php?path=Pinjaman&action=reject', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Tipe': 'Aplikasi/json'
+                    },
+                    body: JSON.stringify({ application_id: applicationId, reason: reason })
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        showSuccess('Aplikasi rejected successfully');
+                        loadApplications();
+                        loadStatistics();
+                    } else {
+                        showError(Data.Pesan || 'Failed to reject Aplikasi');
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error rejecting Aplikasi:', Error);
+                showError('Failed to reject Aplikasi');
+            }
+        }
+
+        // Filter applications
+        function filterApplications() {
+            displayApplications();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            Dokumen.getElementById('statusFilter').value = '';
+            Dokumen.getElementById('priorityFilter').value = '';
+            Dokumen.getElementById('searchInput').value = '';
+            currentPage = 1;
+            displayApplications();
+        }
+
+        // Ekspor applications
+        function exportApplications() {
+            // Implementation for exporting applications
+            
+        }
+
+        // Get demo applications
+        function getDemoApplications() {
+            return [
+                {
+                    id: '1',
+                    application_id: 'LN-2026-03-001',
+                    member_id: 'M-001',
+                    applicant_name: 'Ahmad Wijaya',
+                    Jumlah: 50000000,
+                    purpose: 'Modal Usaha',
+                    term: 12,
+                    interest_rate: 1.5,
+                    monthly_payment: 4500000,
+                    Status: 'Menunggu',
+                    Prioritas: 'high',
+                    applied_date: '2026-03-15',
+                    documents: [
+                        { Nama: 'KTP', Status: 'verified' },
+                        { Nama: 'KK', Status: 'verified' },
+                        { Nama: 'Slip Gaji', Status: 'Menunggu' }
+                    ]
+                },
+                {
+                    id: '2',
+                    application_id: 'LN-2026-03-002',
+                    member_id: 'M-002',
+                    applicant_name: 'Siti Nurhaliza',
+                    Jumlah: 30000000,
+                    purpose: 'Renovasi Rumah',
+                    term: 24,
+                    interest_rate: 1.5,
+                    monthly_payment: 2500000,
+                    Status: 'Review',
+                    Prioritas: 'medium',
+                    applied_date: '2026-03-14',
+                    documents: [
+                        { Nama: 'KTP', Status: 'verified' },
+                        { Nama: 'KK', Status: 'verified' },
+                        { Nama: 'Surat Tanah', Status: 'verified' }
+                    ]
+                },
+                {
+                    id: '3',
+                    application_id: 'LN-2026-03-003',
+                    member_id: 'M-003',
+                    applicant_name: 'Budi Santoso',
+                    Jumlah: 25000000,
+                    purpose: 'Biaya Pendidikan',
+                    term: 18,
+                    interest_rate: 1.5,
+                    monthly_payment: 2000000,
+                    Status: 'approved',
+                    Prioritas: 'low',
+                    applied_date: '2026-03-13',
+                    documents: [
+                        { Nama: 'KTP', Status: 'verified' },
+                        { Nama: 'KK', Status: 'verified' }
+                    ]
+                }
+            ];
+        }
+
+        // Utility functions
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            // Show Berhasil Pesan (implementation needed)
+            
+        }
+
+        function showError(Pesan) {
+            // Show Error Pesan (implementation needed)
+            console.Error('Error:', Pesan);
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Manajemen - Teller Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .account-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #007bff;
+            cursor: pointer;
+        }
+        
+        .account-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .account-Status {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .Saldo-positive {
+            color: #28a745;
+        }
+        
+        .Saldo-negative {
+            color: #dc3545;
+        }
+        
+        .account-Tipe-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .account-Tipe-Simpanan {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .account-Tipe-Pinjaman {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+        
+        .account-Tipe-fixed {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+        
+        .account-Tipe-education {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Transaksi-item {
+            border-left: 3px solid #dee2e6;
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Transaksi-item.Kredit {
+            border-left-color: #28a745;
+        }
+        
+        .Transaksi-item.debit {
+            border-left-color: #dc3545;
+        }
+        
+        .Grafik-container {
+            Posisi: relative;
+            height: 250px;
+        }
+        
+        .Cari-highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-user-cog"></i> Account Manajemen</h1>
+                <p class="mb-0">Teller - Anggota Account Manajemen & Services</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Account Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-2x mb-2"></i>
+                        <h5>Total Accounts</h5>
+                        <h3 id="totalAccounts">0</h3>
+                        <p class="mb-0">Aktif accounts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-piggy-bank fa-2x mb-2"></i>
+                        <h5>Simpanan Accounts</h5>
+                        <h3 id="savingsAccounts">0</h3>
+                        <p class="mb-0">Total Simpanan</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                        <h5>Pinjaman Accounts</h5>
+                        <h3 id="loanAccounts">0</h3>
+                        <p class="mb-0">Aktif Pinjaman</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Grafik-line fa-2x mb-2"></i>
+                        <h5>Total Saldo</h5>
+                        <h3 id="totalBalance">0</h3>
+                        <p class="mb-0">Semua accounts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Search and Filters -->
+            <div class="col-md-12">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-Cari"></i></span>
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Cari by Anggota Nama, account Nomor, or ID...">
+                                    <button class="btn btn-primary" onclick="searchAccounts()">Cari</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-Pilih" id="accountTypeFilter">
+                                    <option value="">Semua Types</option>
+                                    <option value="Simpanan">Simpanan</option>
+                                    <option value="Pinjaman">Pinjaman</option>
+                                    <option value="fixed">Fixed Setoran</option>
+                                    <option value="education">Education</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-Pilih" id="statusFilter">
+                                    <option value="">Semua Status</option>
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Tidak Aktif">Tidak Aktif</option>
+                                    <option value="frozen">Frozen</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-Pilih" id="sortBy">
+                                    <option value="Nama">Urutkan by Nama</option>
+                                    <option value="Saldo">Urutkan by Saldo</option>
+                                    <option value="Dibuat">Urutkan by Dibuat</option>
+                                    <option value="account_number">Urutkan by Account Nomor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                                    <i class="fas fa-redo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="col-md-12 mb-3">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="quick-action" onclick="openNewAccount()">
+                            <i class="fas fa-plus-circle"></i>
+                            <h6>New Account</h6>
+                            <small class="text-muted">Create new account</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="quick-action" onclick="openAccountTransfer()">
+                            <i class="fas fa-exchange-alt"></i>
+                            <h6>Transfer</h6>
+                            <small class="text-muted">Transfer funds</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="quick-action" onclick="openDeposit()">
+                            <i class="fas fa-arrow-down"></i>
+                            <h6>Setoran</h6>
+                            <small class="text-muted">Make Setoran</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="quick-action" onclick="openWithdrawal()">
+                            <i class="fas fa-arrow-up"></i>
+                            <h6>Penarikan</h6>
+                            <small class="text-muted">Proses Penarikan</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="quick-action" onclick="openAccountStatement()">
+                            <i class="fas fa-File-alt"></i>
+                            <h6>Statement</h6>
+                            <small class="text-muted">Generate statement</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="quick-action" onclick="openAccountSettings()">
+                            <i class="fas fa-cog"></i>
+                            <h6>Pengaturan</h6>
+                            <small class="text-muted">Account Pengaturan</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Accounts List -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> Anggota Accounts</h5>
+                        <span class="badge bg-primary" id="accountCount">0 accounts</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="Tabel-responsive">
+                            <table class="Tabel Tabel-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Account Nomor</th>
+                                        <th>Anggota Nama</th>
+                                        <th>Tipe</th>
+                                        <th>Saldo</th>
+                                        <th>Status</th>
+                                        <th>Dibuat</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accountsTable">
+                                    <!-- Accounts will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav aria-label="Accounts pagination">
+                            <ul class="pagination justify-content-center" id="pagination">
+                                <!-- Pagination will be loaded here -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Account Details -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle"></i> Account Detail</h5>
+                    </div>
+                    <div class="card-body" id="accountDetails">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle fa-3x mb-3"></i>
+                            <p>Pilih an account to view Detail</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Transactions -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Transaksi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentTransactions">
+                            <!-- Recent transactions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Account Summary -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-pie"></i> Account Ringkasan</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Grafik-container">
+                            <canvas id="accountSummaryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Account Modal -->
+    <div class="modal fade" id="newAccountModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Create New Account</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newAccountForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Anggota *</label>
+                                    <select class="form-Pilih" id="memberSelect" required>
+                                        <option value="">Pilih Anggota</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Account Tipe *</label>
+                                    <select class="form-Pilih" id="accountType" required>
+                                        <option value="">Pilih account Tipe</option>
+                                        <option value="Simpanan">Simpanan Account</option>
+                                        <option value="fixed">Fixed Setoran</option>
+                                        <option value="education">Education Simpanan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initial Setoran *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="Nomor" class="form-control" id="initialDeposit" min="100000" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Monthly Commitment</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="Nomor" class="form-control" id="monthlyCommitment" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Account Notes</label>
+                                    <textarea class="form-control" id="accountNotes" rows="3" placeholder="Enter any notes Tentang this account..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="createAccount()">
+                        <i class="fas fa-plus"></i> Create Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Account Transfer Modal -->
+    <div class="modal fade" id="transferModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Account Transfer</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transferForm">
+                        <div class="mb-3">
+                            <label class="form-label">From Account *</label>
+                            <select class="form-Pilih" id="fromAccount" required>
+                                <option value="">Pilih source account</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">To Account *</label>
+                            <select class="form-Pilih" id="toAccount" required>
+                                <option value="">Pilih destination account</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="Nomor" class="form-control" id="transferAmount" min="10000" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Transfer Notes</label>
+                            <textarea class="form-control" id="transferNotes" rows="2" placeholder="Enter transfer notes..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="processTransfer()">
+                        <i class="fas fa-exchange-alt"></i> Proses Transfer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Account Details Modal -->
+    <div class="modal fade" id="accountDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Account Detail</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="accountDetailsContent">
+                    <!-- Account details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="printAccountDetails()">
+                        <i class="fas fa-Cetak"></i> Cetak
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let accounts = [];
+        let selectedAccount = null;
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let Grafik = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadAccounts();
+            loadStatistics();
+            initializeChart();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Teller
+            if (currentUser.role !== 'Teller') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load accounts
+        async function loadAccounts() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=accounts', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        accounts = Data.Data;
+                        displayAccounts();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat accounts:', Error);
+                // Use demo Data
+                accounts = getDemoAccounts();
+                displayAccounts();
+            }
+        }
+
+        // Display accounts
+        function displayAccounts() {
+            const tbody = Dokumen.getElementById('accountsTable');
+            tbody.innerHTML = '';
+            
+            const filteredAccounts = filterAccounts();
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageAccounts = filteredAccounts.slice(startIndex, endIndex);
+            
+            pageAccounts.forEach(account => {
+                const row = Dokumen.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${account.account_number}</strong></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="account-Tipe-icon account-Tipe-${account.Tipe} me-2">
+                                <i class="fas fa-${getAccountIcon(account.Tipe)}"></i>
+                            </div>
+                            <div>
+                                <div>${account.member_name}</div>
+                                <small class="text-muted">${account.member_id}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-secondary">${account.Tipe}</span></td>
+                    <td><strong class="${account.Saldo >= 0 ? 'Saldo-positive' : 'Saldo-negative'}">${formatCurrency(account.Saldo)}</strong></td>
+                    <td><span class="account-Status bg-${getStatusColor(account.Status)}">${account.Status}</span></td>
+                    <td>${formatDate(account.created_at)}</td>
+                    <td>
+                        <div class="btn-Grup" role="Grup">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewAccountDetails('${account.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-Berhasil" onclick="depositToAccount('${account.id}')" ${account.status !== 'Aktif' ? 'disabled' : ''}>
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-alert" onclick="withdrawFromAccount('${account.id}')" ${account.status !== 'Aktif' ? 'disabled' : ''}>
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" onclick="editAccount('${account.id}')">
+                                <i class="fas fa-Edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            updatePagination(filteredAccounts.length);
+            Dokumen.getElementById('accountCount').textContent = `${filteredAccounts.length} accounts`;
+        }
+
+        // Filter accounts
+        function filterAccounts() {
+            let filtered = accounts;
+            
+            const accountTypeFilter = Dokumen.getElementById('accountTypeFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            const searchInput = Dokumen.getElementById('searchInput').value.toLowerCase();
+            
+            if (accountTypeFilter) {
+                filtered = filtered.Filter(account => account.Tipe === accountTypeFilter);
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.Filter(account => account.Status === statusFilter);
+            }
+            
+            if (searchInput) {
+                filtered = filtered.Filter(account => 
+                    account.account_number.toLowerCase().includes(searchInput) ||
+                    account.member_name.toLowerCase().includes(searchInput) ||
+                    account.member_id.toLowerCase().includes(searchInput)
+                );
+            }
+            
+            // Apply sorting
+            const sortBy = Dokumen.getElementById('sortBy').value;
+            filtered.Urutkan((a, b) => {
+                switch (sortBy) {
+                    case 'Nama':
+                        return a.member_name.localeCompare(b.member_name);
+                    case 'Saldo':
+                        return b.Saldo - a.Saldo;
+                    case 'Dibuat':
+                        return new Tanggal(b.created_at) - new Tanggal(a.created_at);
+                    case 'account_number':
+                        return a.account_number.localeCompare(b.account_number);
+                    default:
+                        return 0;
+                }
+            });
+            
+            return filtered;
+        }
+
+        // Perbarui pagination
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pagination = Dokumen.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // Sebelumnya button
+            const prevLi = Dokumen.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Sebelumnya</a>`;
+            pagination.appendChild(prevLi);
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'Aktif' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+                pagination.appendChild(li);
+            }
+            
+            // Lanjut button
+            const nextLi = Dokumen.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Lanjut</a>`;
+            pagination.appendChild(nextLi);
+        }
+
+        // Change page
+        function changePage(page) {
+            currentPage = page;
+            displayAccounts();
+        }
+
+        // Cari accounts
+        function searchAccounts() {
+            displayAccounts();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            Dokumen.getElementById('searchInput').value = '';
+            Dokumen.getElementById('accountTypeFilter').value = '';
+            Dokumen.getElementById('statusFilter').value = '';
+            Dokumen.getElementById('sortBy').value = 'Nama';
+            currentPage = 1;
+            displayAccounts();
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=account_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_accounts: 156,
+                    savings_accounts: 98,
+                    loan_accounts: 58,
+                    total_balance: 245000000
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalAccounts').textContent = stats.total_accounts || 0;
+            Dokumen.getElementById('savingsAccounts').textContent = stats.savings_accounts || 0;
+            Dokumen.getElementById('loanAccounts').textContent = stats.loan_accounts || 0;
+            Dokumen.getElementById('totalBalance').textContent = formatCurrency(stats.total_balance || 0);
+        }
+
+        // Initialize Grafik
+        function initializeChart() {
+            const ctx = Dokumen.getElementById('accountSummaryChart').getContext('2d');
+            Grafik = new Grafik(ctx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Simpanan', 'Fixed Setoran', 'Education', 'Pinjaman'],
+                    datasets: [{
+                        Data: [65, 20, 10, 5],
+                        backgroundColor: ['#28a745', '#ffc107', '#17a2b8', '#007bff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            Posisi: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // View account Detail
+        function viewAccountDetails(accountId) {
+            const account = accounts.find(a => a.id === accountId);
+            if (!account) return;
+            
+            selectedAccount = account;
+            displayAccountDetails(account);
+            loadRecentTransactions(accountId);
+        }
+
+        // Display account Detail
+        function displayAccountDetails(account) {
+            const detailsHtml = `
+                <div class="text-center mb-3">
+                    <div class="account-Tipe-icon account-Tipe-${account.Tipe} mx-auto mb-2">
+                        <i class="fas fa-${getAccountIcon(account.Tipe)}"></i>
+                    </div>
+                    <h6>${account.account_number}</h6>
+                    <span class="account-Status bg-${getStatusColor(account.Status)}">${account.Status}</span>
+                </div>
+                
+                <h6>Account Informasi</h6>
+                <table class="Tabel Tabel-sm">
+                    <tr><td>Account Tipe:</td><td>${account.Tipe}</td></tr>
+                    <tr><td>Saldo:</td><td><strong class="${account.Saldo >= 0 ? 'Saldo-positive' : 'Saldo-negative'}">${formatCurrency(account.Saldo)}</strong></td></tr>
+                    <tr><td>Anggota Nama:</td><td>${account.member_name}</td></tr>
+                    <tr><td>Anggota ID:</td><td>${account.member_id}</td></tr>
+                    <tr><td>Dibuat:</td><td>${formatDate(account.created_at)}</td></tr>
+                </table>
+                
+                <h6>Account Pengaturan</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editAccount('${account.id}')">
+                        <i class="fas fa-Edit"></i> Edit Account
+                    </button>
+                    <button class="btn btn-sm btn-outline-Berhasil" onclick="depositToAccount('${account.id}')">
+                        <i class="fas fa-arrow-down"></i> Setoran
+                    </button>
+                    <button class="btn btn-sm btn-outline-alert" onclick="withdrawFromAccount('${account.id}')">
+                        <i class="fas fa-arrow-up"></i> Withdraw
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="generateStatement('${account.id}')">
+                        <i class="fas fa-File-alt"></i> Statement
+                    </button>
+                </div>
+            `;
+            
+            Dokumen.getElementById('accountDetails').innerHTML = detailsHtml;
+            
+            // Perbarui Grafik
+            updateAccountChart(account);
+        }
+
+        // Load recent Transaksi
+        function loadRecentTransactions(accountId) {
+            // Simulate recent Transaksi
+            const Transaksi = [
+                { Tipe: 'Kredit', Deskripsi: 'Initial Setoran', Jumlah: 1000000, Tanggal: '2026-03-15' },
+                { Tipe: 'Kredit', Deskripsi: 'Monthly Simpanan', Jumlah: 500000, Tanggal: '2026-03-10' },
+                { Tipe: 'debit', Deskripsi: 'Penarikan', Jumlah: 200000, Tanggal: '2026-03-08' }
+            ];
+            
+            const transactionsDiv = Dokumen.getElementById('recentTransactions');
+            transactionsDiv.innerHTML = Transaksi.map(Transaksi => `
+                <div class="Transaksi-item ${Transaksi.Tipe}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${Transaksi.Deskripsi}</strong>
+                            <br>
+                            <small class="text-muted">${formatDate(Transaksi.Tanggal)}</small>
+                        </div>
+                        <div class="text-end">
+                            <strong class="${Transaksi.Tipe === 'Kredit' ? 'Saldo-positive' : 'Saldo-negative'}">
+                                ${Transaksi.Tipe === 'Kredit' ? '+' : '-'}${formatCurrency(Transaksi.Jumlah)}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Perbarui account Grafik
+        function updateAccountChart(account) {
+            if (Grafik) {
+                // Perbarui Grafik Data based on account Tipe
+                const Data = getAccountChartData(account);
+                Grafik.Data.datasets[0].Data = Data;
+                Grafik.Perbarui();
+            }
+        }
+
+        // Get account Grafik Data
+        function getAccountChartData(account) {
+            switch (account.Tipe) {
+                case 'Simpanan':
+                    return [account.Saldo * 0.6, account.Saldo * 0.2, account.Saldo * 0.15, account.Saldo * 0.05];
+                case 'fixed':
+                    return [account.Saldo * 0.3, account.Saldo * 0.5, account.Saldo * 0.15, account.Saldo * 0.05];
+                case 'education':
+                    return [account.Saldo * 0.4, account.Saldo * 0.3, account.Saldo * 0.25, account.Saldo * 0.05];
+                default:
+                    return [65, 20, 10, 5];
+            }
+        }
+
+        // Quick action functions
+        function openNewAccount() {
+            // Load Anggota for selection
+            loadMembers();
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newAccountModal'));
+            modal.show();
+        }
+
+        function openAccountTransfer() {
+            // Load accounts for selection
+            loadAccountOptions();
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('transferModal'));
+            modal.show();
+        }
+
+        function openDeposit() {
+            if (!selectedAccount) {
+                Peringatan('Please Pilih an account first');
+                return;
+            }
+            depositToAccount(selectedAccount.id);
+        }
+
+        function openWithdrawal() {
+            if (!selectedAccount) {
+                Peringatan('Please Pilih an account first');
+                return;
+            }
+            withdrawFromAccount(selectedAccount.id);
+        }
+
+        function openAccountStatement() {
+            if (!selectedAccount) {
+                Peringatan('Please Pilih an account first');
+                return;
+            }
+            generateStatement(selectedAccount.id);
+        }
+
+        function openAccountSettings() {
+            if (!selectedAccount) {
+                Peringatan('Please Pilih an account first');
+                return;
+            }
+            editAccount(selectedAccount.id);
+        }
+
+        // Load Anggota for new account
+        function loadMembers() {
+            const Anggota = [
+                { id: 'M-001', Nama: 'Ahmad Wijaya' },
+                { id: 'M-002', Nama: 'Siti Nurhaliza' },
+                { id: 'M-003', Nama: 'Budi Santoso' }
+            ];
+            
+            const memberSelect = Dokumen.getElementById('memberSelect');
+            memberSelect.innerHTML = '<option value="">Pilih Anggota</option>';
+            Anggota.forEach(Anggota => {
+                memberSelect.innerHTML += `<option value="${Anggota.id}">${Anggota.Nama} (${Anggota.id})</option>`;
+            });
+        }
+
+        // Load account options for transfer
+        function loadAccountOptions() {
+            const fromSelect = Dokumen.getElementById('fromAccount');
+            const toSelect = Dokumen.getElementById('toAccount');
+            
+            const options = '<option value="">Pilih account</option>';
+            accounts.forEach(account => {
+                options += `<option value="${account.id}">${account.account_number} - ${account.member_name}</option>`;
+            });
+            
+            fromSelect.innerHTML = options;
+            toSelect.innerHTML = options;
+        }
+
+        // Create account
+        function createAccount() {
+            const memberId = Dokumen.getElementById('memberSelect').value;
+            const accountType = Dokumen.getElementById('accountType').value;
+            const initialDeposit = Dokumen.getElementById('initialDeposit').value;
+            
+            if (!memberId || !accountType || !initialDeposit) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Create new account
+            const newAccount = {
+                id: 'ACC-' + Tanggal.now(),
+                account_number: generateAccountNumber(accountType),
+                member_id: memberId,
+                member_name: getMemberName(memberId),
+                Tipe: accountType,
+                Saldo: parseFloat(initialDeposit),
+                Status: 'Aktif',
+                created_at: new Tanggal().toISOString()
+            };
+            
+            accounts.unshift(newAccount);
+            displayAccounts();
+            updateStatistics({
+                total_accounts: accounts.length,
+                savings_accounts: accounts.Filter(a => a.Tipe === 'Simpanan').length,
+                loan_accounts: accounts.Filter(a => a.Tipe === 'Pinjaman').length,
+                total_balance: accounts.reduce((sum, a) => sum + a.Saldo, 0)
+            });
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newAccountModal'));
+            modal.hide();
+            
+            // Reset Formulir
+            Dokumen.getElementById('newAccountForm').Reset();
+            
+            showSuccess('Account Dibuat successfully!');
+        }
+
+        // Proses transfer
+        function processTransfer() {
+            const fromAccountId = Dokumen.getElementById('fromAccount').value;
+            const toAccountId = Dokumen.getElementById('toAccount').value;
+            const Jumlah = parseFloat(Dokumen.getElementById('transferAmount').value);
+            
+            if (!fromAccountId || !toAccountId || !Jumlah) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            if (fromAccountId === toAccountId) {
+                Peringatan('Cannot transfer to the same account');
+                return;
+            }
+            
+            // Proses transfer
+            const fromAccount = accounts.find(a => a.id === fromAccountId);
+            const toAccount = accounts.find(a => a.id === toAccountId);
+            
+            if (fromAccount && toAccount) {
+                fromAccount.Saldo -= Jumlah;
+                toAccount.Saldo += Jumlah;
+                
+                displayAccounts();
+                
+                // Tutup modal
+                const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('transferModal'));
+                modal.hide();
+                
+                // Reset Formulir
+                Dokumen.getElementById('transferForm').Reset();
+                
+                showSuccess('Transfer processed successfully!');
+            }
+        }
+
+        // Setoran to account
+        function depositToAccount(accountId) {
+            const Jumlah = prompt('Enter Setoran Jumlah:');
+            if (!Jumlah || isNaN(Jumlah)) return;
+            
+            const account = accounts.find(a => a.id === accountId);
+            if (account) {
+                account.Saldo += parseFloat(Jumlah);
+                displayAccounts();
+                updateStatistics({
+                    total_balance: accounts.reduce((sum, a) => sum + a.Saldo, 0)
+                });
+                showSuccess('Setoran processed successfully!');
+            }
+        }
+
+        // Withdraw from account
+        function withdrawFromAccount(accountId) {
+            const Jumlah = prompt('Enter Penarikan Jumlah:');
+            if (!Jumlah || isNaN(Jumlah)) return;
+            
+            const account = accounts.find(a => a.id === accountId);
+            if (account) {
+                if (account.Saldo < parseFloat(amount)) {
+                    alert('Insufficient Saldo');
+                    return;
+                }
+                
+                account.balance -= parseFloat(amount);
+                displayAccounts();
+                updateStatistics({
+                    total_balance: accounts.reduce((sum, a) => sum + a.Saldo, 0)
+                });
+                showSuccess('Penarikan processed successfully!');
+            }
+        }
+
+        // Generate statement
+        function generateStatement(accountId) {
+            const account = accounts.find(a => a.id === accountId);
+            if (!account) return;
+            
+            
+        }
+
+        // Edit account
+        function editAccount(accountId) {
+            const account = accounts.find(a => a.id === accountId);
+            if (!account) return;
+            
+            
+        }
+
+        // Cetak account Detail
+        function printAccountDetails() {
+            window.Cetak();
+        }
+
+        // Utility functions
+        function getAccountIcon(Tipe) {
+            const icons = {
+                'Simpanan': 'piggy-bank',
+                'Pinjaman': 'hand-holding-usd',
+                'fixed': 'lock',
+                'education': 'graduation-cap'
+            };
+            return icons[Tipe] || 'Pengguna';
+        }
+
+        function getStatusColor(Status) {
+            const colors = {
+                'Aktif': 'Berhasil',
+                'Tidak Aktif': 'secondary',
+                'frozen': 'Peringatan',
+                'closed': 'danger'
+            };
+            return colors[Status] || 'secondary';
+        }
+
+        function generateAccountNumber(Tipe) {
+            const prefixes = {
+                'Simpanan': 'SA',
+                'fixed': 'FD',
+                'education': 'ED'
+            };
+            
+            const prefix = prefixes[Tipe] || 'AC';
+            const Nomor = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return prefix + '-' + Nomor;
+        }
+
+        function getMemberName(memberId) {
+            const Anggota = {
+                'M-001': 'Ahmad Wijaya',
+                'M-002': 'Siti Nurhaliza',
+                'M-003': 'Budi Santoso'
+            };
+            return Anggota[memberId] || 'Unknown';
+        }
+
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo accounts
+        function getDemoAccounts() {
+            return [
+                {
+                    id: '1',
+                    account_number: 'SA-1001',
+                    member_id: 'M-001',
+                    member_name: 'Ahmad Wijaya',
+                    Tipe: 'Simpanan',
+                    Saldo: 15000000,
+                    Status: 'Aktif',
+                    created_at: '2026-01-15T00:00:00Z'
+                },
+                {
+                    id: '2',
+                    account_number: 'SA-1002',
+                    member_id: 'M-002',
+                    member_name: 'Siti Nurhaliza',
+                    Tipe: 'Simpanan',
+                    Saldo: 8500000,
+                    Status: 'Aktif',
+                    created_at: '2026-02-20T00:00:00Z'
+                },
+                {
+                    id: '3',
+                    account_number: 'LN-2001',
+                    member_id: 'M-003',
+                    member_name: 'Budi Santoso',
+                    Tipe: 'Pinjaman',
+                    Saldo: -5000000,
+                    Status: 'Aktif',
+                    created_at: '2026-03-10T00:00:00Z'
+                },
+                {
+                    id: '4',
+                    account_number: 'FD-3001',
+                    member_id: 'M-001',
+                    member_name: 'Ahmad Wijaya',
+                    Tipe: 'fixed',
+                    Saldo: 25000000,
+                    Status: 'Aktif',
+                    created_at: '2026-01-20T00:00:00Z'
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+
+        // Event listeners
+        Dokumen.getElementById('accountTypeFilter').addEventListener('change', displayAccounts);
+        Dokumen.getElementById('statusFilter').addEventListener('change', displayAccounts);
+        Dokumen.getElementById('sortBy').addEventListener('change', displayAccounts);
+    </script>
+</body>
+</html>

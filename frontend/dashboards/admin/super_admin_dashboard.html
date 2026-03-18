@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --Berhasil-color: #27ae60;
+            --Peringatan-color: #f39c12;
+            --danger-color: #e74c3c;
+            --Info-color: #17a2b8;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: var(--primary-color);
+            padding-top: 70px;
+            z-index: 999;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            margin: 5px 10px;
+            border-radius: 5px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.Aktif {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        .top-navbar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .top-nav-menu {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .top-nav-item {
+            color: var(--dark-color);
+            text-decoration: Tidak Ada;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: Semua 0.3s;
+        }
+
+        .top-nav-item:hover,
+        .top-nav-item.Aktif {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .HP-menu-toggle {
+            display: Tidak Ada;
+            background: Tidak Ada;
+            border: Tidak Ada;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            border: Tidak Ada;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Pengguna-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .Aktivitas-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .Aktivitas-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        @media (max-width: 768px) {
+            .HP-menu-toggle {
+                display: block;
+            }
+            
+            .top-nav-menu {
+                display: Tidak Ada;
+            }
+            
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+            
+            .top-navbar {
+                padding: 0 15px;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .HP-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="text-center mb-4">
+            <h4 class="text-white">
+                <i class="fas fa-coop"></i> KSP Lam Gabe Jaya
+            </h4>
+            <small class="text-muted">Super Admin Panel</small>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link Aktif" href="#Dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Pengguna">
+                    <i class="fas fa-user"></i> Pengguna Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#roles">
+                    <i class="fas fa-user-tag"></i> Role Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#permissions">
+                    <i class="fas fa-key"></i> Permissions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Sistem">
+                    <i class="fas fa-cogs"></i> Sistem Pengaturan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Backup">
+                    <i class="fas fa-Database"></i> Backup & Pulihkan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Keamanan">
+                    <i class="fas fa-shield-alt"></i> Keamanan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Audit">
+                    <i class="fas fa-Riwayat"></i> Audit Log
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Laporan">
+                    <i class="fas fa-Grafik-line"></i> Laporan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#API">
+                    <i class="fas fa-code"></i> API Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../admin/monitoring_dashboard.html" target="_blank">
+                    <i class="fas fa-shield-alt"></i> Monitoring & Antisipasi
+                    <span class="badge bg-danger ms-auto">Live</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#logout">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Dashboard Content -->
+        <div id="Dashboard-content">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2>
+                        <i class="fas fa-tachometer-alt"></i> Super Admin Dashboard
+                    </h2>
+                    <p class="text-muted">Complete Sistem overview and Manajemen</p>
+                </div>
+            </div>
+
+            <!-- System Status Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card stat-card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Total Pengguna</h6>
+                                    <h3 id="totalUsers">0</h3>
+                                    <small>Aktif accounts</small>
+                                </div>
+                                <i class="fas fa-user fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card stat-card bg-Berhasil text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Sistem Health</h6>
+                                    <h3>98%</h3>
+                                    <small>Optimal Performa</small>
+                                </div>
+                                <i class="fas fa-heartbeat fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card stat-card bg-alert text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Storage Used</h6>
+                                    <h3>45%</h3>
+                                    <small>2.3TB / 5TB</small>
+                                </div>
+                                <i class="fas fa-Database fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card stat-card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Aktif Sessions</h6>
+                                    <h3 id="activeSessions">0</h3>
+                                    <small>Currently online</small>
+                                </div>
+                                <i class="fas fa-user fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-primary" onclick="createUser()">
+                                            <i class="fas fa-user-plus"></i> Create Pengguna
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-Berhasil" onclick="backupSystem()">
+                                            <i class="fas fa-Unduh"></i> Backup Sistem
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-alert" onclick="systemMaintenance()">
+                                            <i class="fas fa-tools"></i> Maintenance
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-info" onclick="viewLogs()">
+                                            <i class="fas fa-File-alt"></i> View Logs
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Analytics -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-Grafik-line"></i> Sistem Aktivitas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="Grafik-container">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-Grafik-pie"></i> Pengguna Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="Grafik-container">
+                                <canvas id="userChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-Riwayat"></i> Recent Sistem Activities</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentActivities">
+                                <div class="Aktivitas-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <i class="fas fa-user-plus text-Berhasil"></i>
+                                            <span class="ms-2">New Pengguna registered: test_teller@lamabejaya.coop</span>
+                                        </div>
+                                        <small class="text-muted">2 min ago</small>
+                                    </div>
+                                </div>
+                                <div class="Aktivitas-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <i class="fas fa-Database text-info"></i>
+                                            <span class="ms-2">Sistem Backup Selesai successfully</span>
+                                        </div>
+                                        <small class="text-muted">1 hour ago</small>
+                                    </div>
+                                </div>
+                                <div class="Aktivitas-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <i class="fas fa-shield-alt text-alert"></i>
+                                            <span class="ms-2">Keamanan scan Selesai - Tidak threats detected</span>
+                                        </div>
+                                        <small class="text-muted">3 hours ago</small>
+                                    </div>
+                                </div>
+                                <div class="Aktivitas-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <i class="fas fa-cog text-primary"></i>
+                                            <span class="ms-2">Sistem Pengaturan Diperbarui</span>
+                                        </div>
+                                        <small class="text-muted">5 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Sistem Alerts</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="systemAlerts">
+                                <div class="alert alert-alert alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Storage Peringatan:</strong> Sistem storage at 45% capacity
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-info alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Sistem Perbarui:</strong> New version available for Review
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-Berhasil alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Semua Systems:</strong> Operating normally
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="navigation_config.js"></script>
+    
+    <script>
+        // Initialize Dashboard
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadDashboardData();
+            initializeCharts();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+
+        // Authentication check
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            if (!token || !Pengguna) {
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+            
+            const userData = JSON.parse(Pengguna);
+            if (userData.role !== 'super_admin') {
+                Peringatan('Akses ditolak. Super Admin role Wajib.');
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+        }
+
+        // Load Dashboard Data
+        function loadDashboardData() {
+            // Simulate API calls to load Data
+            Dokumen.getElementById('totalUsers').textContent = '156';
+            Dokumen.getElementById('activeSessions').textContent = '42';
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Aktivitas Grafik
+            const activityCtx = Dokumen.getElementById('activityChart').getContext('2d');
+            new Grafik(activityCtx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Pengguna Aktivitas',
+                        Data: [65, 78, 90, 81, 56, 95, 88],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Pengguna Distribution Grafik
+            const userCtx = Dokumen.getElementById('userChart').getContext('2d');
+            new Grafik(userCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Admin', 'Teller', 'Surveyor', 'Penagih', 'Anggota'],
+                    datasets: [{
+                        Data: [5, 15, 8, 12, 116],
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Perbarui Waktu
+        function updateTime() {
+            const now = new Tanggal();
+            Dokumen.getElementById('currentTime').textContent = now.toLocaleString('id-ID');
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = Dokumen.getElementById('sidebar');
+            const mainContent = Dokumen.getElementById('mainContent');
+            
+            sidebar.classList.toggle('show');
+            mainContent.classList.toggle('sidebar-open');
+        }
+
+        // Handle navigation clicks
+        function handleNavigation(event) {
+            event.preventDefault();
+            
+            // Remove Aktif Kelas from Semua nav items
+            Dokumen.querySelectorAll('.nav-link, .top-nav-item').forEach(item => {
+                item.classList.remove('Aktif');
+            });
+            
+            // Tambah Aktif Kelas to clicked item
+            event.Target.classList.Tambah('Aktif');
+            
+            // Tutup sidebar on HP after navigation
+            if (window.innerWidth <= 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                sidebar.classList.remove('show');
+                mainContent.classList.remove('sidebar-open');
+            }
+            
+            // Here you would typically load the appropriate content
+            const section = event.target.getAttribute('href').substring(1);
+            console.log('Navigating to:', section);
+        }
+
+        // Initialize navigation event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to navigation items
+            document.querySelectorAll('.nav-link, .top-nav-item').forEach(item => {
+                item.addEventListener('click', handleNavigation);
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 1024) {
+                    Dokumen.getElementById('sidebar').classList.remove('show');
+                    Dokumen.getElementById('mainContent').classList.remove('sidebar-open');
+                }
+            });
+        });
+
+        // Keluar
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Quick action functions
+        function createUser() {
+            window.Lokasi.href = '/mono/super_admin_users.html';
+        }
+
+        function backupSystem() {
+            Peringatan('Sistem Backup initiated. You will be notified when Selesai.');
+        }
+
+        function systemMaintenance() {
+            Peringatan('Maintenance mode activated. Pengguna will be notified.');
+        }
+
+        function viewLogs() {
+            window.Lokasi.href = '/mono/super_admin_logs.html';
+        }
+    </script>
+</body>
+</html>

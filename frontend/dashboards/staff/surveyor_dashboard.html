@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surveyor Dashboard - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #17a2b8;
+            --secondary-color: #2c3e50;
+            --Berhasil-color: #27ae60;
+            --Peringatan-color: #f39c12;
+            --danger-color: #e74c3c;
+            --Info-color: #17a2b8;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: var(--primary-color);
+            padding-top: 70px;
+            z-index: 999;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 15px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.Aktif {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 80px 15px 15px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 280px;
+        }
+
+        .top-navbar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+
+        .top-nav-menu {
+            display: Tidak Ada;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .top-nav-item {
+            color: var(--dark-color);
+            text-decoration: Tidak Ada;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-nav-item:hover,
+        .top-nav-item.Aktif {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .HP-menu-toggle {
+            display: block;
+            background: Tidak Ada;
+            border: Tidak Ada;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .HP-menu-toggle:hover {
+            background: rgba(17, 162, 184, 0.1);
+        }
+
+        .quick-action-HP {
+            Posisi: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .quick-action-HP .btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            border: Tidak Ada;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Pengguna-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-action {
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .Survei-item {
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .Lokasi-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .HP-menu-toggle {
+                display: block;
+            }
+            
+            .top-nav-menu {
+                display: Tidak Ada;
+            }
+            
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+            
+            .top-navbar {
+                padding: 0 15px;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .quick-action {
+                margin-bottom: 15px;
+            }
+            
+            .Survei-item {
+                padding: 12px;
+            }
+            
+            .Lokasi-badge {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .HP-menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .HP-menu-toggle {
+                display: Tidak Ada;
+            }
+            
+            .top-nav-menu {
+                display: flex;
+            }
+            
+            .quick-action-HP {
+                display: Tidak Ada;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="d-flex align-items-center gap-3 flex-grow-1">
+            <button class="HP-menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="top-nav-menu">
+                <a href="#Dashboard" class="top-nav-item Aktif">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#surveys" class="top-nav-item">
+                    <i class="fas fa-clipboard-Daftar"></i> Surveys
+                </a>
+                <a href="#Anggota" class="top-nav-item">
+                    <i class="fas fa-user"></i> Anggota
+                </a>
+                <a href="#locations" class="top-nav-item">
+                    <i class="fas fa-map-marked-alt"></i> Locations
+                </a>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="Posisi-relative">
+                <i class="fas fa-bell text-muted"></i>
+                <span class="Posisi-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    3
+                </span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <div class="Pengguna-avatar">
+                    <i class="fas fa-Cari-Lokasi"></i>
+                </div>
+                <div>
+                    <small class="d-block text-muted">Surveyor</small>
+                    <span id="currentTime">Memuat...</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-sm btn-outline-danger" onclick="Keluar()">
+                <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="text-center mb-4">
+            <h4 class="text-white">
+                <i class="fas fa-coop"></i> KSP Lam Gabe Jaya
+            </h4>
+            <small class="text-muted">Surveyor Panel</small>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link Aktif" href="#Dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#surveys">
+                    <i class="fas fa-clipboard-Daftar"></i> Survei Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Anggota">
+                    <i class="fas fa-user"></i> Anggota Verifikasi
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#locations">
+                    <i class="fas fa-map-marked-alt"></i> Lokasi Tracking
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#schedule">
+                    <i class="fas fa-calendar-alt"></i> Hari Ini's Schedule
+                </a>
+            </li>
+            <li Kelas="nav-item">
+                <a Kelas="nav-link" href="#Laporan">
+                    <i Kelas="fas fa-Grafik-line"></i> Survei Laporan
+                </a>
+            </li>
+            <li Kelas="nav-item">
+                <a Kelas="nav-link" href="#documents">
+                    <i Kelas="fas fa-File-alt"></i> Documents
+                </a>
+            </li>
+            <li Kelas="nav-item">
+                <a Kelas="nav-link" href="#gps">
+                    <i Kelas="fas fa-satellite"></i> GPS Pengaturan
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div Kelas="main-content" id="mainContent">
+
+        <!-- HP Quick Action Button -->
+        <div Kelas="quick-action-HP">
+            <button Kelas="btn btn-primary btn-lg" onclick="startSurvey()">
+                <i Kelas="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="Dashboard-content">
+            <!-- Page Header -->
+            <div Kelas="row mb-4">
+                <div Kelas="col-12">
+                    <h2>
+                        <i Kelas="fas fa-tachometer-alt"></i> Surveyor Dashboard
+                    </h2>
+                    <p Kelas="text-muted">Field Operations & Anggota Verifikasi</p>
+                </div>
+            </div>
+
+            <!-- Hari Ini's Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-clipboard-Daftar fa-2x mb-2"></i>
+                            <h5>Surveys Hari Ini</h5>
+                            <h3 id="surveysToday">0</h3>
+                            <p class="mb-0">Selesai</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-Berhasil text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user-check fa-2x mb-2"></i>
+                            <h5>Anggota Verified</h5>
+                            <h3 id="membersVerified">0</h3>
+                            <p class="mb-0">Minggu Ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-alert text-white">
+                        <div class="card-body">
+                            <i class="fas fa-map-marked-alt fa-2x mb-2"></i>
+                            <h5>Locations Visited</h5>
+                            <h3 id="locationsVisited">0</h3>
+                            <p class="mb-0">Bulan Ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-info text-white">
+                        <div class="card-body">
+                            <i class="fas fa-route fa-2x mb-2"></i>
+                            <h5>Distance Traveled</h5>
+                            <h3 id="distanceTraveled">0</h3>
+                            <p class="mb-0">km Hari Ini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="startSurvey()">
+                                        <i class="fas fa-play-circle"></i>
+                                        <h6>Start Survei</h6>
+                                        <small class="text-muted">New field Survei</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="verifyMember()">
+                                        <i class="fas fa-user-check"></i>
+                                        <h6>Verify Anggota</h6>
+                                        <small class="text-muted">Anggota Verifikasi</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="trackLocation()">
+                                        <i class="fas fa-map-pin"></i>
+                                        <h6>Track Lokasi</h6>
+                                        <small class="text-muted">GPS tracking</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="viewSchedule()">
+                                        <i class="fas fa-calendar"></i>
+                                        <h6>View Schedule</h6>
+                                        <small class="text-muted">Hari Ini's schedule</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Surveys -->
+            <div Kelas="row mb-4">
+                <div Kelas="col-lg-8">
+                    <div Kelas="card">
+                        <div Kelas="card-header">
+                            <h5><i Kelas="fas fa-clipboard-Daftar"></i> Recent Surveys</h5>
+                        </div>
+                        <div Kelas="card-body">
+                            <div id="recentSurveys">
+                                <div Kelas="Survei-item">
+                                    <div Kelas="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6>Anggota Verifikasi - Ahmad Wijaya</h6>
+                                            <p Kelas="mb-1"><small Kelas="text-muted">Alamat Verifikasi and Dokumen validation</small></p>
+                                            <div Kelas="mt-2">
+                                                <span Kelas="Lokasi-badge"><i Kelas="fas fa-map-marker-alt"></i> Jakarta Pusat</span>
+                                                <span Kelas="badge bg-Berhasil ms-2">Selesai</span>
+                                            </div>
+                                        </div>
+                                        <div Kelas="text-end">
+                                            <small Kelas="text-muted">10:30 AM</small><br>
+                                            <button Kelas="btn btn-sm btn-outline-primary mt-1">View Detail</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div Kelas="Survei-item">
+                                    <div Kelas="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6>Bisnis Survei - Toko Maju Jaya</h6>
+                                            <p Kelas="mb-1"><small Kelas="text-muted">Bisnis assessment and Pinjaman eligibility</small></p>
+                                            <div Kelas="mt-2">
+                                                <span Kelas="Lokasi-badge"><i Kelas="fas fa-map-marker-alt"></i> Jakarta Utara</span>
+                                                <span Kelas="badge bg-Peringatan ms-2">In Progress</span>
+                                            </div>
+                                        </div>
+                                        <div Kelas="text-end">
+                                            <small Kelas="text-muted">09:15 AM</small><br>
+                                            <button Kelas="btn btn-sm btn-outline-primary mt-1">Continue</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div Kelas="Survei-item">
+                                    <div Kelas="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6>Beranda Visit - Siti Nurhaliza</h6>
+                                            <p Kelas="mb-1"><small Kelas="text-muted">Residence Verifikasi for Pinjaman Aplikasi</small></p>
+                                            <div Kelas="mt-2">
+                                                <span Kelas="Lokasi-badge"><i Kelas="fas fa-map-marker-alt"></i> Jakarta Barat</span>
+                                                <span Kelas="badge bg-Berhasil ms-2">Selesai</span>
+                                            </div>
+                                        </div>
+                                        <div Kelas="text-end">
+                                            <small Kelas="text-muted">08:45 AM</small><br>
+                                            <button Kelas="btn btn-sm btn-outline-primary mt-1">View Detail</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div Kelas="col-lg-4">
+                    <div Kelas="card">
+                        <div Kelas="card-header">
+                            <h5><i Kelas="fas fa-Grafik-pie"></i> Survei Status</h5>
+                        </div>
+                        <div Kelas="card-body">
+                            <div Kelas="Grafik-container">
+                                <canvas id="surveyStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hari Ini's Schedule and Map -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-calendar-alt"></i> Hari Ini's Schedule</h5>
+                        </div>
+                        <div Kelas="card-body">
+                            <div id="todaySchedule">
+                                <div Kelas="Peringatan Peringatan-Info" role="Peringatan">
+                                    <div Kelas="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>09:00 AM</strong><br>
+                                            <small>Beranda Visit - Budi Santoso (Jakarta Selatan)</small>
+                                        </div>
+                                        <span Kelas="badge bg-Berhasil">Selesai</span>
+                                    </div>
+                                </div>
+                                <div Kelas="Peringatan Peringatan-Peringatan" role="Peringatan">
+                                    <div Kelas="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>11:00 AM</strong><br>
+                                            <small>Bisnis Survei - Warung Makan (Jakarta Pusat)</small>
+                                        </div>
+                                        <span Kelas="badge bg-Peringatan">In Progress</span>
+                                    </div>
+                                </div>
+                                <div Kelas="Peringatan Peringatan-secondary" role="Peringatan">
+                                    <div Kelas="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>02:00 PM</strong><br>
+                                            <small>Anggota Verifikasi - Diana Putri (Jakarta Timur)</small>
+                                        </div>
+                                        <span Kelas="badge bg-secondary">Upcoming</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div Kelas="col-lg-6">
+                    <div Kelas="card">
+                        <div Kelas="card-header">
+                            <h5><i Kelas="fas fa-map"></i> Lokasi Map</h5>
+                        </div>
+                        <div Kelas="card-body">
+                            <div Kelas="Grafik-container">
+                                <div Kelas="d-flex align-items-center justify-content-center h-100 bg-light rounded">
+                                    <div Kelas="text-center">
+                                        <i Kelas="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+                                        <p Kelas="text-muted">Interactive map view</p>
+                                        <small Kelas="text-muted">GPS tracking enabled</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="navigation_config.js"></script>
+    
+    <script>
+        // Initialize Dashboard
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadDashboardData();
+            initializeCharts();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+
+        // Authentication check
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            if (!token || !Pengguna) {
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+            
+            const userData = JSON.parse(Pengguna);
+            if (userData.role !== 'Surveyor') {
+                Peringatan('Akses ditolak. Surveyor role Wajib.');
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+        }
+
+        // Load Dashboard Data
+        function loadDashboardData() {
+            // Simulate API calls to load Data
+            Dokumen.getElementById('surveysToday').textContent = '3';
+            Dokumen.getElementById('membersVerified').textContent = '12';
+            Dokumen.getElementById('locationsVisited').textContent = '28';
+            Dokumen.getElementById('distanceTraveled').textContent = '15.2';
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Survei Status Grafik
+            const surveyCtx = Dokumen.getElementById('surveyStatusChart').getContext('2d');
+            new Grafik(surveyCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Selesai', 'In Progress', 'Menunggu', 'Dibatalkan'],
+                    datasets: [{
+                        Data: [12, 3, 5, 1],
+                        backgroundColor: [
+                            '#27ae60',
+                            '#f39c12',
+                            '#3498db',
+                            '#e74c3c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Perbarui Waktu
+        function updateTime() {
+            const now = new Tanggal();
+            Dokumen.getElementById('currentTime').textContent = now.toLocaleString('id-ID');
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            Dokumen.querySelector('.sidebar').classList.toggle('show');
+        }
+
+        // Keluar
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Quick action functions
+        function startSurvey() {
+            Peringatan('Starting new Survei. GPS tracking enabled.');
+        }
+
+        function verifyMember() {
+            window.Lokasi.href = '/mono/surveyor_members.html';
+        }
+
+        function trackLocation() {
+            Peringatan('Lokasi tracking started. Current Posisi: Jakarta, Indonesia');
+        }
+
+        function viewSchedule() {
+            window.Lokasi.href = '/mono/surveyor_schedule.html';
+        }
+    </script>
+</body>
+</html>

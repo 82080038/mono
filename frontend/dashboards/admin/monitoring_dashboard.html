@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring & Antisipasi - Koperasi SaaS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+        
+        .metric-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .status-excellent { color: #28a745; }
+        .status-good { color: #17a2b8; }
+        .status-warning { color: #ffc107; }
+        .status-critical { color: #dc3545; }
+        .status-emergency { color: #6f42c1; }
+        
+        .alert-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+        }
+        
+        .scenario-card {
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        
+        .scenario-card.high-risk {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .scenario-card.medium-risk {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .scenario-card.low-risk {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            stroke: #4caf50;
+            stroke-dasharray: 126;
+            stroke-dashoffset: 0;
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .timeline-item {
+            border-left: 2px solid #dee2e6;
+            padding-left: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #007bff;
+        }
+        
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1><i class="fas fa-shield-alt"></i> Monitoring & Antisipasi</h1>
+                    <p>Real-time system health monitoring and scenario anticipation</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <span class="live-indicator me-2"></span>
+                        <span>Live Monitoring</span>
+                        <button class="btn btn-light btn-sm ms-3" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Overall System Health -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card metric-card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <h5>Overall System Health</h5>
+                                <h2 id="overall-score" class="mb-0">--</h2>
+                                <span id="overall-status" class="badge">Loading...</span>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="healthChart" width="400" height="200"></canvas>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <svg width="120" height="120">
+                                        <circle class="progress-ring" cx="60" cy="60" r="50" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                                        <circle id="progress-circle" class="progress-ring-circle" cx="60" cy="60" r="50" fill="none" stroke-width="10"/>
+                                    </svg>
+                                    <div class="mt-2">
+                                        <small id="health-percentage">--%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring Categories -->
+        <div class="row mb-4">
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt metric-icon status-excellent"></i>
+                        <h6>Security</h6>
+                        <h5 id="security-score" class="mb-0">--</h5>
+                        <small id="security-status" class="text-muted">Loading...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-tachometer-alt metric-icon status-good"></i>
+                        <h6>Performance</h6>
+                        <h5 id="performance-score" class="mb-0">--</h5>
+                        <small id="performance-status" class="text-muted">Loading...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-balance-scale metric-icon status-good"></i>
+                        <h6>Compliance</h6>
+                        <h5 id="compliance-score" class="mb-0">--</h5>
+                        <small id="compliance-status" class="text-muted">Loading...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line metric-icon status-warning"></i>
+                        <h6>Business</h6>
+                        <h5 id="business-score" class="mb-0">--</h5>
+                        <small id="business-status" class="text-muted">Loading...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-coins metric-icon status-good"></i>
+                        <h6>Financial</h6>
+                        <h5 id="financial-score" class="mb-0">--</h5>
+                        <small id="financial-status" class="text-muted">Loading...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle metric-icon status-warning"></i>
+                        <h6>Alerts</h6>
+                        <h5 id="alerts-count" class="mb-0">--</h5>
+                        <small class="text-muted">Active</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scenario Analysis & Risk Assessment -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-analytics"></i> Scenario Analysis</h5>
+                        <select id="scenario-filter" class="form-select form-select-sm" style="width: auto;">
+                            <option value="all">All Scenarios</option>
+                            <option value="security">Security</option>
+                            <option value="performance">Performance</option>
+                            <option value="compliance">Compliance</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div id="scenario-list">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin"></i> Loading scenarios...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie"></i> Risk Assessment</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="risk-assessment">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin"></i> Loading risk assessment...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Metrics & Predictive Analysis -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-chart-area"></i> System Metrics</h5>
+                        <select id="metrics-timeframe" class="form-select form-select-sm" style="width: auto;">
+                            <option value="1h">Last Hour</option>
+                            <option value="24h" selected>Last 24 Hours</option>
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d">Last 30 Days</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="metricsChart" width="800" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-brain"></i> Predictive Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="predictive-analysis">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin"></i> Loading predictions...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert History & Automated Actions -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-bell"></i> Alert History</h5>
+                        <span class="badge bg-danger" id="critical-alerts-count">0 Critical</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="alert-history">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin"></i> Loading alerts...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-robot"></i> Automated Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="automated-actions">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin"></i> Loading actions...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Global variables
+        let healthChart, metricsChart;
+        let refreshInterval;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            loadDashboardData();
+            startAutoRefresh();
+            
+            // Event listeners
+            document.getElementById('scenario-filter').addEventListener('change', loadScenarios);
+            document.getElementById('metrics-timeframe').addEventListener('change', loadSystemMetrics);
+        });
+        
+        // Initialize charts
+        function initializeCharts() {
+            // Health chart
+            const healthCtx = document.getElementById('healthChart').getContext('2d');
+            healthChart = new Chart(healthCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Security', 'Performance', 'Compliance', 'Business', 'Financial'],
+                    datasets: [{
+                        label: 'Current Status',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Metrics chart
+            const metricsCtx = document.getElementById('metricsChart').getContext('2d');
+            metricsChart = new Chart(metricsCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Response Time (ms)',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }, {
+                        label: 'CPU Usage (%)',
+                        data: [],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }, {
+                        label: 'Memory Usage (%)',
+                        data: [],
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load all dashboard data
+        function loadDashboardData() {
+            loadHealthCheck();
+            loadScenarios();
+            loadRiskAssessment();
+            loadSystemMetrics();
+            loadPredictiveAnalysis();
+            loadAlertHistory();
+            loadAutomatedActions();
+        }
+        
+        // Load health check data
+        function loadHealthCheck() {
+            fetch('api/monitoring.php?action=health_check')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateHealthDisplay(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading health check:', error));
+        }
+        
+        // Update health display
+        function updateHealthDisplay(healthData) {
+            const score = healthData.overall_score;
+            const status = healthData.status;
+            
+            // Update overall score
+            document.getElementById('overall-score').textContent = score.toFixed(1);
+            document.getElementById('overall-status').textContent = status.toUpperCase();
+            document.getElementById('overall-status').className = `badge bg-${getStatusColor(status)}`;
+            document.getElementById('health-percentage').textContent = score.toFixed(0) + '%';
+            
+            // Update progress circle
+            const circumference = 2 * Math.PI * 50;
+            const offset = circumference - (score / 100) * circumference;
+            document.getElementById('progress-circle').style.strokeDashoffset = offset;
+            document.getElementById('progress-circle').style.stroke = getStatusColor(status);
+            
+            // Update category scores
+            Object.keys(healthData.results).forEach(category => {
+                const categoryData = healthData.results[category];
+                const scoreElement = document.getElementById(`${category}-score`);
+                const statusElement = document.getElementById(`${category}-status`);
+                
+                if (scoreElement) {
+                    scoreElement.textContent = categoryData.score.toFixed(1);
+                    scoreElement.className = `mb-0 status-${getStatusClass(categoryData.score)}`;
+                }
+                
+                if (statusElement) {
+                    statusElement.textContent = categoryData.severity.toUpperCase();
+                    statusElement.className = `text-muted status-${getStatusClass(categoryData.score)}`;
+                }
+            });
+            
+            // Update radar chart
+            if (healthChart) {
+                const scores = Object.keys(healthData.results).map(cat => healthData.results[cat].score);
+                healthChart.data.datasets[0].data = scores;
+                healthChart.update();
+            }
+            
+            // Update alerts count
+            const criticalIssues = healthData.critical_issues.length;
+            document.getElementById('alerts-count').textContent = criticalIssues;
+            document.getElementById('critical-alerts-count').textContent = criticalIssues + ' Critical';
+        }
+        
+        // Load scenarios
+        function loadScenarios() {
+            const filter = document.getElementById('scenario-filter').value;
+            
+            fetch(`api/monitoring.php?action=scenario_analysis&scenario_type=${filter}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayScenarios(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading scenarios:', error));
+        }
+        
+        // Display scenarios
+        function displayScenarios(scenarios) {
+            const container = document.getElementById('scenario-list');
+            container.innerHTML = '';
+            
+            Object.keys(scenarios).forEach(category => {
+                const categoryScenarios = scenarios[category];
+                
+                Object.keys(categoryScenarios).forEach(scenarioName => {
+                    const scenario = categoryScenarios[scenarioName];
+                    const riskClass = getRiskClass(scenario.probability, scenario.impact);
+                    
+                    const scenarioCard = document.createElement('div');
+                    scenarioCard.className = `scenario-card ${riskClass} mb-3 p-3`;
+                    scenarioCard.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">${formatScenarioName(scenarioName)}</h6>
+                                <p class="mb-1 small">${scenario.mitigation}</p>
+                                <small class="text-muted">Status: ${scenario.status}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-${getRiskColor(scenario.probability, scenario.impact)}">
+                                    ${scenario.probability} / ${scenario.impact}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(scenarioCard);
+                });
+            });
+        }
+        
+        // Load risk assessment
+        function loadRiskAssessment() {
+            fetch('api/monitoring.php?action=risk_assessment')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayRiskAssessment(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading risk assessment:', error));
+        }
+        
+        // Display risk assessment
+        function displayRiskAssessment(riskData) {
+            const container = document.getElementById('risk-assessment');
+            
+            let html = `
+                <div class="text-center mb-3">
+                    <h4>Risk Score: ${riskData.overall_risk_score}</h4>
+                    <span class="badge bg-${getRiskColor(riskData.overall_risk_score, 100)}">
+                        ${riskData.risk_level.toUpperCase()}
+                    </span>
+                </div>
+                <div class="row">
+            `;
+            
+            Object.keys(riskData.risk_categories).forEach(category => {
+                const categoryData = riskData.risk_categories[category];
+                html += `
+                    <div class="col-6 mb-3">
+                        <div class="text-center">
+                            <h6>${formatCategoryName(category)}</h6>
+                            <h5 class="status-${getStatusClass(categoryData.score)}">${categoryData.score}</h5>
+                            <small>${categoryData.level.toUpperCase()}</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+        
+        // Load system metrics
+        function loadSystemMetrics() {
+            const timeframe = document.getElementById('metrics-timeframe').value;
+            
+            fetch(`api/monitoring.php?action=system_metrics&timeframe=${timeframe}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateMetricsChart(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading system metrics:', error));
+        }
+        
+        // Update metrics chart
+        function updateMetricsChart(metrics) {
+            // Generate sample data points
+            const labels = [];
+            const responseData = [];
+            const cpuData = [];
+            const memoryData = [];
+            
+            for (let i = 0; i < 24; i++) {
+                labels.push(`${i}:00`);
+                responseData.push(metrics.response_time + (Math.random() - 0.5) * 50);
+                cpuData.push(metrics.cpu_usage + (Math.random() - 0.5) * 10);
+                memoryData.push(metrics.memory_usage + (Math.random() - 0.5) * 8);
+            }
+            
+            if (metricsChart) {
+                metricsChart.data.labels = labels;
+                metricsChart.data.datasets[0].data = responseData;
+                metricsChart.data.datasets[1].data = cpuData;
+                metricsChart.data.datasets[2].data = memoryData;
+                metricsChart.update();
+            }
+        }
+        
+        // Load predictive analysis
+        function loadPredictiveAnalysis() {
+            fetch('api/monitoring.php?action=predictive_analysis&prediction_type=all')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayPredictiveAnalysis(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading predictive analysis:', error));
+        }
+        
+        // Display predictive analysis
+        function displayPredictiveAnalysis(predictions) {
+            const container = document.getElementById('predictive-analysis');
+            
+            let html = '';
+            Object.keys(predictions).forEach(predictionType => {
+                const prediction = predictions[predictionType];
+                html += `
+                    <div class="mb-3">
+                        <h6>${formatPredictionName(predictionType)}</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-${getConfidenceColor(prediction.confidence)}" 
+                                 style="width: ${prediction.confidence * 100}%">
+                                ${(prediction.confidence * 100).toFixed(0)}% Confidence
+                            </div>
+                        </div>
+                        <small class="text-muted">${JSON.stringify(prediction.factors)}</small>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Load alert history
+        function loadAlertHistory() {
+            fetch('api/monitoring.php?action=alert_history&limit=10')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayAlertHistory(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading alert history:', error));
+        }
+        
+        // Display alert history
+        function displayAlertHistory(alerts) {
+            const container = document.getElementById('alert-history');
+            container.innerHTML = '';
+            
+            alerts.forEach(alert => {
+                const alertItem = document.createElement('div');
+                alertItem.className = 'timeline-item';
+                alertItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">${alert.type}</h6>
+                            <p class="mb-1 small">${alert.message}</p>
+                            <small class="text-muted">${alert.timestamp}</small>
+                        </div>
+                        <div>
+                            <span class="badge bg-${getSeverityColor(alert.severity)}">
+                                ${alert.severity}
+                            </span>
+                            ${alert.resolved ? '<span class="badge bg-success ms-1">Resolved</span>' : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(alertItem);
+            });
+        }
+        
+        // Load automated actions
+        function loadAutomatedActions() {
+            fetch('api/monitoring.php?action=automated_actions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayAutomatedActions(data.data);
+                    }
+                })
+                .catch(error => console.error('Error loading automated actions:', error));
+        }
+        
+        // Display automated actions
+        function displayAutomatedActions(actions) {
+            const container = document.getElementById('automated-actions');
+            
+            let html = '<h6>Active Actions</h6>';
+            actions.active_actions.forEach(action => {
+                html += `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <small class="d-block">${action.type}</small>
+                            <small class="text-muted">${action.schedule}</small>
+                        </div>
+                        <span class="badge bg-${getStatusColor(action.status)}">
+                            ${action.status}
+                        </span>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Helper functions
+        function getStatusColor(status) {
+            const colors = {
+                'excellent': 'success',
+                'good': 'info',
+                'warning': 'warning',
+                'critical': 'danger',
+                'emergency': 'dark'
+            };
+            return colors[status] || 'secondary';
+        }
+        
+        function getStatusClass(score) {
+            if (score >= 90) return 'excellent';
+            if (score >= 75) return 'good';
+            if (score >= 60) return 'warning';
+            if (score >= 40) return 'critical';
+            return 'emergency';
+        }
+        
+        function getRiskClass(probability, impact) {
+            if (probability === 'high' && impact === 'critical') return 'high-risk';
+            if (probability === 'medium' || impact === 'high') return 'medium-risk';
+            return 'low-risk';
+        }
+        
+        function getRiskColor(probability, impact) {
+            if (probability === 'high' && impact === 'critical') return 'danger';
+            if (probability === 'medium' || impact === 'high') return 'warning';
+            return 'success';
+        }
+        
+        function getConfidenceColor(confidence) {
+            if (confidence >= 0.8) return 'success';
+            if (confidence >= 0.6) return 'warning';
+            return 'danger';
+        }
+        
+        function getSeverityColor(severity) {
+            const colors = {
+                'low': 'info',
+                'medium': 'warning',
+                'high': 'danger',
+                'critical': 'danger'
+            };
+            return colors[severity] || 'secondary';
+        }
+        
+        function formatScenarioName(name) {
+            return name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        function formatCategoryName(category) {
+            return category.charAt(0).toUpperCase() + category.slice(1);
+        }
+        
+        function formatPredictionName(name) {
+            return name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        // Auto refresh
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                loadDashboardData();
+            }, 30000); // Refresh every 30 seconds
+        }
+        
+        // Manual refresh
+        function refreshData() {
+            loadDashboardData();
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

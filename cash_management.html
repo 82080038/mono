@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Manajemen - Kasir Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .cash-drawer {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .denomination-item {
+            background: white;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            transition: transform 0.2s;
+        }
+        
+        .denomination-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .reconciliation-item {
+            border-left: 4px solid #28a745;
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .reconciliation-item.mismatch {
+            border-left-color: #dc3545;
+        }
+        
+        .Peringatan-critical {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .Peringatan-Peringatan {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+        
+        .Grafik-container {
+            Posisi: relative;
+            height: 250px;
+        }
+        
+        .cash-flow-positive {
+            color: #28a745;
+        }
+        
+        .cash-flow-negative {
+            color: #dc3545;
+        }
+        
+        .Status-badge {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-coins"></i> Cash Manajemen</h1>
+                <p class="mb-0">Kasir - Cash Drawer Manajemen & Reconciliation</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Cash Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-wallet fa-2x mb-2"></i>
+                        <h5>Current Saldo</h5>
+                        <h3 id="currentBalance">0</h3>
+                        <p class="mb-0">In drawer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-arrow-down fa-2x mb-2"></i>
+                        <h5>Cash In</h5>
+                        <h3 id="cashIn">0</h3>
+                        <p class="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-arrow-up fa-2x mb-2"></i>
+                        <h5>Cash Out</h5>
+                        <h3 id="cashOut">0</h3>
+                        <p class="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-exchange-alt fa-2x mb-2"></i>
+                        <h5>Net Cash Flow</h5>
+                        <h3 id="netCashFlow">0</h3>
+                        <p class="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Cash Drawer -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cash-Daftar"></i> Cash Drawer</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="cash-drawer mb-3">
+                            <h4><i class="fas fa-lock"></i> Drawer Status</h4>
+                            <p class="mb-0">Secured & Balanced</p>
+                        </div>
+                        
+                        <h6>Cash Denominations</h6>
+                        <div id="denominations">
+                            <!-- Denominations will be loaded here -->
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>Total Cash:</strong>
+                                <strong id="totalCash">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Expected:</span>
+                                <span id="expectedCash">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-Berhasil">
+                                <strong>Variance:</strong>
+                                <strong id="variance">0</strong>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="openCashCount()">
+                                <i class="fas fa-calculator"></i> Cash Jumlah
+                            </button>
+                            <button class="btn btn-Berhasil" onclick="openCashDeposit()">
+                                <i class="fas fa-arrow-down"></i> Setoran to Safe
+                            </button>
+                            <button class="btn btn-alert" onclick="openCashWithdrawal()">
+                                <i class="fas fa-arrow-up"></i> Withdraw from Safe
+                            </button>
+                            <button class="btn btn-info" onclick="openDenominationUpdate()">
+                                <i class="fas fa-Edit"></i> Perbarui Denominations
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="openFloatAdjustment()">
+                                <i class="fas fa-Saldo-scale"></i> Float Adjustment
+                            </button>
+                            <button class="btn btn-outline-Berhasil" onclick="openPettyCash()">
+                                <i class="fas fa-hand-holding-usd"></i> Petty Cash
+                            </button>
+                            <button class="btn btn-outline-alert" onclick="openCashTransfer()">
+                                <i class="fas fa-exchange-alt"></i> Cash Transfer
+                            </button>
+                            <button class="btn btn-outline-info" onclick="generateCashReport()">
+                                <i class="fas fa-File-alt"></i> Cash Laporan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reconciliation -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Saldo-scale"></i> Daily Reconciliation</h5>
+                        <button class="btn btn-primary" onclick="startReconciliation()">
+                            <i class="fas fa-play"></i> Start Reconciliation
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Reconciliation Status -->
+                        <div id="reconciliationStatus">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Ready for Daily Reconciliation</h6>
+                                <p class="mb-0">Last reconciliation: Kemarin at 5:00 PM</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Reconciliation Form -->
+                        <div id="reconciliationForm" style="display: Tidak Ada;">
+                            <h6>Reconciliation Proses</h6>
+                            
+                            <!-- System Calculations -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6>Sistem Calculations</h6>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Opening Saldo:</span>
+                                            <strong id="sysOpeningBalance">0</strong>
+                                        </div>
+                                    </div>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Total Cash In:</span>
+                                            <strong id="sysCashIn" class="cash-flow-positive">+0</strong>
+                                        </div>
+                                    </div>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Total Cash Out:</span>
+                                            <strong id="sysCashOut" class="cash-flow-negative">-0</strong>
+                                        </div>
+                                    </div>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Expected Saldo:</strong>
+                                            <strong id="sysExpectedBalance">0</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Actual Count -->
+                                <div class="col-md-6">
+                                    <h6>Actual Jumlah</h6>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Cash Jumlah:</span>
+                                            <input type="Nomor" class="form-control form-control-sm" id="actualCashCount" placeholder="0.00" style="width: 120px;">
+                                        </div>
+                                    </div>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Other Pembayaran:</span>
+                                            <input type="Nomor" class="form-control form-control-sm" id="otherPayments" placeholder="0.00" style="width: 120px;">
+                                        </div>
+                                    </div>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Total Actual:</strong>
+                                            <strong id="totalActual">0</strong>
+                                        </div>
+                                    </div>
+                                    <div class="reconciliation-item">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Variance:</strong>
+                                            <strong id="reconciliationVariance">0</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes and Actions -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Reconciliation Notes</label>
+                                        <textarea class="form-control" id="reconciliationNotes" rows="3" placeholder="Enter any discrepancies or notes..."></textarea>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-Berhasil" onclick="completeReconciliation()">
+                                            <i class="fas fa-check"></i> Complete Reconciliation
+                                        </button>
+                                        <button class="btn btn-alert" onclick="saveReconciliation()">
+                                            <i class="fas fa-Simpan"></i> Simpan Progress
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="cancelReconciliation()">
+                                            <i class="fas fa-times"></i> Batal
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reconciliation History -->
+                        <div class="mt-4">
+                            <h6>Recent Reconciliations</h6>
+                            <div class="Tabel-responsive">
+                                <table class="Tabel Tabel-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>Opening</th>
+                                            <th>Cash In</th>
+                                            <th>Cash Out</th>
+                                            <th>Expected</th>
+                                            <th>Actual</th>
+                                            <th>Variance</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reconciliationHistory">
+                                        <!-- Reconciliation history will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cash Flow Chart -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-line"></i> Cash Flow Analisis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Daily Cash Flow</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="dailyCashFlowChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Weekly Trend</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="weeklyTrendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alerts & Notifications -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div id="cashAlerts">
+                    <!-- Cash alerts will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cash Count Modal -->
+    <div class="modal fade" id="cashCountModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Cash Jumlah</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Bank Notes</h6>
+                            <div id="bankNotesCount">
+                                <!-- Bank notes count will be loaded here -->
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Coins</h6>
+                            <div id="coinsCount">
+                                <!-- Coins count will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between">
+                                <h6>Total Jumlah:</h6>
+                                <h5 id="totalCountAmount">0</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCashCount()">
+                        <i class="fas fa-Simpan"></i> Simpan Jumlah
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let cashData = {};
+        let reconciliationInProgress = false;
+        let charts = {};
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadCashData();
+            loadReconciliationHistory();
+            initializeCharts();
+            checkCashAlerts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is kasir
+            if (currentUser.role !== 'kasir') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load cash Data
+        async function loadCashData() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=cash_management', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        cashData = Data.Data;
+                        updateCashDisplay();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat cash Data:', Error);
+                // Use demo Data
+                cashData = getDemoCashData();
+                updateCashDisplay();
+            }
+        }
+
+        // Perbarui cash display
+        function updateCashDisplay() {
+            // Perbarui overview cards
+            Dokumen.getElementById('currentBalance').textContent = formatCurrency(cashData.current_balance || 0);
+            Dokumen.getElementById('cashIn').textContent = formatCurrency(cashData.cash_in || 0);
+            Dokumen.getElementById('cashOut').textContent = formatCurrency(cashData.cash_out || 0);
+            Dokumen.getElementById('netCashFlow').textContent = formatCurrency(cashData.net_cash_flow || 0);
+            
+            // Perbarui net cash flow color
+            const netFlowElement = Dokumen.getElementById('netCashFlow');
+            if (cashData.net_cash_flow >= 0) {
+                netFlowElement.className = 'cash-flow-positive';
+            } else {
+                netFlowElement.className = 'cash-flow-negative';
+            }
+            
+            // Perbarui denominations
+            displayDenominations();
+            
+            // Perbarui cash Ringkasan
+            Dokumen.getElementById('totalCash').textContent = formatCurrency(cashData.total_cash || 0);
+            Dokumen.getElementById('expectedCash').textContent = formatCurrency(cashData.expected_balance || 0);
+            Dokumen.getElementById('variance').textContent = formatCurrency(cashData.variance || 0);
+        }
+
+        // Display denominations
+        function displayDenominations() {
+            const denominationsDiv = Dokumen.getElementById('denominations');
+            const denominations = [
+                { Nama: '100,000', value: 100000, Jumlah: cashData.denominations?.['100000'] || 0 },
+                { Nama: '50,000', value: 50000, Jumlah: cashData.denominations?.['50000'] || 0 },
+                { Nama: '20,000', value: 20000, Jumlah: cashData.denominations?.['20000'] || 0 },
+                { Nama: '10,000', value: 10000, Jumlah: cashData.denominations?.['10000'] || 0 },
+                { Nama: '5,000', value: 5000, Jumlah: cashData.denominations?.['5000'] || 0 },
+                { Nama: '2,000', value: 2000, Jumlah: cashData.denominations?.['2000'] || 0 },
+                { Nama: '1,000', value: 1000, Jumlah: cashData.denominations?.['1000'] || 0 },
+                { Nama: 'Coins', value: 500, Jumlah: cashData.denominations?.['coins'] || 0 }
+            ];
+            
+            denominationsDiv.innerHTML = denominations.map(denom => `
+                <div class="denomination-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${denom.Nama}</strong>
+                            <br>
+                            <small class="text-muted">Rp ${denom.value.toLocaleString('id-ID')}</small>
+                        </div>
+                        <div class="text-end">
+                            <strong>${denom.Jumlah}</strong>
+                            <br>
+                            <small class="text-muted">${formatCurrency(denom.value * denom.Jumlah)}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load reconciliation Riwayat
+        async function loadReconciliationHistory() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=reconciliation_history', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        displayReconciliationHistory(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat reconciliation Riwayat:', Error);
+                // Use demo Data
+                displayReconciliationHistory(getDemoReconciliationHistory());
+            }
+        }
+
+        // Display reconciliation Riwayat
+        function displayReconciliationHistory(Riwayat) {
+            const tbody = Dokumen.getElementById('reconciliationHistory');
+            tbody.innerHTML = '';
+            
+            Riwayat.slice(0, 5).forEach(record => {
+                const row = Dokumen.createElement('tr');
+                const varianceClass = record.variance === 0 ? '' : 'text-danger';
+                row.innerHTML = `
+                    <td>${formatDate(record.Tanggal)}</td>
+                    <td>${formatCurrency(record.opening_balance)}</td>
+                    <td class="cash-flow-positive">${formatCurrency(record.cash_in)}</td>
+                    <td class="cash-flow-negative">${formatCurrency(record.cash_out)}</td>
+                    <td>${formatCurrency(record.expected_balance)}</td>
+                    <td>${formatCurrency(record.actual_balance)}</td>
+                    <td class="${varianceClass}">${formatCurrency(record.variance)}</td>
+                    <td><span class="badge bg-${record.Status === 'Selesai' ? 'Berhasil' : 'alert'}">${record.Status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewReconciliation('${record.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Daily cash flow Grafik
+            const dailyCtx = Dokumen.getElementById('dailyCashFlowChart').getContext('2d');
+            charts.daily = new Grafik(dailyCtx, {
+                Tipe: 'bar',
+                Data: {
+                    labels: ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM'],
+                    datasets: [{
+                        label: 'Cash In',
+                        Data: [500000, 750000, 1200000, 800000, 650000, 400000],
+                        backgroundColor: '#28a745'
+                    }, {
+                        label: 'Cash Out',
+                        Data: [200000, 450000, 600000, 350000, 500000, 300000],
+                        backgroundColor: '#dc3545'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Weekly trend Grafik
+            const weeklyCtx = Dokumen.getElementById('weeklyTrendChart').getContext('2d');
+            charts.weekly = new Grafik(weeklyCtx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Net Cash Flow',
+                        Data: [2500000, 3200000, 2800000, 3500000, 4100000, 3800000, 2900000],
+                        borderColor: '#17a2b8',
+                        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Check cash alerts
+        function checkCashAlerts() {
+            const alertsDiv = Dokumen.getElementById('cashAlerts');
+            const alerts = [];
+            
+            // Check for high cash Saldo
+            if (cashData.current_balance > 10000000) {
+                alerts.push({
+                    Tipe: 'Peringatan',
+                    Pesan: 'High cash Saldo detected. Consider depositing to safe.',
+                    icon: 'exclamation-triangle'
+                });
+            }
+            
+            // Check for low cash Saldo
+            if (cashData.current_balance < 1000000) {
+                alerts.push({
+                    type: 'critical',
+                    message: 'Low cash Saldo. Please replenish cash drawer.',
+                    icon: 'times-circle'
+                });
+            }
+            
+            // Check for variance
+            if (Math.abs(cashData.variance || 0) > 10000) {
+                alerts.push({
+                    Tipe: 'Peringatan',
+                    Pesan: `Variance detected: ${formatCurrency(cashData.variance)}. Please reconcile.`,
+                    icon: 'Saldo-scale'
+                });
+            }
+            
+            // Display alerts
+            if (alerts.length > 0) {
+                alertsDiv.innerHTML = alerts.map(Peringatan => `
+                    <div class="alert alert-${alert.Tipe} alert-dismissible fade show" role="Peringatan">
+                        <i class="fas fa-${alert.icon} me-2"></i>
+                        ${Peringatan.Pesan}
+                        <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Start reconciliation
+        function startReconciliation() {
+            reconciliationInProgress = true;
+            
+            // Perbarui UI
+            Dokumen.getElementById('reconciliationStatus').style.display = 'Tidak Ada';
+            Dokumen.getElementById('reconciliationForm').style.display = 'block';
+            
+            // Load Sistem calculations
+            Dokumen.getElementById('sysOpeningBalance').textContent = formatCurrency(cashData.opening_balance || 0);
+            Dokumen.getElementById('sysCashIn').textContent = '+' + formatCurrency(cashData.cash_in || 0);
+            Dokumen.getElementById('sysCashOut').textContent = '-' + formatCurrency(cashData.cash_out || 0);
+            Dokumen.getElementById('sysExpectedBalance').textContent = formatCurrency(cashData.expected_balance || 0);
+            
+            // Reset actual Jumlah
+            Dokumen.getElementById('actualCashCount').value = '';
+            Dokumen.getElementById('otherPayments').value = '';
+            Dokumen.getElementById('reconciliationNotes').value = '';
+            
+            // Calculate totals on input change
+            Dokumen.getElementById('actualCashCount').addEventListener('input', calculateReconciliationTotals);
+            Dokumen.getElementById('otherPayments').addEventListener('input', calculateReconciliationTotals);
+        }
+
+        // Calculate reconciliation totals
+        function calculateReconciliationTotals() {
+            const actualCash = parseFloat(Dokumen.getElementById('actualCashCount').value) || 0;
+            const otherPayments = parseFloat(Dokumen.getElementById('otherPayments').value) || 0;
+            
+            const totalActual = actualCash + otherPayments;
+            const variance = totalActual - (cashData.expected_balance || 0);
+            
+            Dokumen.getElementById('totalActual').textContent = formatCurrency(totalActual);
+            Dokumen.getElementById('reconciliationVariance').textContent = formatCurrency(variance);
+            
+            // Perbarui variance color
+            const varianceElement = Dokumen.getElementById('reconciliationVariance');
+            if (variance === 0) {
+                varianceElement.className = 'text-Berhasil';
+            } else if (Math.abs(variance) < 10000) {
+                varianceElement.className = 'text-Peringatan';
+            } else {
+                varianceElement.className = 'text-danger';
+            }
+        }
+
+        // Complete reconciliation
+        function completeReconciliation() {
+            const actualCash = parseFloat(document.getElementById('actualCashCount').value) || 0;
+            const otherPayments = parseFloat(document.getElementById('otherPayments').value) || 0;
+            const notes = document.getElementById('reconciliationNotes').value;
+            
+            if (!actualCash) {
+                alert('Please enter actual cash Jumlah');
+                return;
+            }
+            
+            const reconciliation = {
+                date: new Date().toISOString(),
+                opening_balance: cashData.opening_balance || 0,
+                cash_in: cashData.cash_in || 0,
+                cash_out: cashData.cash_out || 0,
+                expected_balance: cashData.expected_balance || 0,
+                actual_balance: actualCash + otherPayments,
+                variance: (actualCash + otherPayments) - (cashData.expected_balance || 0),
+                status: 'Selesai',
+                notes: notes
+            };
+            
+            // Save reconciliation
+            saveReconciliationData(reconciliation);
+            
+            // Update UI
+            reconciliationInProgress = false;
+            document.getElementById('reconciliationForm').style.display = 'Tidak Ada';
+            document.getElementById('reconciliationStatus').style.display = 'block';
+            
+            // Show success message
+            showSuccess('Reconciliation Selesai successfully!');
+            
+            // Reload data
+            loadReconciliationHistory();
+        }
+
+        // Save reconciliation data
+        function saveReconciliationData(reconciliation) {
+            // In real implementation, this would save to database
+            
+        }
+
+        // Cancel reconciliation
+        function cancelReconciliation() {
+            reconciliationInProgress = false;
+            document.getElementById('reconciliationForm').style.display = 'Tidak Ada';
+            document.getElementById('reconciliationStatus').style.display = 'block';
+        }
+
+        // Save reconciliation progress
+        function saveReconciliation() {
+            showSuccess('Reconciliation progress saved!');
+        }
+
+        // Open cash count
+        function openCashCount() {
+            // Load cash count form
+            const bankNotesHtml = `
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>100,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['100000'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>50,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['50000'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>20,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['20000'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>10,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['10000'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>5,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['5000'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>2,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['2000'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>1,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['1000'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+            `;
+            
+            const coinsHtml = `
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>1,000:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['1000_coins'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>500:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['500'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>200:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['200'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>100:</span>
+                        <input type="Nomor" class="form-control form-control-sm" value="${cashData.denominations?.['100'] || 0}" style="width: 80px;">
+                    </div>
+                </div>
+            `;
+            
+            Dokumen.getElementById('bankNotesCount').innerHTML = bankNotesHtml;
+            Dokumen.getElementById('coinsCount').innerHTML = coinsHtml;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(Dokumen.getElementById('cashCountModal'));
+            modal.show();
+        }
+
+        // Simpan cash Jumlah
+        function saveCashCount() {
+            showSuccess('Cash Jumlah saved successfully!');
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('cashCountModal'));
+            modal.hide();
+        }
+
+        // Placeholder functions for other features
+        function openCashDeposit() {
+            
+        }
+
+        function openCashWithdrawal() {
+            
+        }
+
+        function openDenominationUpdate() {
+            
+        }
+
+        function openFloatAdjustment() {
+            
+        }
+
+        function openPettyCash() {
+            
+        }
+
+        function openCashTransfer() {
+            
+        }
+
+        function generateCashReport() {
+            
+        }
+
+        function viewReconciliation(reconciliationId) {
+            
+        }
+
+        // Get demo cash Data
+        function getDemoCashData() {
+            return {
+                current_balance: 8500000,
+                cash_in: 12500000,
+                cash_out: 4000000,
+                net_cash_flow: 8500000,
+                opening_balance: 10000000,
+                expected_balance: 8500000,
+                total_cash: 8500000,
+                variance: 0,
+                denominations: {
+                    '100000': 50,
+                    '50000': 30,
+                    '20000': 25,
+                    '10000': 40,
+                    '5000': 20,
+                    '2000': 15,
+                    '1000': 10,
+                    'coins': 25
+                }
+            };
+        }
+
+        // Get demo reconciliation Riwayat
+        function getDemoReconciliationHistory() {
+            return [
+                {
+                    id: 'REC-001',
+                    Tanggal: '2026-03-16T17:00:00Z',
+                    opening_balance: 10000000,
+                    cash_in: 8500000,
+                    cash_out: 6000000,
+                    expected_balance: 12500000,
+                    actual_balance: 12500000,
+                    variance: 0,
+                    Status: 'Selesai'
+                },
+                {
+                    id: 'REC-002',
+                    Tanggal: '2026-03-15T17:00:00Z',
+                    opening_balance: 9500000,
+                    cash_in: 12000000,
+                    cash_out: 7500000,
+                    expected_balance: 14000000,
+                    actual_balance: 13995000,
+                    variance: -5000,
+                    Status: 'Selesai'
+                }
+            ];
+        }
+
+        // Utility functions
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+# Koperasi SaaS - Git Ignore File
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+error.log
+access.log
+
+# Backup files
+backup/
+*.sql
+*.sql.gz
+*.backup
+*.bak
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# Cache
+cache/
+*.cache
+
+# Uploads
+uploads/
+files/
+
+# Development files
+*.py
+*.json
+test_*.php
+debug_*.php
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node modules (if any)
+node_modules/
+
+# Composer files
+vendor/
+composer.lock
+
+# Deployment package
+deployment_package/
+*.tar.gz
+
+# Local configuration
+config/local.php
+config/development.php
+
+# Test files
+tests/
+test_reports/
+*.test
+
+# Documentation drafts
+*_draft.md
+*_work.md
+
+# Database files
+*.db
+*.sqlite
+
+# Session files
+sessions/
+*.session
+
+# SSL certificates
+*.crt
+*.key
+*.pem
+
+# Backup scripts
+backup_database.sh
+restore_database.sh
+
+# Development mode indicator
+DEVELOPMENT_MODE.md
+
+# Status reports
+*_status_report_*.json
+*_test_report_*.json
+
+# Archive
+archive/
+old/
+deprecated/
+
+# Monitoring
+monitoring/
+*.monitor
+
+# Security
+security_logs/
+*.security
+
+# Performance
+performance/
+*.perf
+
+# Local development
+local/
+dev/
+development/

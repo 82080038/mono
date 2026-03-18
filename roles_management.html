@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roles Manajemen - Super Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .role-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #6f42c1;
+            cursor: pointer;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .role-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-Aktif { background: #28a745; color: white; }
+        .Status-Tidak Aktif { background: #6c757d; color: white; }
+        .Status-Menunggu { background: #ffc107; color: #000; }
+        
+        .permission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .permission-item {
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #f8f9fa;
+            font-size: 0.875rem;
+        }
+        
+        .permission-granted {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .permission-denied {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .Pengguna-Jumlah {
+            background: #6f42c1;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #6f42c1;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #6f42c1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .role-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .role-super-Admin { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
+        .role-Admin { background: linear-gradient(135deg, #007bff, #0056b3); }
+        .role-mantri { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .role-kasir { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .role-Teller { background: linear-gradient(135deg, #fd7e14, #e8590c); }
+        .role-Surveyor { background: linear-gradient(135deg, #20c997, #17a2b8); }
+        .role-Penagih { background: linear-gradient(135deg, #dc3545, #c82333); }
+        .role-Anggota { background: linear-gradient(135deg, #6c757d, #545b62); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-user-shield"></i> Roles Manajemen</h1>
+                <p class="mb-0">Super Admin - Sistem Roles & Permissions Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Role Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-2x mb-2"></i>
+                        <h5>Total Roles</h5>
+                        <h3 id="totalRoles">0</h3>
+                        <p class="mb-0">Sistem roles</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user-check fa-2x mb-2"></i>
+                        <h5>Aktif Roles</h5>
+                        <h3 id="activeRoles">0</h3>
+                        <p class="mb-0">Currently Aktif</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user-cog fa-2x mb-2"></i>
+                        <h5>Total Pengguna</h5>
+                        <h3 id="totalUsers">0</h3>
+                        <p class="mb-0">Sistem Pengguna</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                        <h5>Permissions</h5>
+                        <h3 id="totalPermissions">0</h3>
+                        <p class="mb-0">Sistem permissions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Roles List -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-user-cog"></i> Sistem Roles</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter" onchange="filterRoles()">
+                                <option value="">Semua Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Tidak Aktif">Tidak Aktif</option>
+                                <option value="Menunggu">Menunggu</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="createNewRole()">
+                                <i class="fas fa-plus"></i> New Role
+                            </button>
+                            <button class="btn btn-Berhasil btn-sm" onclick="exportRoles()">
+                                <i class="fas fa-Unduh"></i> Ekspor
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="rolesList">
+                            <!-- Roles will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Role Details -->
+                <div class="card" id="roleDetailsCard" style="display: Tidak Ada;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user-shield"></i> <span id="roleDetailsTitle">Role Detail</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="roleDetailsContent">
+                            <!-- Role details will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="createNewRole()">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <h6>New Role</h6>
+                                    <small class="text-muted">Create role</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="managePermissions()">
+                                    <i class="fas fa-key"></i>
+                                    <h6>Permissions</h6>
+                                    <small class="text-muted">Manage access</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="assignUsers()">
+                                    <i class="fas fa-user-plus"></i>
+                                    <h6>Assign Pengguna</h6>
+                                    <small class="text-muted">Pengguna roles</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="auditRoles()">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    <h6>Audit Roles</h6>
+                                    <small class="text-muted">Review access</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Role Distribution -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-pie"></i> Role Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="roleDistributionChart" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Aktivitas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <!-- Recent activity will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Role Modal -->
+    <div class="modal fade" id="newRoleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Create New Role</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newRoleForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Nama *</label>
+                                    <input type="text" class="form-control" id="roleName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Code *</label>
+                                    <input type="text" class="form-control" id="roleCode" required placeholder="e.g., Manajer, supervisor">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Level *</label>
+                                    <select class="form-Pilih" id="roleLevel" required>
+                                        <option value="">Pilih Level</option>
+                                        <option value="1">Level 1 (Super Admin)</option>
+                                        <option value="2">Level 2 (Admin)</option>
+                                        <option value="3">Level 3 (Manajer)</option>
+                                        <option value="4">Level 4 (Staf)</option>
+                                        <option value="5">Level 5 (Anggota)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-Pilih" id="roleStatus">
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Tidak Aktif">Tidak Aktif</option>
+                                        <option value="Menunggu">Menunggu</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Deskripsi</label>
+                                    <textarea class="form-control" id="roleDescription" rows="3" placeholder="Enter role Deskripsi..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Permissions</label>
+                                    <div class="permission-grid" id="permissionGrid">
+                                        <!-- Permissions will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="createRole()">
+                        <i class="fas fa-plus"></i> Create Role
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Role Modal -->
+    <div class="modal fade" id="editRoleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Edit Role</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editRoleForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Nama *</label>
+                                    <input type="text" class="form-control" id="editRoleName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Code *</label>
+                                    <input type="text" class="form-control" id="editRoleCode" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Level *</label>
+                                    <select class="form-Pilih" id="editRoleLevel" required>
+                                        <option value="1">Level 1 (Super Admin)</option>
+                                        <option value="2">Level 2 (Admin)</option>
+                                        <option value="3">Level 3 (Manajer)</option>
+                                        <option value="4">Level 4 (Staf)</option>
+                                        <option value="5">Level 5 (Anggota)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-Pilih" id="editRoleStatus">
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Tidak Aktif">Tidak Aktif</option>
+                                        <option value="Menunggu">Menunggu</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Deskripsi</label>
+                                    <textarea class="form-control" id="editRoleDescription" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Role Permissions</label>
+                                    <div class="permission-grid" id="editPermissionGrid">
+                                        <!-- Permissions will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-alert" onclick="deactivateRole()">
+                        <i class="fas fa-ban"></i> Deactivate
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="updateRole()">
+                        <i class="fas fa-Simpan"></i> Perbarui Role
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let roles = [];
+        let permissions = [];
+        let selectedRole = null;
+        let roleChart = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadRoles();
+            loadStatistics();
+            loadRecentActivity();
+            initializeChart();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Super Admin
+            if (currentUser.role !== 'super_admin') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load roles
+        async function loadRoles() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=roles', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        roles = Data.Data;
+                        displayRoles();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat roles:', Error);
+                // Use demo Data
+                roles = getDemoRoles();
+                displayRoles();
+            }
+        }
+
+        // Display roles
+        function displayRoles() {
+            const rolesList = Dokumen.getElementById('rolesList');
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            
+            let filteredRoles = roles;
+            
+            if (statusFilter) {
+                filteredRoles = roles.Filter(role => role.Status === statusFilter);
+            }
+            
+            rolesList.innerHTML = '';
+            
+            if (filteredRoles.length === 0) {
+                rolesList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak roles found</div>';
+                return;
+            }
+            
+            filteredRoles.forEach(role => {
+                const roleCard = Dokumen.createElement('div');
+                roleCard.className = 'role-card card mb-2';
+                roleCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="role-icon role-${role.code} me-3">
+                                        <i class="fas fa-${getRoleIcon(role.code)}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${role.Nama}</h6>
+                                        <p class="mb-1">${role.code} - Level ${role.Level}</p>
+                                        <small class="text-muted">
+                                            ${role.Deskripsi || 'Tidak Deskripsi available'}
+                                            <br>
+                                            Dibuat: ${formatDate(role.created_at)}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="mb-2">
+                                    <span class="role-Status Status-${role.Status}">${role.Status}</span>
+                                    <span class="Pengguna-Jumlah ms-2">${role.user_count || 0} Pengguna</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewRoleDetails('${role.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="editRole('${role.id}')">
+                                        <i class="fas fa-Edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="assignUsersToRole('${role.id}')">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                rolesList.appendChild(roleCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=role_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_roles: 8,
+                    active_roles: 7,
+                    total_users: 156,
+                    total_permissions: 45
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalRoles').textContent = stats.total_roles || 0;
+            Dokumen.getElementById('activeRoles').textContent = stats.active_roles || 0;
+            Dokumen.getElementById('totalUsers').textContent = stats.total_users || 0;
+            Dokumen.getElementById('totalPermissions').textContent = stats.total_permissions || 0;
+        }
+
+        // Load recent Aktivitas
+        function loadRecentActivity() {
+            const activityDiv = Dokumen.getElementById('recentActivity');
+            
+            const activities = [
+                { Tipe: 'role_created', Deskripsi: 'Dibuat new role: Supervisor', Waktu: '2 hours ago', Pengguna: 'Admin Pengguna' },
+                { Tipe: 'permission_updated', Deskripsi: 'Diperbarui permissions for Admin role', Waktu: '4 hours ago', Pengguna: 'Super Admin' },
+                { Tipe: 'user_assigned', Deskripsi: 'Assigned 3 Pengguna to Manajer role', Waktu: '6 hours ago', Pengguna: 'Admin Pengguna' },
+                { Tipe: 'role_deactivated', Deskripsi: 'Deactivated role: Intern', Waktu: '1 day ago', Pengguna: 'Super Admin' },
+                { Tipe: 'permission_granted', Deskripsi: 'Granted new permissions to Teller role', Waktu: '2 days ago', Pengguna: 'Admin Pengguna' }
+            ];
+            
+            activityDiv.innerHTML = activities.map(Aktivitas => `
+                <div class="d-flex align-items-start mb-2">
+                    <div class="me-2">
+                        <i class="fas fa-${getActivityIcon(Aktivitas.Tipe)} text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <small class="text-muted">${Aktivitas.Deskripsi}</small>
+                        <br>
+                        <small class="text-muted">${Aktivitas.Pengguna} - ${Aktivitas.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize Grafik
+        function initializeChart() {
+            const ctx = Dokumen.getElementById('roleDistributionChart').getContext('2d');
+            roleChart = new Grafik(ctx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Super Admin', 'Admin', 'Mantri', 'Kasir', 'Teller', 'Surveyor', 'Penagih', 'Anggota'],
+                    datasets: [{
+                        Data: [1, 3, 8, 5, 6, 4, 7, 122],
+                        backgroundColor: [
+                            '#6f42c1', '#007bff', '#17a2b8', '#28a745', 
+                            '#fd7e14', '#20c997', '#dc3545', '#6c757d'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            Posisi: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // View role Detail
+        function viewRoleDetails(roleId) {
+            const role = roles.find(r => r.id === roleId);
+            if (!role) return;
+            
+            selectedRole = role;
+            
+            // Show role Detail card
+            Dokumen.getElementById('roleDetailsCard').style.display = 'block';
+            Dokumen.getElementById('roleDetailsTitle').textContent = role.Nama;
+            
+            const detailsContent = Dokumen.getElementById('roleDetailsContent');
+            
+            detailsContent.innerHTML = `
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Role Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Role Nama:</td><td><strong>${role.Nama}</strong></td></tr>
+                            <tr><td>Role Code:</td><td>${role.code}</td></tr>
+                            <tr><td>Level:</td><td>${role.Level}</td></tr>
+                            <tr><td>Status:</td><td><span class="role-Status Status-${role.Status}">${role.Status}</span></td></tr>
+                            <tr><td>Pengguna Jumlah:</td><td><span class="Pengguna-Jumlah">${role.user_count || 0} Pengguna</span></td></tr>
+                            <tr><td>Dibuat:</td><td>${formatDate(role.created_at)}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Role Statistik</h6>
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <h4 class="text-primary">${role.user_count || 0}</h4>
+                                <small class="text-muted">Aktif Pengguna</small>
+                            </div>
+                            <div class="col-6 text-center">
+                                <h4 class="text-Berhasil">${role.permissions ? role.permissions.length : 0}</h4>
+                                <small class="text-muted">Permissions</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Deskripsi</h6>
+                    <p>${role.Deskripsi || 'Tidak Deskripsi available'}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Permissions</h6>
+                    <div class="permission-grid">
+                        ${role.permissions ? role.permissions.map(permission => `
+                            <div class="permission-item permission-granted">
+                                <i class="fas fa-check me-1"></i>${permission}
+                            </div>
+                        `).join('') : '<div Kelas="text-muted">Tidak permissions assigned</div>'}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Menu Access</h6>
+                    <div class="permission-grid">
+                        ${role.menu_items ? role.menu_items.map(menu => `
+                            <div class="permission-item permission-granted">
+                                <i class="fas fa-check me-1"></i>${menu.Judul}
+                            </div>
+                        `).join('') : '<div Kelas="text-muted">Tidak menu items assigned</div>'}
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="editRole('${role.id}')">
+                        <i class="fas fa-Edit"></i> Edit Role
+                    </button>
+                    <button class="btn btn-Berhasil" onclick="assignUsersToRole('${role.id}')">
+                        <i class="fas fa-user-plus"></i> Assign Pengguna
+                    </button>
+                    <button class="btn btn-alert" onclick="duplicateRole('${role.id}')">
+                        <i class="fas fa-copy"></i> Duplicate Role
+                    </button>
+                </div>
+            `;
+        }
+
+        // Create new role
+        function createNewRole() {
+            loadPermissions();
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newRoleModal'));
+            modal.show();
+        }
+
+        // Load permissions
+        function loadPermissions() {
+            permissions = [
+                'user_management', 'role_management', 'system_settings', 'backup_management',
+                'security_center', 'audit_logs', 'Laporan', 'member_management',
+                'loan_management', 'savings_management', 'transaction_management',
+                'collection_management', 'survey_management', 'field_operations'
+            ];
+            
+            const permissionGrid = Dokumen.getElementById('permissionGrid');
+            permissionGrid.innerHTML = permissions.map(permission => `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${permission}" id="perm_${permission}">
+                    <label class="form-check-label" for="perm_${permission}">
+                        ${permission.replace('_', ' ').toUpperCase()}
+                    </label>
+                </div>
+            `).join('');
+        }
+
+        // Create role
+        function createRole() {
+            const roleName = Dokumen.getElementById('roleName').value;
+            const roleCode = Dokumen.getElementById('roleCode').value;
+            const roleLevel = Dokumen.getElementById('roleLevel').value;
+            const roleStatus = Dokumen.getElementById('roleStatus').value;
+            const roleDescription = Dokumen.getElementById('roleDescription').value;
+            
+            if (!roleName || !roleCode || !roleLevel) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Get selected permissions
+            const selectedPermissions = [];
+            Dokumen.querySelectorAll('#permissionGrid input:checked').forEach(checkbox => {
+                selectedPermissions.push(checkbox.value);
+            });
+            
+            // Create new role
+            const newRole = {
+                id: 'ROLE-' + Tanggal.now(),
+                Nama: roleName,
+                code: roleCode,
+                Level: parseInt(roleLevel),
+                Status: roleStatus,
+                Deskripsi: roleDescription,
+                permissions: selectedPermissions,
+                user_count: 0,
+                created_at: new Tanggal().toISOString()
+            };
+            
+            roles.unshift(newRole);
+            displayRoles();
+            updateStatistics({
+                total_roles: roles.length,
+                active_roles: roles.Filter(r => r.Status === 'Aktif').length,
+                total_users: parseInt(Dokumen.getElementById('totalUsers').textContent),
+                total_permissions: parseInt(Dokumen.getElementById('totalPermissions').textContent)
+            });
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newRoleModal'));
+            modal.hide();
+            Dokumen.getElementById('newRoleForm').Reset();
+            
+            showSuccess('Role Dibuat successfully!');
+        }
+
+        // Edit role
+        function editRole(roleId) {
+            const role = roles.find(r => r.id === roleId);
+            if (!role) return;
+            
+            selectedRole = role;
+            
+            // Load role Data into modal
+            Dokumen.getElementById('editRoleName').value = role.Nama;
+            Dokumen.getElementById('editRoleCode').value = role.code;
+            Dokumen.getElementById('editRoleLevel').value = role.Level;
+            Dokumen.getElementById('editRoleStatus').value = role.Status;
+            Dokumen.getElementById('editRoleDescription').value = role.Deskripsi || '';
+            
+            // Load permissions
+            loadPermissions();
+            
+            // Check existing permissions
+            setTimeout(() => {
+                if (role.permissions) {
+                    role.permissions.forEach(permission => {
+                        const checkbox = Dokumen.getElementById(`edit_perm_${permission}`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                        }
+                    });
+                }
+            }, 100);
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('editRoleModal'));
+            modal.show();
+        }
+
+        // Perbarui role
+        function updateRole() {
+            const roleName = Dokumen.getElementById('editRoleName').value;
+            const roleCode = Dokumen.getElementById('editRoleCode').value;
+            const roleLevel = Dokumen.getElementById('editRoleLevel').value;
+            const roleStatus = Dokumen.getElementById('editRoleStatus').value;
+            const roleDescription = Dokumen.getElementById('editRoleDescription').value;
+            
+            if (!roleName || !roleCode || !roleLevel) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Get selected permissions
+            const selectedPermissions = [];
+            Dokumen.querySelectorAll('#editPermissionGrid input:checked').forEach(checkbox => {
+                selectedPermissions.push(checkbox.value);
+            });
+            
+            // Perbarui role
+            selectedRole.Nama = roleName;
+            selectedRole.code = roleCode;
+            selectedRole.Level = parseInt(roleLevel);
+            selectedRole.Status = roleStatus;
+            selectedRole.Deskripsi = roleDescription;
+            selectedRole.permissions = selectedPermissions;
+            
+            displayRoles();
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('editRoleModal'));
+            modal.hide();
+            
+            showSuccess('Role Diperbarui successfully!');
+        }
+
+        // Deactivate role
+        function deactivateRole() {
+            if (!Konfirmasi('Are you sure you want to deactivate this role?')) return;
+            
+            selectedRole.Status = 'Tidak Aktif';
+            displayRoles();
+            
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('editRoleModal'));
+            modal.hide();
+            
+            showSuccess('Role deactivated successfully!');
+        }
+
+        // Assign Pengguna to role
+        function assignUsersToRole(roleId) {
+            const role = roles.find(r => r.id === roleId);
+            if (!role) return;
+            
+            
+        }
+
+        // Duplicate role
+        function duplicateRole(roleId) {
+            const role = roles.find(r => r.id === roleId);
+            if (!role) return;
+            
+            const duplicatedRole = {
+                ...role,
+                id: 'ROLE-' + Tanggal.now(),
+                Nama: role.Nama + ' (Copy)',
+                code: role.code + '_copy',
+                user_count: 0,
+                created_at: new Tanggal().toISOString()
+            };
+            
+            roles.unshift(duplicatedRole);
+            displayRoles();
+            
+            showSuccess('Role duplicated successfully!');
+        }
+
+        // Quick action functions
+        function managePermissions() {
+            
+        }
+
+        function assignUsers() {
+            
+        }
+
+        function auditRoles() {
+            
+        }
+
+        function exportRoles() {
+            const rolesData = roles.map(role => ({
+                Nama: role.Nama,
+                code: role.code,
+                Level: role.Level,
+                Status: role.Status,
+                user_count: role.user_count || 0,
+                permissions: role.permissions || [],
+                created_at: role.created_at
+            }));
+            
+            const dataStr = JSON.stringify(rolesData, null, 2);
+            const dataUri = 'Data:Aplikasi/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `roles_export_${new Tanggal().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = Dokumen.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('Unduh', exportFileDefaultName);
+            linkElement.click();
+            
+            showSuccess('Roles exported successfully!');
+        }
+
+        // Filter roles
+        function filterRoles() {
+            displayRoles();
+        }
+
+        // Utility functions
+        function getRoleIcon(roleCode) {
+            const icons = {
+                'super_admin': 'crown',
+                'Admin': 'Pengguna-shield',
+                'mantri': 'Grafik-line',
+                'kasir': 'cash-Daftar',
+                'Teller': 'Pengguna-tie',
+                'Surveyor': 'map-marked-alt',
+                'Penagih': 'hand-holding-usd',
+                'Anggota': 'Pengguna'
+            };
+            return icons[roleCode] || 'Pengguna';
+        }
+
+        function getActivityIcon(Tipe) {
+            const icons = {
+                'role_created': 'plus-circle',
+                'permission_updated': 'key',
+                'user_assigned': 'Pengguna-plus',
+                'role_deactivated': 'ban',
+                'permission_granted': 'check-circle'
+            };
+            return icons[Tipe] || 'circle';
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo roles
+        function getDemoRoles() {
+            return [
+                {
+                    id: '1',
+                    Nama: 'Super Admin',
+                    code: 'super_admin',
+                    Level: 1,
+                    Status: 'Aktif',
+                    Deskripsi: 'Full Sistem access and Administrasi',
+                    user_count: 1,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['user_management', 'role_management', 'system_settings', 'backup_management', 'security_center', 'audit_logs', 'Laporan'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'super_admin_dashboard.html' },
+                        { Judul: 'Pengguna', url: 'users_crud.html' },
+                        { Judul: 'Roles', url: 'roles_management.html' },
+                        { Judul: 'Pengaturan', url: 'system_settings.html' },
+                        { Judul: 'Backup', url: 'backup_management.html' },
+                        { Judul: 'Keamanan', url: 'security_center.html' },
+                        { Judul: 'Audit Logs', url: 'audit_logs.html' },
+                        { Judul: 'Laporan', url: 'system_reports.html' }
+                    ]
+                },
+                {
+                    id: '2',
+                    Nama: 'Admin',
+                    code: 'Admin',
+                    Level: 2,
+                    Status: 'Aktif',
+                    Deskripsi: 'Administrative access for operations Manajemen',
+                    user_count: 3,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['member_management', 'loan_management', 'savings_management', 'transaction_management', 'Laporan'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'admin_dashboard.html' },
+                        { Judul: 'Operations', url: 'operations_management.html' },
+                        { Judul: 'Staf', url: 'staff_management.html' },
+                        { Judul: 'Anggota', url: 'members_crud.html' },
+                        { Judul: 'Laporan', url: 'admin_reports.html' },
+                        { Judul: 'Pengaturan', url: 'admin_settings.html' }
+                    ]
+                },
+                {
+                    id: '3',
+                    Nama: 'Mantri',
+                    code: 'mantri',
+                    Level: 3,
+                    Status: 'Aktif',
+                    Deskripsi: 'Kredit Analisis and Pinjaman Manajemen',
+                    user_count: 8,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['loan_management', 'credit_analysis', 'portfolio_management', 'Laporan'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'mantri_dashboard.html' },
+                        { Judul: 'Pinjaman Applications', url: 'loan_applications.html' },
+                        { Judul: 'Portfolio', url: 'portfolio_management.html' },
+                        { Judul: 'Kredit Laporan', url: 'credit_reports.html' }
+                    ]
+                },
+                {
+                    id: '4',
+                    Nama: 'Kasir',
+                    code: 'kasir',
+                    Level: 4,
+                    Status: 'Aktif',
+                    Deskripsi: 'Cash Manajemen and Pembayaran Memproses',
+                    user_count: 5,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['payment_processing', 'cash_management', 'transaction_management'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'kasir_dashboard.html' },
+                        { Judul: 'Pembayaran Memproses', url: 'payment_processing.html' },
+                        { Judul: 'Cash Manajemen', url: 'cash_management.html' },
+                        { Judul: 'Transaksi', url: 'Transaksi.html' },
+                        { Judul: 'Reconciliation', url: 'reconciliation.html' }
+                    ]
+                },
+                {
+                    id: '5',
+                    Nama: 'Teller',
+                    code: 'Teller',
+                    Level: 4,
+                    Status: 'Aktif',
+                    Deskripsi: 'Anggota services and account Manajemen',
+                    user_count: 6,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['member_management', 'account_management', 'document_processing'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'teller_dashboard.html' },
+                        { Judul: 'Anggota Registration', url: 'member_registration.html' },
+                        { Judul: 'Account Manajemen', url: 'account_management.html' },
+                        { Judul: 'Account Inquiries', url: 'account_inquiries.html' },
+                        { Judul: 'Dokumen Memproses', url: 'document_processing.html' }
+                    ]
+                },
+                {
+                    id: '6',
+                    Nama: 'Surveyor',
+                    code: 'Surveyor',
+                    Level: 4,
+                    Status: 'Aktif',
+                    Deskripsi: 'Field Survei and Data Penagihan',
+                    user_count: 4,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['survey_management', 'member_verification', 'field_operations'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'surveyor_dashboard.html' },
+                        { Judul: 'Survei Manajemen', url: 'survey_management.html' },
+                        { Judul: 'Anggota Verifikasi', url: 'member_verification.html' },
+                        { Judul: 'GPS Tracking', url: 'gps_tracking.html' },
+                        { Judul: 'Field Data', url: 'field_data.html' }
+                    ]
+                },
+                {
+                    id: '7',
+                    Nama: 'Penagih',
+                    code: 'Penagih',
+                    Level: 4,
+                    Status: 'Aktif',
+                    Deskripsi: 'Debt Penagihan and recovery operations',
+                    user_count: 7,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['collection_management', 'overdue_management', 'route_planning'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'collector_dashboard.html' },
+                        { Judul: 'Penagihan Manajemen', url: 'collection_management.html' },
+                        { Judul: 'Telat Accounts', url: 'overdue_accounts.html' },
+                        { Judul: 'Route Planning', url: 'route_planning.html' },
+                        { Judul: 'Penagihan Laporan', url: 'collection_reports.html' }
+                    ]
+                },
+                {
+                    id: '8',
+                    Nama: 'Anggota',
+                    code: 'Anggota',
+                    Level: 5,
+                    Status: 'Aktif',
+                    Deskripsi: 'Anggota access to personal services',
+                    user_count: 122,
+                    created_at: '2026-01-01T00:00:00Z',
+                    permissions: ['profile_management', 'account_view', 'transaction_view'],
+                    menu_items: [
+                        { Judul: 'Dashboard', url: 'member_dashboard.html' },
+                        { Judul: 'Profil', url: 'member_profile.html' },
+                        { Judul: 'Accounts', url: 'member_accounts.html' },
+                        { Judul: 'Transaksi', url: 'member_transactions.html' },
+                        { Judul: 'Applications', url: 'member_applications.html' },
+                        { Judul: 'Pesan', url: 'member_messages.html' }
+                    ]
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

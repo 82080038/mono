@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simpanan - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <link rel="stylesheet" href="/mono/helpers/modal-styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-link {
+            color: white;
+            text-decoration: Tidak Ada;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .container {
+            padding: 2rem;
+        }
+        
+        .Tabel-actions {
+            white-space: nowrap;
+        }
+        
+        .Tabel-actions .btn {
+            margin: 0 2px;
+        }
+        
+        .Status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .Status-Aktif { background-color: #d4edda; color: #155724; }
+        .Status-Tidak Aktif { background-color: #f8d7da; color: #721c24; }
+        .Status-frozen { background-color: #fff3cd; color: #856404; }
+        .Status-closed { background-color: #e2e3e5; color: #383d41; }
+        
+        .Saldo-positive { color: #155724; font-weight: 600; }
+        .Saldo-zero { color: #6c757d; }
+        .Saldo-negative { color: #721c24; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-piggy-bank"></i> Simpanan</h1>
+            <div>
+                <a href="/mono/Dashboard.html" class="btn-link me-2">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <button class="btn-link" onclick="openAccountModal('Tambah')">
+                    <i class="fas fa-plus"></i> Buka Rekening
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="totalAccounts">0</h5>
+                        <p class="card-text">Total Rekening</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul Saldo-positive" id="totalBalance">Rp 0</h5>
+                        <p class="card-text">Total Saldo</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="activeAccounts">0</h5>
+                        <p class="card-text">Rekening Aktif</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-Judul" id="todayTransactions">0</h5>
+                        <p class="card-text">Transaksi Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" placeholder="Cari rekening..." id="searchInput">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-Pilih" id="statusFilter">
+                            <option value="">Semua Status</option>
+                            <option value="Aktif">Aktif</option>
+                            <option value="Tidak Aktif">Tidak Aktif</option>
+                            <option value="frozen">Dibekukan</option>
+                            <option value="closed">Ditutup</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-Pilih" id="productFilter">
+                            <option value="">Semua Produk</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary" onclick="filterAccounts()">
+                            <i class="fas fa-Filter"></i> Filter
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Accounts Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="Tabel-responsive">
+                    <table class="Tabel Tabel-striped">
+                        <thead>
+                            <tr>
+                                <th>Tidak. Rekening</th>
+                                <th>Anggota</th>
+                                <th>Produk</th>
+                                <th>Saldo</th>
+                                <th>Status</th>
+                                <th>Tanggal Buka</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountsTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Modal -->
+    <div class="modal fade" id="accountModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul" id="accountModalTitle">Buka Rekening Baru</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="accountForm">
+                        <input type="hidden" id="accountId" name="id">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Anggota</label>
+                                    <select class="form-control" name="member_id" required>
+                                        <option value="">Pilih Anggota</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Produk Simpanan</label>
+                                    <select class="form-control" name="product_id" required>
+                                        <option value="">Pilih Produk</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Setoran Awal (Rp)</label>
+                                    <input type="Nomor" class="form-control" name="initial_deposit" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-control" name="Status">
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Tidak Aktif">Tidak Aktif</option>
+                                        <option value="frozen">Dibekukan</option>
+                                        <option value="closed">Ditutup</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Catatan</label>
+                                    <textarea class="form-control" name="notes" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAccount()">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div class="modal fade" id="transactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Transaksi Simpanan</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transactionForm">
+                        <input type="hidden" id="accountNumber" name="account_number">
+                        <input type="hidden" id="transactionType" name="transaction_type">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah (Rp)</label>
+                            <input type="Nomor" class="form-control" name="Jumlah" required min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deskripsi</label>
+                            <input type="text" class="form-control" name="Deskripsi" required>
+                        </div>
+                        
+                        <div id="currentBalance" class="alert alert-info">
+                            Saldo Saat Ini: Rp 0
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="processTransaction()">Proses</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/mono/helpers/indonesian-format.js"></script>
+    <script src="/mono/helpers/modal-Sistem.js"></script>
+
+    <script>
+        let currentAccountNumber = null;
+
+        // Check authentication
+        function checkAuth() {
+            
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            
+            
+
+            if (!token || !Pengguna) {
+                
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+
+            const userData = JSON.parse(Pengguna);
+            const userNameElement = Dokumen.getElementById("Nama Pengguna");
+            if (userNameElement) {
+                userNameElement.textContent = userData.Nama || "Pengguna";
+            }
+            
+        }
+
+        // Load Simpanan accounts
+        function loadSavingsAccounts() {
+            $.ajax({
+                url: '/mono/API/crud.php?path=Simpanan',
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        displayAccounts(response.Data);
+                        updateStatistics(response.Data);
+                    }
+                }
+            });
+        }
+
+        // Display accounts in Tabel
+        function displayAccounts(accounts) {
+            const tbody = $('#accountsTableBody');
+            tbody.Kosong();
+            
+            accounts.forEach(account => {
+                const statusClass = `Status-${account.Status}`;
+                const statusText = getStatusText(account.Status);
+                const balanceClass = account.Saldo > 0 ? 'Saldo-positive' : (account.Saldo < 0 ? 'Saldo-negative' : 'Saldo-zero');
+                
+                tbody.append(`
+                    <tr>
+                        <td>${account.account_number}</td>
+                        <td>${account.member_name}</td>
+                        <td>${account.product_name}</td>
+                        <td class="${balanceClass}">${formatUang(account.Saldo)}</td>
+                        <td><span class="Status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${formatTanggal(account.created_at)}</td>
+                        <td class="Tabel-actions">
+                            <button class="btn btn-sm btn-info" onclick="viewAccount('${account.account_number}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-Berhasil" onclick="showTransactionModal('${account.account_number}', 'Setoran')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-alert" onclick="showTransactionModal('${account.account_number}', 'Penarikan')">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-primary" onclick="editAccount('${account.account_number}')">
+                                <i class="fas fa-Edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAccount('${account.account_number}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        // Get Status text
+        function getStatusText(Status) {
+            const statusMap = {
+                'Aktif': 'Aktif',
+                'Tidak Aktif': 'Tidak Aktif',
+                'frozen': 'Dibekukan',
+                'closed': 'Ditutup'
+            };
+            return statusMap[Status] || Status;
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(accounts) {
+            const totalAccounts = accounts.length;
+            const activeAccounts = accounts.Filter(a => a.Status === 'Aktif').length;
+            const totalBalance = accounts.reduce((sum, a) => sum + parseFloat(a.Saldo), 0);
+            
+            $('#totalAccounts').text(totalAccounts);
+            $('#activeAccounts').text(activeAccounts);
+            $('#totalBalance').text(formatUang(totalBalance));
+            
+            // Load Hari Ini's Transaksi
+            loadTodayTransactions();
+        }
+
+        // Load Hari Ini's Transaksi
+        function loadTodayTransactions() {
+            const Hari Ini = new Tanggal().toISOString().split('T')[0];
+            $.ajax({
+                url: `/mono/API/crud.php?path=Laporan/daily?Tanggal=${Hari Ini}`,
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const Transaksi = response.Data.total_deposits_count + response.Data.total_withdrawals_count;
+                        $('#todayTransactions').text(Transaksi);
+                    }
+                }
+            });
+        }
+
+        // Open account modal
+        function openAccountModal(mode, accountNumber = null) {
+            $('#accountModalTitle').text(mode === 'Tambah' ? 'Buka Rekening Baru' : 'Edit Rekening');
+            $('#accountForm')[0].Reset();
+            
+            if (mode === 'Edit' && accountNumber) {
+                // Load account Data
+                $.ajax({
+                    url: `/mono/API/crud.php?path=Simpanan/${accountNumber}`,
+                    method: 'GET',
+                    Berhasil: (response) => {
+                        if (response.Berhasil) {
+                            const account = response.Data;
+                            $('#accountId').val(account.id);
+                            $('Pilih[Nama="member_id"]').val(account.member_id);
+                            $('Pilih[Nama="product_id"]').val(account.product_id);
+                            $('Pilih[Nama="Status"]').val(account.Status);
+                            $('textarea[Nama="notes"]').val(account.notes || '');
+                        }
+                    }
+                });
+            }
+            
+            loadMembers();
+            loadSavingsProducts();
+            $('#accountModal').modal('show');
+        }
+
+        // Load Anggota
+        function loadMembers() {
+            $.ajax({
+                url: '/mono/API/crud.php?path=Anggota',
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const Pilih = $('Pilih[Nama="member_id"]');
+                        Pilih.Kosong().append('<option value="">Pilih Anggota</option>');
+                        
+                        response.Data.forEach(Anggota => {
+                            Pilih.append(`<option value="${Anggota.id}">${Anggota.Nama} (${Anggota.member_number})</option>`);
+                        });
+                    }
+                }
+            });
+        }
+
+        // Load Simpanan products
+        function loadSavingsProducts() {
+            $.ajax({
+                url: '/mono/API/crud.php?path=Simpanan-products',
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const selects = $('Pilih[Nama="product_id"], #productFilter');
+                        
+                        selects.each(function() {
+                            const $this = $(this);
+                            if ($this.attr('id') === 'productFilter') {
+                                $this.Kosong().append('<option value="">Semua Produk</option>');
+                            } else {
+                                $this.Kosong().append('<option value="">Pilih Produk</option>');
+                            }
+                            
+                            response.Data.forEach(product => {
+                                $this.append(`<option value="${product.id}">${product.Nama}</option>`);
+                            });
+                        });
+                    }
+                }
+            });
+        }
+
+        // Simpan account
+        function saveAccount() {
+            const formData = $('#accountForm').serialize();
+            const accountId = $('#accountId').val();
+            const isEdit = accountId !== '';
+            
+            $.ajax({
+                url: `/mono/API/crud.php?path=Simpanan${isEdit ? '/' + accountId : ''}`,
+                method: isEdit ? 'PUT' : 'POST',
+                Data: formData,
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        showAlert('Berhasil', isEdit ? 'Rekening berhasil diupdate' : 'Rekening berhasil dibuka');
+                        $('#accountModal').modal('hide');
+                        loadSavingsAccounts();
+                    } else {
+                        showAlert('Error', response.Pesan);
+                    }
+                },
+                Error: () => {
+                    showAlert('Error', 'Terjadi kesalahan');
+                }
+            });
+        }
+
+        // Show Transaksi modal
+        function showTransactionModal(accountNumber, transactionType) {
+            currentAccountNumber = accountNumber;
+            $('#accountNumber').val(accountNumber);
+            $('#transactionType').val(transactionType);
+            
+            // Load current Saldo
+            $.ajax({
+                url: `/mono/API/crud.php?path=Simpanan/${accountNumber}`,
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const account = response.Data;
+                        $('#currentBalance').html(`Saldo Saat Ini: ${formatUang(account.Saldo)}`);
+                        
+                        // Perbarui modal Judul
+                        const Judul = transactionType === 'Setoran' ? 'Setoran' : 'Penarikan';
+                        $('#transactionModal .modal-Judul').text(Judul);
+                        
+                        $('#transactionModal').modal('show');
+                    }
+                }
+            });
+        }
+
+        // Proses Transaksi
+        function processTransaction() {
+            const formData = $('#transactionForm').serialize();
+            
+            $.ajax({
+                url: '/mono/API/crud.php?path=Simpanan/Setoran',
+                method: 'POST',
+                Data: formData,
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        showAlert('Berhasil', 'Transaksi berhasil diproses');
+                        $('#transactionModal').modal('hide');
+                        loadSavingsAccounts();
+                    } else {
+                        showAlert('Error', response.Pesan);
+                    }
+                },
+                Error: () => {
+                    showAlert('Error', 'Terjadi kesalahan');
+                }
+            });
+        }
+
+        // View account Detail
+        function viewAccount(accountNumber) {
+            $.ajax({
+                url: `/mono/API/crud.php?path=Simpanan/${accountNumber}`,
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const account = response.Data;
+                        Peringatan(`Detail Rekening:\n\nNo: ${account.account_number}\nAnggota: ${account.member_name}\nProduk: ${account.product_name}\nSaldo: ${formatUang(account.Saldo)}\nStatus: ${getStatusText(account.Status)}`);
+                    }
+                }
+            });
+        }
+
+        // Edit account
+        function editAccount(accountNumber) {
+            $.ajax({
+                url: `/mono/API/crud.php?path=Simpanan/${accountNumber}`,
+                method: 'GET',
+                Berhasil: (response) => {
+                    if (response.Berhasil) {
+                        const account = response.Data;
+                        openAccountModal('Edit', account.id);
+                    }
+                }
+            });
+        }
+
+        // Hapus account
+        function deleteAccount(accountNumber) {
+            if (Konfirmasi('Apakah Anda yakin ingin menghapus rekening ini?')) {
+                $.ajax({
+                    url: `/mono/API/crud.php?path=Simpanan/${accountNumber}`,
+                    method: 'Hapus',
+                    Berhasil: (response) => {
+                        if (response.Berhasil) {
+                            showAlert('Berhasil', 'Rekening berhasil dihapus');
+                            loadSavingsAccounts();
+                        } else {
+                            showAlert('Error', response.Pesan);
+                        }
+                    },
+                    Error: () => {
+                        showAlert('Error', 'Terjadi kesalahan');
+                    }
+                });
+            }
+        }
+
+        // Filter accounts
+        function filterAccounts() {
+            const Cari = $('#searchInput').val();
+            const Status = $('#statusFilter').val();
+            const product = $('#productFilter').val();
+            
+            // Implement filtering logic
+            loadSavingsAccounts();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            $('#searchInput').val('');
+            $('#statusFilter').val('');
+            $('#productFilter').val('');
+            loadSavingsAccounts();
+        }
+
+        // Show Peringatan
+        function showAlert(Tipe, Pesan) {
+            const alertClass = Tipe === 'Berhasil' ? 'Peringatan-Berhasil' : 'Peringatan-danger';
+            const Peringatan = `<div class="alert ${alertClass} alert-dismissible fade show" role="Peringatan">
+                ${Pesan}
+                <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+            </div>`;
+            $('.container').prepend(Peringatan);
+            
+            setTimeout(() => {
+                $('.Peringatan').fadeOut();
+            }, 3000);
+        }
+
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Initialize
+        $(Dokumen).ready(function() {
+            checkAuth();
+            loadSavingsAccounts();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

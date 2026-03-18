@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Tracking - Surveyor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .map-container {
+            height: 500px;
+            border-radius: 8px;
+            overflow: hidden;
+            Posisi: relative;
+        }
+        
+        .tracking-controls {
+            Posisi: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .Lokasi-Info {
+            Posisi: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+        }
+        
+        .route-item {
+            border-left: 4px solid #17a2b8;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: Semua 0.3s;
+        }
+        
+        .route-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+        
+        .route-item.Aktif {
+            background: #e3f2fd;
+            border-left-color: #007bff;
+        }
+        
+        .tracking-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-Aktif {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .Status-Tidak Aktif {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .Status-paused {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .Kecepatan-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .Kecepatan-bar {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .Kecepatan-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+            transition: width 0.3s;
+        }
+        
+        .checkpoint-marker {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .checkpoint-Selesai {
+            background: #28a745;
+        }
+        
+        .checkpoint-current {
+            background: #ffc107;
+            animation: pulse 2s infinite;
+        }
+        
+        .checkpoint-Menunggu {
+            background: #6c757d;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .tracking-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-map-marked-alt"></i> GPS Tracking</h1>
+                <p class="mb-0">Surveyor - Real-Waktu Lokasi Tracking & Route Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Tracking Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-route fa-2x mb-2"></i>
+                        <h5>Hari Ini's Distance</h5>
+                        <h3 id="todayDistance">0 km</h3>
+                        <p Kelas="mb-0">Total traveled</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Berhasil text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-map-pin fa-2x mb-2"></i>
+                        <h5>Checkpoints</h5>
+                        <h3 id="checkpointsCount">0</h3>
+                        <p Kelas="mb-0">Visited Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Peringatan text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-clock fa-2x mb-2"></i>
+                        <h5>Aktif Waktu</h5>
+                        <h3 id="activeTime">0h 0m</h3>
+                        <p Kelas="mb-0">Tracking duration</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-primary text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-tachometer-alt fa-2x mb-2"></i>
+                        <h5>Avg Kecepatan</h5>
+                        <h3 id="avgSpeed">0 km/h</h3>
+                        <p Kelas="mb-0">Current trip</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div Kelas="row">
+            <!-- Map View -->
+            <div Kelas="col-md-8">
+                <div Kelas="card">
+                    <div Kelas="card-header d-flex justify-content-between align-items-center">
+                        <h5><i Kelas="fas fa-map"></i> Live Tracking Map</h5>
+                        <div Kelas="d-flex gap-2">
+                            <span Kelas="tracking-Status Status-Aktif" id="trackingStatus">Aktif</span>
+                            <button Kelas="btn btn-sm btn-Berhasil" onclick="startTracking()" id="startBtn">
+                                <i Kelas="fas fa-play"></i> Start
+                            </button>
+                            <button Kelas="btn btn-sm btn-Peringatan" onclick="pauseTracking()" id="pauseBtn" style="display: Tidak Ada;">
+                                <i Kelas="fas fa-pause"></i> Pause
+                            </button>
+                            <button Kelas="btn btn-sm btn-danger" onclick="stopTracking()" id="stopBtn" style="display: Tidak Ada;">
+                                <i Kelas="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+                    </div>
+                    <div Kelas="card-body p-0">
+                        <div id="trackingMap" Kelas="map-container">
+                            <div Kelas="tracking-controls">
+                                <h6>Tracking Controls</h6>
+                                <div Kelas="d-grid gap-2">
+                                    <button Kelas="btn btn-sm btn-outline-primary" onclick="centerOnUser()">
+                                        <i Kelas="fas fa-crosshairs"></i> Center on Me
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Info" onclick="toggleRoute()">
+                                        <i Kelas="fas fa-route"></i> Toggle Route
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="addCheckpoint()">
+                                        <i Kelas="fas fa-map-pin"></i> Tambah Checkpoint
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="clearRoute()">
+                                        <i Kelas="fas fa-trash"></i> Hapus Route
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div Kelas="Lokasi-Info">
+                                <h6>Current Lokasi</h6>
+                                <div id="currentLocationInfo">
+                                    <p Kelas="mb-1"><strong>Latitude:</strong> <span id="currentLat">-</span></p>
+                                    <p Kelas="mb-1"><strong>Longitude:</strong> <span id="currentLng">-</span></p>
+                                    <p Kelas="mb-1"><strong>Alamat:</strong> <span id="currentAddress">Memuat...</span></p>
+                                    <p Kelas="mb-1"><strong>Kecepatan:</strong> <span id="currentSpeed">0 km/h</span></p>
+                                    <p Kelas="mb-0"><strong>Akurasi:</strong> <span id="gpsAccuracy">-</span> m</p>
+                                </div>
+                                
+                                <div Kelas="Kecepatan-indicator mt-2">
+                                    <span>Kecepatan:</span>
+                                    <div Kelas="Kecepatan-bar">
+                                        <div Kelas="Kecepatan-fill" id="speedFill" style="width: 0%"></div>
+                                    </div>
+                                    <span id="speedValue">0 km/h</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Route Statistik -->
+                <div Kelas="card mt-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Grafik-line"></i> Route Statistik</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="tracking-stats">
+                            <div Kelas="stat-card">
+                                <div Kelas="stat-value" id="totalDistance">0 km</div>
+                                <div Kelas="stat-label">Total Distance</div>
+                            </div>
+                            <div Kelas="stat-card">
+                                <div Kelas="stat-value" id="totalTime">0h 0m</div>
+                                <div Kelas="stat-label">Total Waktu</div>
+                            </div>
+                            <div Kelas="stat-card">
+                                <div Kelas="stat-value" id="maxSpeed">0 km/h</div>
+                                <div Kelas="stat-label">Max Kecepatan</div>
+                            </div>
+                            <div Kelas="stat-card">
+                                <div Kelas="stat-value" id="waypoints">0</div>
+                                <div Kelas="stat-label">Waypoints</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div Kelas="col-md-4">
+                <!-- Hari Ini's Route -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Daftar"></i> Hari Ini's Route</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div id="routeList">
+                            <!-- Route items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Checkpoints -->
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-map-pin"></i> Checkpoints</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div id="checkpointList">
+                            <!-- Checkpoints will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Route Riwayat -->
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Riwayat"></i> Route Riwayat</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="mb-3">
+                            <Pilih Kelas="Formulir-Pilih Formulir-Pilih-sm" id="historyFilter" onchange="loadRouteHistory()">
+                                <option value="">Semua Routes</option>
+                                <option value="Hari Ini">Hari Ini</option>
+                                <option value="week">Minggu Ini</option>
+                                <option value="month">Bulan Ini</option>
+                            </Pilih>
+                        </div>
+                        <div id="routeHistory">
+                            <!-- Route Riwayat will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tambah Checkpoint Modal -->
+    <div Kelas="modal fade" id="checkpointModal" tabindex="-1">
+        <div Kelas="modal-dialog">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Tambah Checkpoint</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body">
+                    <Formulir id="checkpointForm">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Checkpoint Nama *</label>
+                            <input Tipe="text" Kelas="form-control" id="checkpointName" Wajib>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Deskripsi</label>
+                            <textarea Kelas="form-control" id="checkpointDescription" rows="3" placeholder="Enter checkpoint Deskripsi..."></textarea>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Checkpoint Tipe</label>
+                            <Pilih Kelas="Formulir-Pilih" id="checkpointType">
+                                <option value="Survei">Survei Lokasi</option>
+                                <option value="Anggota">Anggota Visit</option>
+                                <option value="office">Office</option>
+                                <option value="break">Break</option>
+                                <option value="other">Other</option>
+                            </Pilih>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Use Current Lokasi</label>
+                            <div Kelas="Formulir-check">
+                                <input Kelas="Formulir-check-input" Tipe="checkbox" id="useCurrentLocation" checked>
+                                <label Kelas="Formulir-check-label" for="useCurrentLocation">
+                                    Use current GPS Lokasi
+                                </label>
+                            </div>
+                        </div>
+                        <div Kelas="mb-3" id="manualLocation" style="display: Tidak Ada;">
+                            <label Kelas="form-label">Manual Lokasi</label>
+                            <div Kelas="row">
+                                <div Kelas="col-md-6">
+                                    <input Tipe="Nomor" Kelas="form-control" id="manualLat" placeholder="Latitude" step="0.000001">
+                                </div>
+                                <div Kelas="col-md-6">
+                                    <input Tipe="Nomor" Kelas="form-control" id="manualLng" placeholder="Longitude" step="0.000001">
+                                </div>
+                            </div>
+                        </div>
+                    </Formulir>
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Batal</button>
+                    <button Tipe="button" Kelas="btn btn-primary" onclick="saveCheckpoint()">
+                        <i Kelas="fas fa-Simpan"></i> Simpan Checkpoint
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let map = null;
+        let currentMarker = null;
+        let routeControl = null;
+        let trackingInterval = null;
+        let isTracking = false;
+        let isPaused = false;
+        let currentRoute = [];
+        let checkpoints = [];
+        let currentPosition = null;
+        let routeStats = {
+            distance: 0,
+            Waktu: 0,
+            maxSpeed: 0,
+            waypoints: 0
+        };
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            initializeMap();
+            loadTodayRoute();
+            loadCheckpoints();
+            loadRouteHistory();
+            startLocationUpdates();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Surveyor
+            if (currentUser.role !== 'Surveyor') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('trackingMap').setView([-6.2088, 106.8456], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Get current Lokasi
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(Posisi) {
+                    const lat = Posisi.coords.latitude;
+                    const lng = Posisi.coords.longitude;
+                    
+                    currentPosition = { lat, lng };
+                    
+                    // Tambah current Lokasi marker
+                    if (currentMarker) {
+                        map.removeLayer(currentMarker);
+                    }
+                    
+                    currentMarker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: 'current-Lokasi-marker',
+                            html: '<div style="background: #007bff; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><i class="fas fa-user"></i></div>',
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map);
+                    
+                    map.setView([lat, lng], 15);
+                    
+                    updateLocationInfo(lat, lng, Posisi.coords.Akurasi, Posisi.coords.Kecepatan || 0);
+                }, function(Error) {
+                    console.Error('Error getting Lokasi:', Error);
+                    // Use default Lokasi
+                    updateLocationInfo(-6.2088, 106.8456, 50, 0);
+                });
+            }
+        }
+
+        // Start Lokasi updates
+        function startLocationUpdates() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(function(Posisi) {
+                    const lat = Posisi.coords.latitude;
+                    const lng = Posisi.coords.longitude;
+                    const Kecepatan = Posisi.coords.Kecepatan || 0;
+                    const Akurasi = Posisi.coords.Akurasi;
+                    
+                    currentPosition = { lat, lng };
+                    
+                    // Perbarui marker Posisi
+                    if (currentMarker) {
+                        currentMarker.setLatLng([lat, lng]);
+                    }
+                    
+                    // Tambah to route if tracking
+                    if (isTracking && !isPaused) {
+                        currentRoute.push([lat, lng]);
+                        updateRoute();
+                        updateStats(Kecepatan);
+                    }
+                    
+                    updateLocationInfo(lat, lng, Akurasi, Kecepatan);
+                }, function(Error) {
+                    console.Error('Error watching Posisi:', Error);
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            }
+        }
+
+        // Perbarui Lokasi Info
+        function updateLocationInfo(lat, lng, Akurasi, Kecepatan) {
+            Dokumen.getElementById('currentLat').textContent = lat.toFixed(6);
+            Dokumen.getElementById('currentLng').textContent = lng.toFixed(6);
+            Dokumen.getElementById('gpsAccuracy').textContent = Akurasi.toFixed(0);
+            Dokumen.getElementById('currentSpeed').textContent = (Kecepatan * 3.6).toFixed(1) + ' km/h';
+            Dokumen.getElementById('speedValue').textContent = (Kecepatan * 3.6).toFixed(1) + ' km/h';
+            
+            // Perbarui Kecepatan bar
+            const speedPercent = Math.min((Kecepatan * 3.6) / 120 * 100, 100); // Max 120 km/h
+            Dokumen.getElementById('speedFill').style.width = speedPercent + '%';
+            
+            // Get Alamat (reverse geocoding)
+            reverseGeocode(lat, lng);
+        }
+
+        // Reverse geocoding
+        function reverseGeocode(lat, lng) {
+            // Using Nominatim for reverse geocoding
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(Data => {
+                    if (Data && Data.display_name) {
+                        Dokumen.getElementById('currentAddress').textContent = Data.display_name;
+                    }
+                })
+                .catch(Error => {
+                    console.Error('Error reverse geocoding:', Error);
+                    Dokumen.getElementById('currentAddress').textContent = 'Alamat not available';
+                });
+        }
+
+        // Start tracking
+        function startTracking() {
+            isTracking = true;
+            isPaused = false;
+            currentRoute = [];
+            routeStats = { distance: 0, Waktu: 0, maxSpeed: 0, waypoints: 0 };
+            
+            // Perbarui UI
+            Dokumen.getElementById('trackingStatus').className = 'tracking-Status Status-Aktif';
+            Dokumen.getElementById('trackingStatus').textContent = 'Aktif';
+            Dokumen.getElementById('startBtn').style.display = 'Tidak Ada';
+            Dokumen.getElementById('pauseBtn').style.display = 'inline-block';
+            Dokumen.getElementById('stopBtn').style.display = 'inline-block';
+            
+            // Start tracking interval
+            trackingInterval = setInterval(updateTrackingTime, 1000);
+            
+            showSuccess('GPS tracking started!');
+        }
+
+        // Pause tracking
+        function pauseTracking() {
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                Dokumen.getElementById('trackingStatus').className = 'tracking-Status Status-paused';
+                Dokumen.getElementById('trackingStatus').textContent = 'Paused';
+                Dokumen.getElementById('pauseBtn').innerHTML = '<i class="fas fa-play"></i> Resume';
+            } else {
+                Dokumen.getElementById('trackingStatus').className = 'tracking-Status Status-Aktif';
+                Dokumen.getElementById('trackingStatus').textContent = 'Aktif';
+                Dokumen.getElementById('pauseBtn').innerHTML = '<i class="fas fa-pause"></i> Pause';
+            }
+        }
+
+        // Stop tracking
+        function stopTracking() {
+            isTracking = false;
+            isPaused = false;
+            
+            // Hapus interval
+            if (trackingInterval) {
+                clearInterval(trackingInterval);
+                trackingInterval = null;
+            }
+            
+            // Perbarui UI
+            Dokumen.getElementById('trackingStatus').className = 'tracking-Status Status-Tidak Aktif';
+            Dokumen.getElementById('trackingStatus').textContent = 'Tidak Aktif';
+            Dokumen.getElementById('startBtn').style.display = 'inline-block';
+            Dokumen.getElementById('pauseBtn').style.display = 'Tidak Ada';
+            Dokumen.getElementById('stopBtn').style.display = 'Tidak Ada';
+            
+            // Simpan route
+            if (currentRoute.length > 0) {
+                saveRoute();
+            }
+            
+            showSuccess('GPS tracking stopped!');
+        }
+
+        // Perbarui route
+        function updateRoute() {
+            if (currentRoute.length < 2) return;
+            
+            // Remove existing route
+            if (routeControl) {
+                map.removeControl(routeControl);
+            }
+            
+            // Tambah new route
+            routeControl = L.Routing.control({
+                waypoints: currentRoute.map(point => L.latLng(point[0], point[1])),
+                routeWhileDragging: false,
+                addWaypoints: false,
+                createMarker: function() { return null; },
+                lineOptions: {
+                    styles: [
+                        { color: '#007bff', weight: 4, opacity: 0.7 }
+                    ]
+                }
+            }).addTo(map);
+        }
+
+        // Perbarui stats
+        function updateStats(Kecepatan) {
+            const speedKmh = Kecepatan * 3.6;
+            
+            // Perbarui max Kecepatan
+            if (speedKmh > routeStats.maxSpeed) {
+                routeStats.maxSpeed = speedKmh;
+            }
+            
+            // Calculate distance (simplified)
+            if (currentRoute.length > 1) {
+                const lastPoint = currentRoute[currentRoute.length - 2];
+                const currentPoint = currentRoute[currentRoute.length - 1];
+                const distance = calculateDistance(lastPoint[0], lastPoint[1], currentPoint[0], currentPoint[1]);
+                routeStats.distance += distance;
+            }
+            
+            // Perbarui display
+            updateStatsDisplay();
+        }
+
+        // Perbarui tracking Waktu
+        function updateTrackingTime() {
+            if (!isPaused) {
+                routeStats.Waktu++;
+                updateStatsDisplay();
+            }
+        }
+
+        // Perbarui stats display
+        function updateStatsDisplay() {
+            Dokumen.getElementById('todayDistance').textContent = routeStats.distance.toFixed(1) + ' km';
+            Dokumen.getElementById('totalDistance').textContent = routeStats.distance.toFixed(1) + ' km';
+            Dokumen.getElementById('activeTime').textContent = formatTime(routeStats.Waktu);
+            Dokumen.getElementById('totalTime').textContent = formatTime(routeStats.Waktu);
+            Dokumen.getElementById('avgSpeed').textContent = routeStats.Waktu > 0 ? (routeStats.distance / (routeStats.Waktu / 3600)).toFixed(1) + ' km/h' : '0 km/h';
+            Dokumen.getElementById('maxSpeed').textContent = routeStats.maxSpeed.toFixed(1) + ' km/h';
+            Dokumen.getElementById('waypoints').textContent = currentRoute.length;
+            Dokumen.getElementById('checkpointsCount').textContent = checkpoints.length;
+        }
+
+        // Calculate distance between two points
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Format Waktu
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+
+        // Center on Pengguna
+        function centerOnUser() {
+            if (currentPosition) {
+                map.setView([currentPosition.lat, currentPosition.lng], 15);
+            }
+        }
+
+        // Toggle route
+        function toggleRoute() {
+            if (routeControl) {
+                if (map.hasLayer(routeControl)) {
+                    map.removeLayer(routeControl);
+                } else {
+                    map.addLayer(routeControl);
+                }
+            }
+        }
+
+        // Tambah checkpoint
+        function addCheckpoint() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('checkpointModal'));
+            modal.show();
+        }
+
+        // Simpan checkpoint
+        function saveCheckpoint() {
+            const Nama = Dokumen.getElementById('checkpointName').value;
+            const Deskripsi = Dokumen.getElementById('checkpointDescription').value;
+            const Tipe = Dokumen.getElementById('checkpointType').value;
+            const useCurrent = Dokumen.getElementById('useCurrentLocation').checked;
+            
+            if (!Nama) {
+                Peringatan('Please enter checkpoint Nama');
+                return;
+            }
+            
+            let lat, lng;
+            if (useCurrent && currentPosition) {
+                lat = currentPosition.lat;
+                lng = currentPosition.lng;
+            } else {
+                lat = parseFloat(Dokumen.getElementById('manualLat').value);
+                lng = parseFloat(Dokumen.getElementById('manualLng').value);
+                
+                if (isNaN(lat) || isNaN(lng)) {
+                    Peringatan('Please enter valid coordinates');
+                    return;
+                }
+            }
+            
+            const checkpoint = {
+                id: 'CP-' + Tanggal.now(),
+                Nama: Nama,
+                Deskripsi: Deskripsi,
+                Tipe: Tipe,
+                latitude: lat,
+                longitude: lng,
+                timestamp: new Tanggal().toISOString()
+            };
+            
+            checkpoints.push(checkpoint);
+            
+            // Tambah marker to map
+            L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(`<strong>${Nama}</strong><br>${Deskripsi}<br><small>${Tipe}</small>`);
+            
+            // Perbarui display
+            loadCheckpoints();
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('checkpointModal'));
+            modal.hide();
+            Dokumen.getElementById('checkpointForm').Reset();
+            
+            showSuccess('Checkpoint added successfully!');
+        }
+
+        // Hapus route
+        function clearRoute() {
+            if (!Konfirmasi('Are you sure you want to Hapus the current route?')) return;
+            
+            // Remove route from map
+            if (routeControl) {
+                map.removeControl(routeControl);
+                routeControl = null;
+            }
+            
+            // Hapus route Data
+            currentRoute = [];
+            routeStats = { distance: 0, Waktu: 0, maxSpeed: 0, waypoints: 0 };
+            
+            // Perbarui display
+            updateStatsDisplay();
+            
+            showSuccess('Route cleared!');
+        }
+
+        // Simpan route
+        function saveRoute() {
+            const route = {
+                id: 'RT-' + Tanggal.now(),
+                Tanggal: new Tanggal().toISOString().split('T')[0],
+                distance: routeStats.distance,
+                Waktu: routeStats.Waktu,
+                maxSpeed: routeStats.maxSpeed,
+                waypoints: currentRoute.length,
+                checkpoints: checkpoints.length,
+                route: currentRoute
+            };
+            
+            // Simpan to localStorage (in real app, Simpan to Database)
+            let routes = JSON.parse(localStorage.getItem('surveyor_routes') || '[]');
+            routes.push(route);
+            localStorage.setItem('surveyor_routes', JSON.stringify(routes));
+            
+            showSuccess('Route saved successfully!');
+        }
+
+        // Load Hari Ini's route
+        function loadTodayRoute() {
+            const routeList = Dokumen.getElementById('routeList');
+            
+            // Get Hari Ini's routes from localStorage
+            const routes = JSON.parse(localStorage.getItem('surveyor_routes') || '[]');
+            const Hari Ini = new Tanggal().toISOString().split('T')[0];
+            const todayRoutes = routes.Filter(route => route.Tanggal === Hari Ini);
+            
+            if (todayRoutes.length === 0) {
+                routeList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak routes for Hari Ini</div>';
+                return;
+            }
+            
+            routeList.innerHTML = todayRoutes.map(route => `
+                <div class="route-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">Route ${route.id.split('-')[1]}</h6>
+                            <p class="mb-1">${route.distance.toFixed(1)} km in ${formatTime(route.Waktu)}</p>
+                            <small class="text-muted">
+                                Max Kecepatan: ${route.maxSpeed.toFixed(1)} km/h | 
+                                Waypoints: ${route.waypoints} | 
+                                Checkpoints: ${route.checkpoints}
+                            </small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewRoute('${route.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load checkpoints
+        function loadCheckpoints() {
+            const checkpointList = Dokumen.getElementById('checkpointList');
+            
+            if (checkpoints.length === 0) {
+                checkpointList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak checkpoints</div>';
+                return;
+            }
+            
+            checkpointList.innerHTML = checkpoints.map(checkpoint => `
+                <div class="d-flex align-items-center mb-2">
+                    <div class="checkpoint-marker checkpoint-Selesai me-2"></div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0">${checkpoint.Nama}</h6>
+                        <small class="text-muted">${checkpoint.Tipe}</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeCheckpoint('${checkpoint.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Load route Riwayat
+        function loadRouteHistory() {
+            const historyDiv = Dokumen.getElementById('routeHistory');
+            const Filter = Dokumen.getElementById('historyFilter').value;
+            
+            const routes = JSON.parse(localStorage.getItem('surveyor_routes') || '[]');
+            let filteredRoutes = routes;
+            
+            if (Filter === 'Hari Ini') {
+                const Hari Ini = new Tanggal().toISOString().split('T')[0];
+                filteredRoutes = routes.Filter(route => route.Tanggal === Hari Ini);
+            } else if (Filter === 'week') {
+                const weekAgo = new Tanggal();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                filteredRoutes = routes.Filter(route => new Tanggal(route.Tanggal) >= weekAgo);
+            } else if (Filter === 'month') {
+                const monthAgo = new Tanggal();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                filteredRoutes = routes.Filter(route => new Tanggal(route.Tanggal) >= monthAgo);
+            }
+            
+            if (filteredRoutes.length === 0) {
+                historyDiv.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak routes found</div>';
+                return;
+            }
+            
+            historyDiv.innerHTML = filteredRoutes.slice(0, 5).map(route => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h6 class="mb-0">${formatDate(route.Tanggal)}</h6>
+                        <small class="text-muted">${route.distance.toFixed(1)} km</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewRoute('${route.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // View route
+        function viewRoute(routeId) {
+            const routes = JSON.parse(localStorage.getItem('surveyor_routes') || '[]');
+            const route = routes.find(r => r.id === routeId);
+            
+            if (!route || !route.route || route.route.length === 0) {
+                Peringatan('Route Data not available');
+                return;
+            }
+            
+            // Hapus existing route
+            if (routeControl) {
+                map.removeLayer(routeControl);
+            }
+            
+            // Display route on map
+            routeControl = L.Routing.control({
+                waypoints: route.route.map(point => L.latLng(point[0], point[1])),
+                routeWhileDragging: false,
+                addWaypoints: false,
+                createMarker: function() { return null; },
+                lineOptions: {
+                    styles: [
+                        { color: '#28a745', weight: 4, opacity: 0.7 }
+                    ]
+                }
+            }).addTo(map);
+            
+            // Fit map to route
+            if (route.route.length > 0) {
+                const bounds = L.latLngBounds(route.route);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+            
+            showSuccess('Route loaded on map!');
+        }
+
+        // Remove checkpoint
+        function removeCheckpoint(checkpointId) {
+            if (!Konfirmasi('Are you sure you want to remove this checkpoint?')) return;
+            
+            checkpoints = checkpoints.Filter(cp => cp.id !== checkpointId);
+            loadCheckpoints();
+            showSuccess('Checkpoint removed!');
+        }
+
+        // Toggle manual Lokasi
+        Dokumen.getElementById('useCurrentLocation')?.addEventListener('change', function() {
+            const manualLocation = Dokumen.getElementById('manualLocation');
+            manualLocation.style.display = this.checked ? 'Tidak Ada' : 'block';
+        });
+
+        // Utility functions
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Keluar function
+        function Keluar() {
+            // Stop tracking if Aktif
+            if (isTracking) {
+                stopTracking();
+            }
+            
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

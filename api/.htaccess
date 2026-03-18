@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteBase /mono/api/
+
+# Handle path-based routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^/]+)/?$ crud.php?endpoint=$1 [L,QSA]
+
+# Handle nested paths like crud.php/users
+RewriteRule ^crud\.php/([^/]+)/?$ crud.php?endpoint=$1 [L,QSA]

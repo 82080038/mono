@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Manajemen - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Operasi-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #6f42c1;
+            cursor: pointer;
+        }
+        
+        .Operasi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Prioritas-critical { border-left-color: #dc3545; }
+        .Prioritas-high { border-left-color: #fd7e14; }
+        .Prioritas-medium { border-left-color: #ffc107; }
+        .Prioritas-low { border-left-color: #28a745; }
+        
+        .Status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-Menunggu { background: #ffc107; color: #000; }
+        .Status-in-progress { background: #17a2b8; color: white; }
+        .Status-Selesai { background: #28a745; color: white; }
+        .Status-Dibatalkan { background: #dc3545; color: white; }
+        .Status-on-hold { background: #6c757d; color: white; }
+        
+        .Prioritas-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .Prioritas-critical-badge { background: #dc3545; color: white; }
+        .Prioritas-high-badge { background: #fd7e14; color: white; }
+        .Prioritas-medium-badge { background: #ffc107; color: #000; }
+        .Prioritas-low-badge { background: #28a745; color: white; }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #6f42c1;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #6f42c1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+        
+        .Operasi-timeline {
+            Posisi: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            Posisi: relative;
+            padding-bottom: 1rem;
+            border-left: 2px solid #dee2e6;
+            padding-left: 1rem;
+            margin-left: -1px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            Posisi: absolute;
+            left: -6px;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #6f42c1;
+            border: 2px solid white;
+        }
+        
+        .timeline-item.Selesai::before {
+            background: #28a745;
+        }
+        
+        .timeline-item.in-progress::before {
+            background: #17a2b8;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .Operasi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .icon-Pinjaman { background: linear-gradient(135deg, #007bff, #0056b3); }
+        .icon-Penagihan { background: linear-gradient(135deg, #dc3545, #c82333); }
+        .icon-Audit { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
+        .icon-Kepatuhan { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .icon-Laporan { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .icon-maintenance { background: linear-gradient(135deg, #fd7e14, #e8590c); }
+        
+        .progress-ring {
+            width: 50px;
+            height: 50px;
+            Posisi: relative;
+        }
+        
+        .progress-ring circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .Staf-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #6f42c1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Operasi-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .metric-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #6f42c1;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .Alur Kerja-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .Alur Kerja-step {
+            flex: 1;
+            text-align: center;
+            Posisi: relative;
+        }
+        
+        .Alur Kerja-step::after {
+            content: '';
+            Posisi: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e9ecef;
+            z-index: -1;
+        }
+        
+        .Alur Kerja-step:last-child::after {
+            display: Tidak Ada;
+        }
+        
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .step-Aktif {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .step-Selesai {
+            background: #28a745;
+            color: white;
+        }
+        
+        .Efisiensi-Skor {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .Skor-excellent { color: #28a745; }
+        .Skor-good { color: #17a2b8; }
+        .Skor-average { color: #ffc107; }
+        .Skor-poor { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-cogs"></i> Operations Manajemen</h1>
+                <p class="mb-0">Admin - Operations Oversight & Alur Kerja Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Operations Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-tasks fa-2x mb-2"></i>
+                        <h5>Total Operations</h5>
+                        <h3 id="totalOperations">0</h3>
+                        <p class="mb-0">Aktif tasks</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h5>Selesai</h5>
+                        <h3 id="completedOperations">0</h3>
+                        <p class="mb-0">Minggu Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h5>In Progress</h5>
+                        <h3 id="inProgressOperations">0</h3>
+                        <p class="mb-0">Currently</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Persentase fa-2x mb-2"></i>
+                        <h5>Efisiensi</h5>
+                        <h3 id="efficiencyScore">0%</h3>
+                        <p class="mb-0">Overall</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Operations List -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> Operations Queue</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="priorityFilter" onchange="filterOperations()">
+                                <option value="">Semua Prioritas</option>
+                                <option value="critical">Critical</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter" onchange="filterOperations()">
+                                <option value="">Semua Status</option>
+                                <option value="Menunggu">Menunggu</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="Selesai">Selesai</option>
+                                <option value="Dibatalkan">Dibatalkan</option>
+                                <option value="on_hold">On Hold</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="createNewOperation()">
+                                <i class="fas fa-plus"></i> New Operasi
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="operationsList">
+                            <!-- Operations will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Operations Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-line"></i> Operations Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Operations Performa</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Departemen Efisiensi</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="efficiencyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="createNewOperation()">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <h6>New Operasi</h6>
+                                    <small class="text-muted">Create Tugas</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="viewWorkflow()">
+                                    <i class="fas fa-Proyek-diagram"></i>
+                                    <h6>Alur Kerja</h6>
+                                    <small class="text-muted">View flow</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="auditOperations()">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    <h6>Audit</h6>
+                                    <small class="text-muted">Review ops</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="generateReport()">
+                                    <i class="fas fa-File-alt"></i>
+                                    <h6>Laporan</h6>
+                                    <small class="text-muted">Generate</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Workflow Overview -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-sitemap"></i> Alur Kerja Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="workflowOverview">
+                            <!-- Workflow overview will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Operations Metrics -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-pie"></i> Operations Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Operasi-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value" id="avgCompletionTime">2.3d</div>
+                                <div class="metric-label">Avg Completion</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="onTimeRate">85%</div>
+                                <div class="metric-label">On-Waktu Tarif</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="qualityScore">92%</div>
+                                <div class="metric-label">Kualitas Skor</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="resourceUtilization">78%</div>
+                                <div class="metric-label">Resource Util</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activities -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Activities</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Operasi-timeline" id="recentActivities">
+                            <!-- Recent activities will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Operation Modal -->
+    <div class="modal fade" id="newOperationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Create New Operasi</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newOperationForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Operasi Judul *</label>
+                                    <input type="text" class="form-control" id="operationTitle" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Operasi Tipe *</label>
+                                    <select class="form-Pilih" id="operationType" required>
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="loan_processing">Pinjaman Memproses</option>
+                                        <option value="Penagihan">Penagihan</option>
+                                        <option value="Audit">Audit</option>
+                                        <option value="Kepatuhan">Kepatuhan</option>
+                                        <option value="Laporan">Laporan Generation</option>
+                                        <option value="maintenance">Sistem Maintenance</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Prioritas *</label>
+                                    <select class="form-Pilih" id="operationPriority" required>
+                                        <option value="">Pilih Prioritas</option>
+                                        <option value="critical">Critical</option>
+                                        <option value="high">High</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Assigned To *</label>
+                                    <select class="form-Pilih" id="assignedTo" required>
+                                        <option value="">Pilih Staf</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Deskripsi</label>
+                                    <textarea class="form-control" id="operationDescription" rows="3" placeholder="Enter Operasi Deskripsi..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Due Tanggal</label>
+                                    <input type="Tanggal" class="form-control" id="dueDate">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Estimated Hours</label>
+                                    <input type="Nomor" class="form-control" id="estimatedHours" min="1" value="8">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Requirements</label>
+                                    <textarea class="form-control" id="requirements" rows="2" placeholder="Daftar Operasi requirements..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOperation()">
+                        <i class="fas fa-Simpan"></i> Create Operasi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Operation Details Modal -->
+    <div class="modal fade" id="operationDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Operasi Detail</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="operationDetails">
+                    <!-- Operation details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-alert" onclick="pauseOperation()">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button type="button" class="btn btn-Berhasil" onclick="completeOperation()">
+                        <i class="fas fa-check"></i> Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let operations = [];
+        let Staf = [];
+        let performanceChart = null;
+        let efficiencyChart = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadOperations();
+            loadStatistics();
+            loadWorkflowOverview();
+            loadRecentActivities();
+            initializeCharts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Admin
+            if (currentUser.role !== 'Admin') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load operations
+        async function loadOperations() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=operations', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        operations = Data.Data;
+                        displayOperations();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat operations:', Error);
+                // Use demo Data
+                operations = getDemoOperations();
+                displayOperations();
+            }
+        }
+
+        // Display operations
+        function displayOperations() {
+            const operationsList = Dokumen.getElementById('operationsList');
+            const priorityFilter = Dokumen.getElementById('priorityFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            
+            let filteredOperations = operations;
+            
+            // Filter by Prioritas
+            if (priorityFilter) {
+                filteredOperations = filteredOperations.Filter(op => op.Prioritas === priorityFilter);
+            }
+            
+            // Filter by Status
+            if (statusFilter) {
+                filteredOperations = filteredOperations.Filter(op => op.Status === statusFilter);
+            }
+            
+            operationsList.innerHTML = '';
+            
+            if (filteredOperations.length === 0) {
+                operationsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak operations found</div>';
+                return;
+            }
+            
+            filteredOperations.forEach(Operasi => {
+                const operationCard = Dokumen.createElement('div');
+                operationCard.className = `Operasi-card card mb-2 Prioritas-${Operasi.Prioritas}`;
+                operationCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="Operasi-icon icon-${Operasi.Tipe} me-3">
+                                        <i class="fas fa-${getOperationIcon(Operasi.Tipe)}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${Operasi.Judul}</h6>
+                                        <p class="mb-1">${Operasi.Deskripsi}</p>
+                                        <small class="text-muted">
+                                            <span class="Prioritas-badge Prioritas-${Operasi.Prioritas}-badge">${Operasi.Prioritas}</span>
+                                            <span class="Status-badge Status-${Operasi.Status}">${Operasi.Status.replace('_', ' ')}</span>
+                                            | Assigned to: ${Operasi.assigned_to_name || 'Unassigned'}
+                                            | Due: ${formatDate(Operasi.due_date)}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="mb-2">
+                                    <small class="text-muted">Progress: ${Operasi.progress || 0}%</small>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-${getProgressColor(Operasi.progress)}" style="width: ${Operasi.progress || 0}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewOperationDetails('${Operasi.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="startOperation('${Operasi.id}')" ${operation.status !== 'Menunggu' ? 'disabled' : ''}>
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="editOperation('${Operasi.id}')" ${operation.status === 'Selesai' ? 'disabled' : ''}>
+                                        <i class="fas fa-Edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                operationsList.appendChild(operationCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=operations_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_operations: 25,
+                    completed_operations: 12,
+                    in_progress_operations: 5,
+                    efficiency_score: 85.3
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalOperations').textContent = stats.total_operations || 0;
+            Dokumen.getElementById('completedOperations').textContent = stats.completed_operations || 0;
+            Dokumen.getElementById('inProgressOperations').textContent = stats.in_progress_operations || 0;
+            Dokumen.getElementById('efficiencyScore').textContent = (stats.efficiency_score || 0).toFixed(1) + '%';
+            
+            // Perbarui metrics
+            Dokumen.getElementById('avgCompletionTime').textContent = (stats.avg_completion_time || 2.3).toFixed(1) + 'd';
+            Dokumen.getElementById('onTimeRate').textContent = (stats.on_time_rate || 85) + '%';
+            Dokumen.getElementById('qualityScore').textContent = (stats.quality_score || 92) + '%';
+            Dokumen.getElementById('resourceUtilization').textContent = (stats.resource_utilization || 78) + '%';
+        }
+
+        // Load Alur Kerja overview
+        function loadWorkflowOverview() {
+            const workflowDiv = Dokumen.getElementById('workflowOverview');
+            
+            const workflows = [
+                { Nama: 'Initiation', Selesai: 25, Total: 25, Status: 'Selesai' },
+                { Nama: 'Planning', Selesai: 20, Total: 25, Status: 'in_progress' },
+                { Nama: 'Execution', Selesai: 15, Total: 25, Status: 'in_progress' },
+                { Nama: 'Review', Selesai: 8, Total: 25, Status: 'Menunggu' },
+                { Nama: 'Completion', Selesai: 5, Total: 25, Status: 'Menunggu' }
+            ];
+            
+            workflowDiv.innerHTML = `
+                <div class="Alur Kerja-steps">
+                    ${workflows.map(step => `
+                        <div class="Alur Kerja-step">
+                            <div class="step-circle step-${step.Status}">${step.Selesai}</div>
+                            <small>${step.Nama}</small>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="text-center mt-3">
+                    <div class="Efisiensi-Skor Skor-excellent">${85.3%</div>
+                    <small class="text-muted">Overall Alur Kerja Efisiensi</small>
+                </div>
+            `;
+        }
+
+        // Load recent activities
+        function loadRecentActivities() {
+            const activitiesDiv = Dokumen.getElementById('recentActivities');
+            
+            const activities = [
+                { Tipe: 'Selesai', Judul: 'Pinjaman Memproses Operasi Selesai', Pengguna: 'Ahmad Wijaya', Waktu: '2 hours ago' },
+                { Tipe: 'in_progress', Judul: 'Penagihan Audit in progress', Pengguna: 'Siti Nurhaliza', Waktu: '4 hours ago' },
+                { Tipe: 'Menunggu', Judul: 'Monthly Kepatuhan Review Menunggu', Pengguna: 'Admin Pengguna', Waktu: '6 hours ago' },
+                { Tipe: 'Selesai', Judul: 'Sistem maintenance Selesai', Pengguna: 'IT Tim', Waktu: '1 day ago' },
+                { Tipe: 'Dibatalkan', Judul: 'Laporan generation Dibatalkan', Pengguna: 'Admin Pengguna', Waktu: '2 days ago' }
+            ];
+            
+            activitiesDiv.innerHTML = activities.map(Aktivitas => `
+                <div class="timeline-item ${Aktivitas.Tipe}">
+                    <div>
+                        <strong>${Aktivitas.Judul}</strong>
+                        <br>
+                        <small class="text-muted">${Aktivitas.Pengguna} - ${Aktivitas.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Performa Grafik
+            const performanceCtx = Dokumen.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Grafik(performanceCtx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Operations Selesai',
+                        Data: [8, 12, 10, 15, 18, 6, 4],
+                        borderColor: '#6f42c1',
+                        backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                        tension: 0.1
+                    }, {
+                        label: 'Efisiensi Tarif',
+                        Data: [85, 88, 82, 90, 92, 78, 80],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Efisiensi Grafik
+            const efficiencyCtx = Dokumen.getElementById('efficiencyChart').getContext('2d');
+            efficiencyChart = new Grafik(efficiencyCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Mantri', 'Kasir', 'Teller', 'Surveyor', 'Penagih'],
+                    datasets: [{
+                        Data: [92, 88, 85, 78, 82],
+                        backgroundColor: [
+                            '#007bff',
+                            '#28a745',
+                            '#17a2b8',
+                            '#ffc107',
+                            '#dc3545'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            Posisi: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // View Operasi Detail
+        function viewOperationDetails(operationId) {
+            const Operasi = operations.find(op => op.id === operationId);
+            if (!Operasi) return;
+            
+            const Detail = Dokumen.getElementById('operationDetails');
+            
+            Detail.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Operasi Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Operasi ID:</td><td><strong>${Operasi.id}</strong></td></tr>
+                            <tr><td>Judul:</td><td>${Operasi.Judul}</td></tr>
+                            <tr><td>Tipe:</td><td>${Operasi.Tipe}</td></tr>
+                            <tr><td>Prioritas:</td><td><span class="Prioritas-badge Prioritas-${Operasi.Prioritas}-badge">${Operasi.Prioritas}</span></td></tr>
+                            <tr><td>Status:</td><td><span class="Status-badge Status-${Operasi.Status}">${Operasi.Status.replace('_', ' ')}</span></td></tr>
+                            <tr><td>Assigned To:</td><td>${Operasi.assigned_to_name || 'Unassigned'}</td></tr>
+                            <tr><td>Due Tanggal:</td><td>${formatDate(Operasi.due_date)}</td></tr>
+                            <tr><td>Dibuat:</td><td>${formatDateTime(Operasi.created_at)}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Performa Metrics</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Progress:</td><td><strong>${Operasi.progress || 0}%</strong></td></tr>
+                            <tr><td>Estimated Hours:</td><td>${Operasi.estimated_hours || 'N/A'}</td></tr>
+                            <tr><td>Actual Hours:</td><td>${Operasi.actual_hours || 'N/A'}</td></tr>
+                            <tr><td>Efisiensi:</td><td><strong>${Operasi.Efisiensi || 'N/A'}%</strong></td></tr>
+                            <tr><td>Kualitas Skor:</td><td><strong>${Operasi.quality_score || 'N/A'}</strong></td></tr>
+                            <tr><td>On Waktu:</td><td><strong>${Operasi.on_time ? 'Ya' : 'Tidak'}</strong></td></tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Deskripsi</h6>
+                        <p>${Operasi.Deskripsi}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Requirements</h6>
+                        <p>${Operasi.requirements || 'Tidak requirements specified'}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Aktivitas Timeline</h6>
+                        <div class="Operasi-timeline">
+                            <div class="timeline-item Selesai">
+                                <div>
+                                    <strong>Operasi Dibuat</strong>
+                                    <br>
+                                    <small class="text-muted">${formatDateTime(Operasi.created_at)} - ${Operasi.created_by || 'Sistem'}</small>
+                                </div>
+                            </div>
+                            ${Operasi.started_at ? `
+                                <div class="timeline-item Selesai">
+                                    <div>
+                                        <strong>Operasi Started</strong>
+                                        <br>
+                                        <small class="text-muted">${formatDateTime(Operasi.started_at)} - ${Operasi.assigned_to_name}</small>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${Operasi.completed_at ? `
+                                <div class="timeline-item Selesai">
+                                    <div>
+                                        <strong>Operasi Selesai</strong>
+                                        <br>
+                                        <small class="text-muted">${formatDateTime(Operasi.completed_at)} - ${Operasi.completed_by || Operasi.assigned_to_name}</small>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('operationDetailsModal'));
+            modal.show();
+        }
+
+        // Start Operasi
+        function startOperation(operationId) {
+            const Operasi = operations.find(op => op.id === operationId);
+            if (!Operasi) return;
+            
+            Operasi.Status = 'in_progress';
+            Operasi.started_at = new Tanggal().toISOString();
+            Operasi.progress = 10;
+            
+            displayOperations();
+            
+            // Simulate progress
+            simulateOperationProgress(operationId);
+            
+            showSuccess(`Operasi "${Operasi.Judul}" started successfully!`);
+        }
+
+        // Simulate Operasi progress
+        function simulateOperationProgress(operationId) {
+            const Operasi = operations.find(op => op.id === operationId);
+            if (!Operasi) return;
+            
+            const progressInterval = setInterval(() => {
+                if (Operasi.progress < 100) {
+                    operation.progress += Math.random() * 15;
+                    if (operation.progress > 100) Operasi.progress = 100;
+                    
+                    displayOperations();
+                } else {
+                    clearInterval(progressInterval);
+                    Operasi.Status = 'Selesai';
+                    Operasi.completed_at = new Tanggal().toISOString();
+                    Operasi.progress = 100;
+                    
+                    displayOperations();
+                    loadStatistics();
+                    
+                    showSuccess(`Operasi "${Operasi.Judul}" Selesai successfully!`);
+                }
+            }, 2000);
+        }
+
+        // Complete Operasi
+        function completeOperation() {
+            // This would be called from the modal
+            showSuccess('Operasi marked as Selesai!');
+        }
+
+        // Pause Operasi
+        function pauseOperation() {
+            // This would be called from the modal
+            showSuccess('Operasi paused!');
+        }
+
+        // Edit Operasi
+        function editOperation(operationId) {
+            const Operasi = operations.find(op => op.id === operationId);
+            if (!Operasi) return;
+            
+            
+        }
+
+        // Create new Operasi
+        function createNewOperation() {
+            // Load Staf options
+            loadStaffOptions();
+            
+            // Set default due Tanggal to 7 days from now
+            const defaultDate = new Tanggal();
+            defaultDate.setDate(defaultDate.getDate() + 7);
+            Dokumen.getElementById('dueDate').value = defaultDate.toISOString().split('T')[0];
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newOperationModal'));
+            modal.show();
+        }
+
+        // Load Staf options
+        function loadStaffOptions() {
+            // Mock Staf Data
+            const staffOptions = [
+                { id: '1', Nama: 'Ahmad Wijaya', Departemen: 'mantri' },
+                { id: '2', Nama: 'Siti Nurhaliza', Departemen: 'kasir' },
+                { id: '3', Nama: 'Budi Santoso', Departemen: 'Teller' },
+                { id: '4', Nama: 'Dian Kartika', Departemen: 'Surveyor' },
+                { id: '5', Nama: 'Eko Prasetyo', Departemen: 'Penagih' }
+            ];
+            
+            const assignedToSelect = Dokumen.getElementById('assignedTo');
+            assignedToSelect.innerHTML = '<option value="">Pilih Staf</option>';
+            staffOptions.forEach(Staf => {
+                assignedToSelect.innerHTML += `<option value="${Staf.id}">${Staf.Nama} - ${Staf.Departemen}</option>`;
+            });
+        }
+
+        // Simpan Operasi
+        function saveOperation() {
+            const Judul = Dokumen.getElementById('operationTitle').value;
+            const Tipe = Dokumen.getElementById('operationType').value;
+            const Prioritas = Dokumen.getElementById('operationPriority').value;
+            const assignedTo = Dokumen.getElementById('assignedTo').value;
+            const Deskripsi = Dokumen.getElementById('operationDescription').value;
+            const dueDate = Dokumen.getElementById('dueDate').value;
+            const estimatedHours = Dokumen.getElementById('estimatedHours').value;
+            const requirements = Dokumen.getElementById('requirements').value;
+            
+            if (!Judul || !Tipe || !Prioritas || !assignedTo) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Get assigned Staf Nama
+            const assignedToName = Dokumen.getElementById('assignedTo').options[Dokumen.getElementById('assignedTo').selectedIndex].text;
+            
+            // Create new Operasi
+            const newOperation = {
+                id: 'OP-' + Tanggal.now(),
+                Judul: Judul,
+                Tipe: Tipe,
+                Prioritas: Prioritas,
+                Status: 'Menunggu',
+                Deskripsi: Deskripsi,
+                assigned_to: assignedTo,
+                assigned_to_name: assignedToName,
+                due_date: dueDate,
+                estimated_hours: parseInt(estimatedHours),
+                requirements: requirements,
+                progress: 0,
+                created_at: new Tanggal().toISOString(),
+                created_by: currentUser.Nama
+            };
+            
+            operations.unshift(newOperation);
+            displayOperations();
+            
+            // Perbarui Statistik
+            const stats = {
+                total_operations: parseInt(Dokumen.getElementById('totalOperations').textContent) + 1,
+                completed_operations: parseInt(Dokumen.getElementById('completedOperations').textContent),
+                in_progress_operations: parseInt(Dokumen.getElementById('inProgressOperations').textContent),
+                efficiency_score: parseFloat(Dokumen.getElementById('efficiencyScore').textContent)
+            };
+            updateStatistics(stats);
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newOperationModal'));
+            modal.hide();
+            Dokumen.getElementById('newOperationForm').Reset();
+            
+            showSuccess('Operasi Dibuat successfully!');
+        }
+
+        // Quick action functions
+        function viewWorkflow() {
+            
+        }
+
+        function auditOperations() {
+            showSuccess('Operations Audit initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Operations Audit Selesai successfully!');
+            }, 2000);
+        }
+
+        function generateReport() {
+            showSuccess('Operations Laporan generation initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Operations Laporan generated successfully!');
+            }, 1500);
+        }
+
+        // Filter operations
+        function filterOperations() {
+            displayOperations();
+        }
+
+        // Utility functions
+        function getOperationIcon(Tipe) {
+            const icons = {
+                'loan_processing': 'hand-holding-usd',
+                'Penagihan': 'hand-holding-usd',
+                'Audit': 'clipboard-check',
+                'Kepatuhan': 'shield-alt',
+                'Laporan': 'File-alt',
+                'maintenance': 'tools'
+            };
+            return icons[Tipe] || 'cogs';
+        }
+
+        function getProgressColor(progress) {
+            if (progress >= 80) return 'Berhasil';
+            if (progress >= 50) return 'Info';
+            if (progress >= 25) return 'Peringatan';
+            return 'danger';
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Tanggal(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo operations
+        function getDemoOperations() {
+            return [
+                {
+                    id: '1',
+                    Judul: 'Q1 Pinjaman Portfolio Review',
+                    Tipe: 'Audit',
+                    Prioritas: 'high',
+                    Status: 'in_progress',
+                    Deskripsi: 'Quarterly Review of Pinjaman portfolio Performa and Risiko assessment',
+                    assigned_to: '1',
+                    assigned_to_name: 'Ahmad Wijaya - Mantri',
+                    due_date: '2026-03-25',
+                    estimated_hours: 16,
+                    actual_hours: 8,
+                    progress: 50,
+                    Efisiensi: 85,
+                    quality_score: 92,
+                    on_time: true,
+                    created_at: '2026-03-17T08:00:00Z',
+                    created_by: 'Admin Pengguna',
+                    started_at: '2026-03-17T09:00:00Z',
+                    requirements: 'Review Semua Aktif Pinjaman, assess Risiko levels, generate recommendations'
+                },
+                {
+                    id: '2',
+                    Judul: 'Telat Penagihan Campaign',
+                    Tipe: 'Penagihan',
+                    Prioritas: 'critical',
+                    Status: 'in_progress',
+                    Deskripsi: 'Systematic Penagihan of Telat accounts with high Prioritas',
+                    assigned_to: '5',
+                    assigned_to_name: 'Eko Prasetyo - Penagih',
+                    due_date: '2026-03-20',
+                    estimated_hours: 24,
+                    actual_hours: 12,
+                    progress: 65,
+                    Efisiensi: 78,
+                    quality_score: 88,
+                    on_time: false,
+                    created_at: '2026-03-17T08:30:00Z',
+                    created_by: 'Admin Pengguna',
+                    started_at: '2026-03-17T10:00:00Z',
+                    requirements: 'Kontak Semua Telat accounts, negotiate Pembayaran plans, Perbarui Status'
+                },
+                {
+                    id: '3',
+                    Judul: 'Kepatuhan Check - March 2026',
+                    Tipe: 'Kepatuhan',
+                    Prioritas: 'medium',
+                    Status: 'Menunggu',
+                    Deskripsi: 'Monthly Kepatuhan Review for regulatory requirements',
+                    assigned_to: '2',
+                    assigned_to_name: 'Siti Nurhaliza - Kasir',
+                    due_date: '2026-03-31',
+                    estimated_hours: 8,
+                    actual_hours: 0,
+                    progress: 0,
+                    Efisiensi: 0,
+                    quality_score: 0,
+                    on_time: true,
+                    created_at: '2026-03-17T09:00:00Z',
+                    created_by: 'Admin Pengguna',
+                    requirements: 'Review Semua Kepatuhan requirements, generate Kepatuhan Laporan'
+                },
+                {
+                    id: '4',
+                    Judul: 'Monthly Financial Laporan',
+                    Tipe: 'Laporan',
+                    Prioritas: 'medium',
+                    Status: 'Selesai',
+                    Deskripsi: 'Generate comprehensive monthly financial Laporan',
+                    assigned_to: '3',
+                    assigned_to_name: 'Budi Santoso - Teller',
+                    due_date: '2026-03-15',
+                    estimated_hours: 6,
+                    actual_hours: 5,
+                    progress: 100,
+                    Efisiensi: 95,
+                    quality_score: 98,
+                    on_time: true,
+                    created_at: '2026-03-10T08:00:00Z',
+                    created_by: 'Admin Pengguna',
+                    started_at: '2026-03-15T09:00:00Z',
+                    completed_at: '2026-03-15T14:00:00Z',
+                    completed_by: 'Budi Santoso',
+                    requirements: 'Compile financial Data, generate charts, create Laporan Dokumen'
+                },
+                {
+                    id: '5',
+                    Judul: 'Sistem Maintenance - Database',
+                    Tipe: 'maintenance',
+                    Prioritas: 'low',
+                    Status: 'Selesai',
+                    Deskripsi: 'Routine Database maintenance and optimization',
+                    assigned_to: 'IT Tim',
+                    assigned_to_name: 'IT Tim',
+                    due_date: '2026-03-17',
+                    estimated_hours: 4,
+                    actual_hours: 3,
+                    progress: 100,
+                    Efisiensi: 100,
+                    quality_score: 100,
+                    on_time: true,
+                    created_at: '2026-03-17T02:00:00Z',
+                    created_by: 'Sistem',
+                    started_at: '2026-03-17T02:30:00Z',
+                    completed_at: '2026-03-17T05:30:00Z',
+                    completed_by: 'IT Tim',
+                    requirements: 'Database Backup, optimization, Performa tuning'
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

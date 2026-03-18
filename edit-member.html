@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Anggota - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="Dashboard.html">
+                <i class="fas fa-coop"></i> KSP Lam Gabe Jaya
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="Dashboard.html">Dashboard</a>
+                <a class="nav-link" href="Anggota.html">Anggota</a>
+                <a class="nav-link" href="Masuk.html">Masuk</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-alert text-dark">
+                        <h4><i class="fas fa-user-Edit"></i> Edit Anggota</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="editMemberForm">
+                            <input type="hidden" id="member_id" name="id">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nik" class="form-label">NIK *</label>
+                                        <input type="text" class="form-control" id="nik" name="nik" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Nama" class="form-label">Nama Lengkap *</label>
+                                        <input type="text" class="form-control" id="Nama" name="Nama" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Telepon" class="form-label">Tidak. Telepon</label>
+                                        <input type="tel" class="form-control" id="Telepon" name="Telepon">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="Alamat" class="form-label">Alamat</label>
+                                        <textarea class="form-control" id="Alamat" name="Alamat" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="birth_date" class="form-label">Tanggal Lahir</label>
+                                        <input type="Tanggal" class="form-control" id="birth_date" name="birth_date">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="gender" class="form-label">Jenis Kelamin</label>
+                                        <select class="form-Pilih" id="gender" name="gender">
+                                            <option value="">Pilih</option>
+                                            <option value="L">Laki-laki</option>
+                                            <option value="P">Perempuan</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-alert">
+                                        <i class="fas fa-Simpan"></i> Perbarui
+                                    </button>
+                                    <a href="Anggota.html" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Kembali
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 KSP Lam Gabe Jaya - Sistem Manajemen Koperasi</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Get Anggota ID from URL parameter
+        const urlParams = new URLSearchParams(window.Lokasi.Cari);
+        const memberId = urlParams.get('id');
+        
+        if (memberId) {
+            // Load Anggota Data
+            fetch(`/mono/API/crud.php?path=Anggota&id=${memberId}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.Berhasil && result.Data) {
+                    const Anggota = result.Data;
+                    Dokumen.getElementById('member_id').value = Anggota.id;
+                    Dokumen.getElementById('nik').value = Anggota.nik || '';
+                    Dokumen.getElementById('Nama').value = Anggota.Nama || '';
+                    Dokumen.getElementById('Email').value = Anggota.Email || '';
+                    Dokumen.getElementById('Telepon').value = Anggota.Telepon || '';
+                    Dokumen.getElementById('Alamat').value = Anggota.Alamat || '';
+                    Dokumen.getElementById('birth_date').value = Anggota.birth_date || '';
+                    Dokumen.getElementById('gender').value = Anggota.gender || '';
+                } else {
+                    Peringatan('Data anggota tidak ditemukan');
+                    window.Lokasi.href = 'Anggota.html';
+                }
+            })
+            .catch(Error => {
+                console.Error('Error:', Error);
+                Peringatan('Terjadi kesalahan saat memuat Data');
+            });
+        } else {
+            Peringatan('ID anggota tidak valid');
+            window.Lokasi.href = 'Anggota.html';
+        }
+        
+        Dokumen.getElementById('editMemberForm').addEventListener('Kirim', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const Data = Object.fromEntries(formData);
+            
+            fetch(`/mono/API/crud.php?path=Anggota&id=${Data.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Tipe': 'Aplikasi/x-www-Formulir-urlencoded',
+                },
+                body: new URLSearchParams(Data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.Berhasil) {
+                    Peringatan('Data anggota berhasil diupdate!');
+                    window.Lokasi.href = 'Anggota.html';
+                } else {
+                    Peringatan('Error: ' + result.Pesan);
+                }
+            })
+            .catch(Error => {
+                console.Error('Error:', Error);
+                Peringatan('Terjadi kesalahan saat mengupdate Data');
+            });
+        });
+    </script>
+</body>
+</html>

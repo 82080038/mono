@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telat Accounts - Penagih Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Telat-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #dc3545;
+            cursor: pointer;
+        }
+        
+        .Telat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .severity-critical { border-left-color: #dc3545; }
+        .severity-high { border-left-color: #fd7e14; }
+        .severity-medium { border-left-color: #ffc107; }
+        .severity-low { border-left-color: #28a745; }
+        
+        .days-Telat {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .Telat-critical { background: #dc3545; color: white; }
+        .Telat-high { background: #fd7e14; color: white; }
+        .Telat-medium { background: #ffc107; color: #000; }
+        .Telat-low { background: #28a745; color: white; }
+        
+        .action-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .action-contacted { background: #17a2b8; color: white; }
+        .action-visited { background: #6f42c1; color: white; }
+        .action-legal { background: #dc3545; color: white; }
+        .action-settled { background: #28a745; color: white; }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .Risiko-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .Risiko-bar {
+            flex: 1;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .Risiko-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+            transition: width 0.3s;
+        }
+        
+        .Penagihan-strategy {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .strategy-header {
+            display: flex;
+            justify-content-between;
+            align-items-center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .strategy-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #dc3545;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #dc3545;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Telat-timeline {
+            Posisi: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            Posisi: relative;
+            padding-bottom: 1rem;
+            border-left: 2px solid #dee2e6;
+            padding-left: 1rem;
+            margin-left: -1rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            Posisi: absolute;
+            left: -6px;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #dc3545;
+            border: 2px solid white;
+        }
+        
+        .timeline-item.Berhasil::before {
+            background: #28a745;
+        }
+        
+        .timeline-item.Peringatan::before {
+            background: #ffc107;
+        }
+        
+        .Anggota-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dc3545;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .Peringatan-Telat {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .Peringatan-Peringatan {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .Peringatan-Berhasil {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-exclamation-triangle"></i> Telat Accounts</h1>
+                <p class="mb-0">Penagih - Telat Account Manajemen & Recovery</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Overdue Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-danger text-white">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <h5>Total Telat</h5>
+                        <h3 id="totalOverdue">0</h3>
+                        <p class="mb-0">Accounts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h5>Critical (30+ days)</h5>
+                        <h3 id="criticalOverdue">0</h3>
+                        <p class="mb-0">High Prioritas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                        <h5>Telat Jumlah</h5>
+                        <h3 id="overdueAmount">0</h3>
+                        <p class="mb-0">Total value</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Persentase fa-2x mb-2"></i>
+                        <h5>Recovery Tarif</h5>
+                        <h3 id="recoveryRate">0%</h3>
+                        <p class="mb-0">Bulan Ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alert Banner -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-Telat" role="Peringatan">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">Critical Telat Peringatan</h6>
+                            <p class="mb-0">You have <strong id="criticalAlertCount">0</strong> critical Telat accounts requiring immediate attention. Total Telat Jumlah: <strong id="criticalAlertAmount">0</strong></p>
+                        </div>
+                        <div>
+                            <button class="btn btn-danger btn-sm" onclick="viewCriticalAccounts()">
+                                <i class="fas fa-eye"></i> View Critical
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Overdue Accounts List -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> Telat Accounts</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="severityFilter" onchange="filterOverdueAccounts()">
+                                <option value="">Semua Severity</option>
+                                <option value="critical">Critical</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="actionFilter" onchange="filterOverdueAccounts()">
+                                <option value="">Semua Actions</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="visited">Visited</option>
+                                <option value="legal">Legal Action</option>
+                                <option value="settled">Settled</option>
+                            </select>
+                            <button class="btn btn-danger btn-sm" onclick="generateOverdueReport()">
+                                <i class="fas fa-File-alt"></i> Laporan
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="overdueAccountsList">
+                            <!-- Overdue accounts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Overdue Map -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-map-marked-alt"></i> Telat Accounts Map</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="overdueMap" class="map-container"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="bulkContact()">
+                                    <i class="fas fa-Telepon"></i>
+                                    <h6>Bulk Kontak</h6>
+                                    <small class="text-muted">Send reminders</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="scheduleVisits()">
+                                    <i class="fas fa-calendar"></i>
+                                    <h6>Schedule Visits</h6>
+                                    <small class="text-muted">Plan visits</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="legalActions()">
+                                    <i class="fas fa-gavel"></i>
+                                    <h6>Legal Actions</h6>
+                                    <small class="text-muted">Start Proses</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="settlementOffers()">
+                                    <i class="fas fa-handshake"></i>
+                                    <h6>Settlements</h6>
+                                    <small class="text-muted">Make offers</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Collection Strategies -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-lightbulb"></i> Penagihan Strategies</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="collectionStrategies">
+                            <!-- Collection strategies will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Risk Assessment -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-line"></i> Risiko Assessment</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Risiko Distribution</h6>
+                            <div class="Risiko-indicator">
+                                <span>Low Risiko:</span>
+                                <div class="Risiko-bar">
+                                    <div class="Risiko-fill" style="width: 25%"></div>
+                                </div>
+                                <span>25%</span>
+                            </div>
+                            <div class="Risiko-indicator">
+                                <span>Medium Risiko:</span>
+                                <div class="Risiko-bar">
+                                    <div class="Risiko-fill" style="width: 35%"></div>
+                                </div>
+                                <span>35%</span>
+                            </div>
+                            <div class="Risiko-indicator">
+                                <span>High Risiko:</span>
+                                <div class="Risiko-bar">
+                                    <div class="Risiko-fill" style="width: 40%"></div>
+                                </div>
+                                <span>40%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>Recovery Prakiraan</h6>
+                            <canvas id="recoveryChart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activities -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Activities</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Telat-timeline" id="activityTimeline">
+                            <!-- Timeline items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Collection Strategy Modal -->
+    <div class="modal fade" id="strategyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Penagihan Strategy</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="strategyContent">
+                    <!-- Strategy content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="applyStrategy()">
+                        <i class="fas fa-check"></i> Apply Strategy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Legal Action Modal -->
+    <div class="modal fade" id="legalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Initiate Legal Action</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="legalActionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Account</label>
+                            <input type="text" class="form-control" id="legalAccountInfo" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Legal Action Tipe *</label>
+                            <select class="form-Pilih" id="legalActionType" required>
+                                <option value="">Pilih action Tipe</option>
+                                <option value="demand_letter">Demand Letter</option>
+                                <option value="legal_notice">Legal Notice</option>
+                                <option value="court_proceeding">Court Proceeding</option>
+                                <option value="asset_seizure">Asset Seizure</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason for Legal Action *</label>
+                            <textarea class="form-control" id="legalReason" rows="3" required placeholder="Enter reason for legal action..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Supporting Documents</label>
+                            <div class="border rounded p-3 text-center">
+                                <i class="fas fa-File-Unggah fa-2x mb-2"></i>
+                                <p>Click to Unggah documents</p>
+                                <small class="text-muted">PDF, DOC, DOCX (Max 10MB)</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="submitLegalAction()">
+                        <i class="fas fa-gavel"></i> Kirim Legal Action
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let overdueAccounts = [];
+        let map = null;
+        let markers = [];
+        let recoveryChart = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadOverdueAccounts();
+            loadStatistics();
+            initializeMap();
+            loadCollectionStrategies();
+            loadActivityTimeline();
+            initializeRecoveryChart();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Penagih
+            if (currentUser.role !== 'Penagih') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load Telat accounts
+        async function loadOverdueAccounts() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=overdue_accounts', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        overdueAccounts = Data.Data;
+                        displayOverdueAccounts();
+                        updateMapMarkers();
+                        updateCriticalAlert();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Telat accounts:', Error);
+                // Use demo Data
+                overdueAccounts = getDemoOverdueAccounts();
+                displayOverdueAccounts();
+                updateMapMarkers();
+                updateCriticalAlert();
+            }
+        }
+
+        // Display Telat accounts
+        function displayOverdueAccounts() {
+            const accountsList = Dokumen.getElementById('overdueAccountsList');
+            const severityFilter = Dokumen.getElementById('severityFilter').value;
+            const actionFilter = Dokumen.getElementById('actionFilter').value;
+            
+            let filteredAccounts = overdueAccounts;
+            
+            // Filter by severity
+            if (severityFilter) {
+                filteredAccounts = filteredAccounts.Filter(account => account.severity === severityFilter);
+            }
+            
+            // Filter by action
+            if (actionFilter) {
+                filteredAccounts = filteredAccounts.Filter(account => account.last_action === actionFilter);
+            }
+            
+            accountsList.innerHTML = '';
+            
+            if (filteredAccounts.length === 0) {
+                accountsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak Telat accounts found</div>';
+                return;
+            }
+            
+            filteredAccounts.forEach(account => {
+                const accountCard = Dokumen.createElement('div');
+                accountCard.className = `Telat-card card mb-2 severity-${account.severity}`;
+                accountCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="Anggota-avatar me-3">
+                                        ${account.member_name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${account.member_name}</h6>
+                                        <p class="mb-1">Pinjaman: ${account.loan_number} | ID: ${account.member_id}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt"></i> ${account.Alamat}
+                                            <br>
+                                            <i class="fas fa-Telepon"></i> ${account.phone_number}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="mb-2">
+                                    <span class="days-Telat Telat-${account.severity}">${account.days_overdue} days</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Telat: ${formatCurrency(account.overdue_amount)}</strong>
+                                </div>
+                                <div class="mb-2">
+                                    ${account.last_action ? `<span class="action-badge action-${account.last_action}">${account.last_action.replace('_', ' ')}</span>` : '<span Kelas="badge bg-secondary">Tidak Action</span>'}
+                                </div>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewOverdueDetails('${account.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="recordPayment('${account.id}')">
+                                        <i class="fas fa-money-bill"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="initiateLegalAction('${account.id}')">
+                                        <i class="fas fa-gavel"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                accountsList.appendChild(accountCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=overdue_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_overdue: 28,
+                    critical_overdue: 8,
+                    overdue_amount: 45000000,
+                    recovery_rate: 65.5
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalOverdue').textContent = stats.total_overdue || 0;
+            Dokumen.getElementById('criticalOverdue').textContent = stats.critical_overdue || 0;
+            Dokumen.getElementById('overdueAmount').textContent = formatCurrency(stats.overdue_amount || 0);
+            Dokumen.getElementById('recoveryRate').textContent = (stats.recovery_rate || 0).toFixed(1) + '%';
+        }
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('overdueMap').setView([-6.2088, 106.8456], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Perbarui map markers
+        function updateMapMarkers() {
+            // Hapus existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            // Tambah markers for Telat accounts
+            overdueAccounts.forEach(account => {
+                if (account.latitude && account.longitude) {
+                    const markerColor = getSeverityColor(account.severity);
+                    const marker = L.marker([account.latitude, account.longitude], {
+                        icon: L.divIcon({
+                            className: 'Telat-marker',
+                            html: `<div style="background: ${markerColor}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><i class="fas fa-exclamation-triangle" style="font-size: 10px;"></i></div>`,
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map)
+                    .bindPopup(`
+                        <strong>${account.member_name}</strong><br>
+                        Pinjaman: ${account.loan_number}<br>
+                        Telat: ${formatCurrency(account.overdue_amount)}<br>
+                        Days: ${account.days_overdue}<br>
+                        Severity: <span class="badge bg-${getSeverityColor(account.severity)}">${account.severity}</span>
+                    `);
+                    
+                    markers.push(marker);
+                }
+            });
+            
+            // Fit map to show Semua markers
+            if (markers.length > 0) {
+                const Grup = new L.featureGroup(markers);
+                map.fitBounds(Grup.getBounds().pad(0.1));
+            }
+        }
+
+        // Load Penagihan strategies
+        function loadCollectionStrategies() {
+            const strategiesDiv = Dokumen.getElementById('collectionStrategies');
+            
+            const strategies = [
+                {
+                    Nama: 'Soft Pengingat',
+                    Deskripsi: 'Send gentle Pembayaran reminders',
+                    Prioritas: 'low',
+                    success_rate: 65
+                },
+                {
+                    Nama: 'Telepon Call',
+                    Deskripsi: 'Direct Telepon Kontak',
+                    Prioritas: 'medium',
+                    success_rate: 75
+                },
+                {
+                    Nama: 'Field Visit',
+                    Deskripsi: 'In-person visitation',
+                    Prioritas: 'high',
+                    success_rate: 85
+                },
+                {
+                    Nama: 'Legal Notice',
+                    Deskripsi: 'Formal legal Peringatan',
+                    Prioritas: 'critical',
+                    success_rate: 90
+                }
+            ];
+            
+            strategiesDiv.innerHTML = strategies.map(strategy => `
+                <div class="Penagihan-strategy">
+                    <div class="strategy-header">
+                        <h6 class="mb-0">${strategy.Nama}</h6>
+                        <div class="strategy-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewStrategy('${strategy.Nama}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-Berhasil" onclick="applyStrategyToAccounts('${strategy.Nama}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="mb-1 text-muted">${strategy.Deskripsi}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Prioritas: ${strategy.Prioritas}</small>
+                        <small class="text-Berhasil">Berhasil: ${strategy.success_rate}%</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Aktivitas timeline
+        function loadActivityTimeline() {
+            const timeline = Dokumen.getElementById('activityTimeline');
+            
+            const activities = [
+                { Tipe: 'Berhasil', Deskripsi: 'Pembayaran received from Ahmad Wijaya', Waktu: '2 hours ago', Jumlah: 1500000 },
+                { Tipe: 'Peringatan', Deskripsi: 'Legal notice sent to Siti Nurhaliza', Waktu: '3 hours ago' },
+                { Tipe: 'Berhasil', Deskripsi: 'Field visit Selesai for Budi Santoso', Waktu: '4 hours ago' },
+                { Tipe: 'Peringatan', Deskripsi: 'Telepon call attempted - Tidak answer', Waktu: '5 hours ago' },
+                { Tipe: 'Berhasil', Deskripsi: 'Demand letter sent to Dian Kartika', Waktu: '6 hours ago' }
+            ];
+            
+            timeline.innerHTML = activities.map(Aktivitas => `
+                <div class="timeline-item ${Aktivitas.Tipe}">
+                    <div>
+                        <strong>${Aktivitas.Deskripsi}</strong>
+                        ${Aktivitas.Jumlah ? `<br><small class="text-Berhasil">${formatCurrency(Aktivitas.Jumlah)}</small>` : ''}
+                        <br>
+                        <small class="text-muted">${Aktivitas.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize recovery Grafik
+        function initializeRecoveryChart() {
+            const ctx = Dokumen.getElementById('recoveryChart').getContext('2d');
+            recoveryChart = new Grafik(ctx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Recovery Tarif',
+                        Data: [58, 62, 65, 68, 70, 65],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Perbarui critical Peringatan
+        function updateCriticalAlert() {
+            const criticalAccounts = overdueAccounts.Filter(account => account.severity === 'critical');
+            const criticalAmount = criticalAccounts.reduce((sum, account) => sum + account.overdue_amount, 0);
+            
+            Dokumen.getElementById('criticalAlertCount').textContent = criticalAccounts.length;
+            Dokumen.getElementById('criticalAlertAmount').textContent = formatCurrency(criticalAmount);
+        }
+
+        // View Telat Detail
+        function viewOverdueDetails(accountId) {
+            const account = overdueAccounts.find(a => a.id === accountId);
+            if (!account) return;
+            
+            Peringatan('Telat account Detail: ' + JSON.stringify(account, null, 2));
+        }
+
+        // Record Pembayaran
+        function recordPayment(accountId) {
+            const account = overdueAccounts.find(a => a.id === accountId);
+            if (!account) return;
+            
+            const Jumlah = prompt('Enter Pembayaran Jumlah:');
+            if (!Jumlah || isNaN(Jumlah)) return;
+            
+            showSuccess('Pembayaran recorded successfully!');
+        }
+
+        // Initiate legal action
+        function initiateLegalAction(accountId) {
+            const account = overdueAccounts.find(a => a.id === accountId);
+            if (!account) return;
+            
+            // Load account Info into modal
+            Dokumen.getElementById('legalAccountInfo').value = `${account.member_name} (${account.loan_number})`;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('legalModal'));
+            modal.show();
+        }
+
+        // Kirim legal action
+        function submitLegalAction() {
+            const actionType = Dokumen.getElementById('legalActionType').value;
+            const reason = Dokumen.getElementById('legalReason').value;
+            
+            if (!actionType || !reason) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            showSuccess('Legal action submitted successfully!');
+            
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('legalModal'));
+            modal.hide();
+            
+            // Reset Formulir
+            Dokumen.getElementById('legalActionForm').Reset();
+        }
+
+        // View critical accounts
+        function viewCriticalAccounts() {
+            Dokumen.getElementById('severityFilter').value = 'critical';
+            filterOverdueAccounts();
+        }
+
+        // Generate Telat Laporan
+        function generateOverdueReport() {
+            showSuccess('Telat Laporan will be generated');
+        }
+
+        // Quick action functions
+        function bulkContact() {
+            showSuccess('Bulk Kontak feature will be implemented');
+        }
+
+        function scheduleVisits() {
+            showSuccess('Visit scheduling feature will be implemented');
+        }
+
+        function legalActions() {
+            showSuccess('Legal actions feature will be implemented');
+        }
+
+        function settlementOffers() {
+            showSuccess('Settlement offers feature will be implemented');
+        }
+
+        // Strategy functions
+        function viewStrategy(strategyName) {
+            Peringatan('View strategy: ' + strategyName);
+        }
+
+        function applyStrategyToAccounts(strategyName) {
+            Peringatan('Apply strategy to accounts: ' + strategyName);
+        }
+
+        // Apply strategy
+        function applyStrategy() {
+            showSuccess('Strategy applied successfully!');
+            
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('strategyModal'));
+            modal.hide();
+        }
+
+        // Filter Telat accounts
+        function filterOverdueAccounts() {
+            displayOverdueAccounts();
+        }
+
+        // Utility functions
+        function getSeverityColor(severity) {
+            const colors = {
+                'critical': '#dc3545',
+                'high': '#fd7e14',
+                'medium': '#ffc107',
+                'low': '#28a745'
+            };
+            return colors[severity] || '#6c757d';
+        }
+
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo Telat accounts
+        function getDemoOverdueAccounts() {
+            return [
+                {
+                    id: '1',
+                    member_id: 'M-001',
+                    member_name: 'Ahmad Wijaya',
+                    loan_number: 'LN-2026-001',
+                    overdue_amount: 2500000,
+                    days_overdue: 45,
+                    severity: 'critical',
+                    last_action: 'visited',
+                    Alamat: 'Jl. Merdeka Tidak. 123, Jakarta',
+                    phone_number: '08123456789',
+                    Email: 'ahmad@example.com',
+                    latitude: -6.2088,
+                    longitude: 106.8456,
+                    due_date: '2026-02-01',
+                    last_payment_date: '2025-12-15'
+                },
+                {
+                    id: '2',
+                    member_id: 'M-002',
+                    member_name: 'Siti Nurhaliza',
+                    loan_number: 'LN-2026-002',
+                    overdue_amount: 1500000,
+                    days_overdue: 32,
+                    severity: 'critical',
+                    last_action: 'legal',
+                    Alamat: 'Jl. Sudirman Tidak. 456, Jakarta',
+                    phone_number: '08234567890',
+                    Email: 'siti@example.com',
+                    latitude: -6.2150,
+                    longitude: 106.8500,
+                    due_date: '2026-02-13',
+                    last_payment_date: '2026-01-20'
+                },
+                {
+                    id: '3',
+                    member_id: 'M-003',
+                    member_name: 'Budi Santoso',
+                    loan_number: 'LN-2026-003',
+                    overdue_amount: 800000,
+                    days_overdue: 18,
+                    severity: 'high',
+                    last_action: 'contacted',
+                    Alamat: 'Jl. Thamrin Tidak. 789, Jakarta',
+                    phone_number: '08345678901',
+                    Email: 'budi@example.com',
+                    latitude: -6.2000,
+                    longitude: 106.8400,
+                    due_date: '2026-02-27',
+                    last_payment_date: '2026-02-10'
+                },
+                {
+                    id: '4',
+                    member_id: 'M-004',
+                    member_name: 'Dian Kartika',
+                    loan_number: 'LN-2026-004',
+                    overdue_amount: 500000,
+                    days_overdue: 8,
+                    severity: 'medium',
+                    last_action: null,
+                    Alamat: 'Jl. Gatot Subroto Tidak. 321, Jakarta',
+                    phone_number: '08456789012',
+                    Email: 'dian@example.com',
+                    latitude: -6.1950,
+                    longitude: 106.8350,
+                    due_date: '2026-03-09',
+                    last_payment_date: '2026-03-01'
+                },
+                {
+                    id: '5',
+                    member_id: 'M-005',
+                    member_name: 'Eko Prasetyo',
+                    loan_number: 'LN-2026-005',
+                    overdue_amount: 300000,
+                    days_overdue: 3,
+                    severity: 'low',
+                    last_action: null,
+                    Alamat: 'Jl. Rasuna Said Tidak. 456, Jakarta',
+                    phone_number: '08567890123',
+                    Email: 'eko@example.com',
+                    latitude: -6.2250,
+                    longitude: 106.8550,
+                    due_date: '2026-03-14',
+                    last_payment_date: '2026-03-11'
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

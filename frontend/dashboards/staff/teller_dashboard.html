@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teller Dashboard - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #f39c12;
+            --secondary-color: #2c3e50;
+            --Berhasil-color: #27ae60;
+            --Peringatan-color: #f39c12;
+            --danger-color: #e74c3c;
+            --Info-color: #17a2b8;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fdcb6e 0%, #f39c12 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 270px;
+            background: var(--primary-color);
+            padding-top: 70px;
+            z-index: 999;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 15px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.Aktif {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 270px;
+        }
+
+        .top-navbar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .top-nav-menu {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .top-nav-item {
+            color: var(--dark-color);
+            text-decoration: Tidak Ada;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-nav-item:hover,
+        .top-nav-item.Aktif {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .HP-menu-toggle {
+            display: Tidak Ada;
+            background: Tidak Ada;
+            border: Tidak Ada;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .HP-menu-toggle:hover {
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .quick-action-HP {
+            Posisi: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .quick-action-HP .btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            border: Tidak Ada;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Pengguna-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-action {
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .Transaksi-item {
+            padding: 10px;
+            border-left: 4px solid var(--primary-color);
+            background: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .HP-menu-toggle {
+                display: block;
+            }
+            
+            .top-nav-menu {
+                display: Tidak Ada;
+            }
+            
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+            
+            .top-navbar {
+                padding: 0 15px;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .quick-action {
+                margin-bottom: 15px;
+            }
+            
+            .Transaksi-item {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .HP-menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .HP-menu-toggle {
+                display: Tidak Ada;
+            }
+            
+            .top-nav-menu {
+                display: flex;
+            }
+            
+            .quick-action-HP {
+                display: Tidak Ada;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="d-flex align-items-center gap-3 flex-grow-1">
+            <button class="HP-menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="top-nav-menu" id="topNavMenu">
+                <!-- Top navigation will be generated dynamically -->
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="Posisi-relative">
+                <i class="fas fa-bell text-muted"></i>
+                <span class="Posisi-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    2
+                </span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <div class="Pengguna-avatar">
+                    <i class="fas fa-cash-Daftar"></i>
+                </div>
+                <div>
+                    <small class="d-block text-muted">Teller</small>
+                    <span id="currentTime">Memuat...</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-sm btn-outline-danger" onclick="Keluar()">
+                <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="text-center mb-4">
+            <h4 class="text-white">
+                <i class="fas fa-coop"></i> KSP Lam Gabe Jaya
+            </h4>
+            <small class="text-muted">Teller Panel</small>
+        </div>
+        
+        <ul class="nav flex-column" id="navigationMenu">
+            <!-- Navigation will be generated dynamically -->
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Mobile Quick Action Button -->
+        <div class="quick-action-HP">
+            <button class="btn btn-alert btn-lg" onclick="processTransaction()">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="Dashboard-content">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2>
+                        <i class="fas fa-tachometer-alt"></i> Teller Dashboard
+                    </h2>
+                    <p class="text-muted">Daily Operations & Pelanggan Service</p>
+                </div>
+            </div>
+
+            <!-- Today's Ringkasan -->
+            <div Kelas="row mb-4">
+                <div Kelas="col-md-3">
+                    <div Kelas="card stat-card text-center bg-primary text-white">
+                        <div Kelas="card-body">
+                            <i Kelas="fas fa-user fa-2x mb-2"></i>
+                            <h5>New Anggota</h5>
+                            <h3 id="newMembers">0</h3>
+                            <p Kelas="mb-0">Hari Ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div Kelas="col-md-3">
+                    <div Kelas="card stat-card text-center bg-Berhasil text-white">
+                        <div Kelas="card-body">
+                            <i Kelas="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                            <h5>Pinjaman Processed</h5>
+                            <h3 id="loansProcessed">0</h3>
+                            <p Kelas="mb-0">Hari Ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div Kelas="col-md-3">
+                    <div Kelas="card stat-card text-center bg-Peringatan text-white">
+                        <div Kelas="card-body">
+                            <i Kelas="fas fa-piggy-bank fa-2x mb-2"></i>
+                            <h5>Simpanan Deposits</h5>
+                            <h3 id="savingsDeposits">0</h3>
+                            <p Kelas="mb-0">Hari Ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div Kelas="col-md-3">
+                    <div Kelas="card stat-card text-center bg-Info text-white">
+                        <div Kelas="card-body">
+                            <i Kelas="fas fa-money-bill-wave fa-2x mb-2"></i>
+                            <h5>Pembayaran Received</h5>
+                            <h3 id="paymentsReceived">0</h3>
+                            <p Kelas="mb-0">Hari Ini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div Kelas="row mb-4">
+                <div Kelas="col-12">
+                    <div Kelas="card">
+                        <div Kelas="card-header">
+                            <h5><i Kelas="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div Kelas="card-body">
+                            <div Kelas="row">
+                                <div Kelas="col-md-3 col-sm-6 mb-3">
+                                    <div Kelas="quick-action" onclick="registerMember()">
+                                        <i Kelas="fas fa-user-plus"></i>
+                                        <h6>Daftar Anggota</h6>
+                                        <small Kelas="text-muted">New Anggota registration</small>
+                                    </div>
+                                </div>
+                                <div Kelas="col-md-3 col-sm-6 mb-3">
+                                    <div Kelas="quick-action" onclick="processLoanApplication()">
+                                        <i Kelas="fas fa-hand-holding-usd"></i>
+                                        <h6>Proses Pinjaman</h6>
+                                        <small Kelas="text-muted">Pinjaman Aplikasi</small>
+                                    </div>
+                                </div>
+                                <div Kelas="col-md-3 col-sm-6 mb-3">
+                                    <div Kelas="quick-action" onclick="depositSavings()">
+                                        <i Kelas="fas fa-piggy-bank"></i>
+                                        <h6>Setoran Simpanan</h6>
+                                        <small Kelas="text-muted">Anggota Setoran</small>
+                                    </div>
+                                </div>
+                                <div Kelas="col-md-3 col-sm-6 mb-3">
+                                    <div Kelas="quick-action" onclick="receivePayment()">
+                                        <i Kelas="fas fa-money-bill-wave"></i>
+                                        <h6>Receive Pembayaran</h6>
+                                        <small Kelas="text-muted">Pinjaman Pembayaran</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transaksi -->
+            <div Kelas="row mb-4">
+                <div Kelas="col-lg-8">
+                    <div Kelas="card">
+                        <div Kelas="card-header">
+                            <h5><i Kelas="fas fa-exchange-alt"></i> Recent Transaksi</h5>
+                        </div>
+                        <div Kelas="card-body">
+                            <div id="recentTransactions">
+                                <div Kelas="Transaksi-item">
+                                    <div Kelas="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Anggota Registration</strong><br>
+                                            <small Kelas="text-muted">Siti Nurhaliza - ID: 2023-001</small>
+                                        </div>
+                                        <div Kelas="text-end">
+                                            <span Kelas="badge bg-Berhasil">Selesai</span><br>
+                                            <small Kelas="text-muted">10:30 AM</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div Kelas="Transaksi-item">
+                                    <div Kelas="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Pinjaman Pencairan</strong><br>
+                                            <small Kelas="text-muted">Ahmad Wijaya - Rp 5,000,000</small>
+                                        </div>
+                                        <div Kelas="text-end">
+                                            <span Kelas="badge bg-primary">Processed</span><br>
+                                            <small Kelas="text-muted">09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div Kelas="Transaksi-item">
+                                    <div Kelas="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Simpanan Setoran</strong><br>
+                                            <small Kelas="text-muted">Budi Santoso - Rp 500,000</small>
+                                        </div>
+                                        <div Kelas="text-end">
+                                            <span Kelas="badge bg-Berhasil">Selesai</span><br>
+                                            <small Kelas="text-muted">09:15 AM</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div Kelas="Transaksi-item">
+                                    <div Kelas="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Pinjaman Pembayaran</strong><br>
+                                            <small Kelas="text-muted">Diana Putri - Rp 250,000</small>
+                                        </div>
+                                        <div Kelas="text-end">
+                                            <span Kelas="badge bg-Berhasil">Received</span><br>
+                                            <small Kelas="text-muted">08:30 AM</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div Kelas="col-lg-4">
+                    <div Kelas="card">
+                        <div Kelas="card-header">
+                            <h5><i Kelas="fas fa-Grafik-pie"></i> Hari Ini's Activities</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="Grafik-container">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Tasks and Queue -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-clock"></i> Menunggu Tasks</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="pendingTasks">
+                                <div class="alert alert-alert alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Pinjaman Applications:</strong> 3 Menunggu Review
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-info alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Dokumen Verifikasi:</strong> 2 Anggota need ID Verifikasi
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-Berhasil alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Daily Laporan:</strong> Ready for submission
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-user"></i> Pelanggan Queue</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="customerQueue">
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                    <div>
+                                        <i class="fas fa-user text-primary"></i>
+                                        <span class="ms-2">A001 - Ahmad Wijaya</span>
+                                    </div>
+                                    <span class="badge bg-alert">Waiting</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                    <div>
+                                        <i class="fas fa-user text-primary"></i>
+                                        <span class="ms-2">A002 - Siti Nurhaliza</span>
+                                    </div>
+                                    <span class="badge bg-info">In Progress</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                    <div>
+                                        <i class="fas fa-user text-primary"></i>
+                                        <span class="ms-2">A003 - Budi Santoso</span>
+                                    </div>
+                                    <span class="badge bg-secondary">Lanjut</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="navigation_config.js"></script>
+    
+    <script>
+        // Initialize Dashboard
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadDashboardData();
+            initializeCharts();
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Initialize navigation
+            initializeNavigation();
+        });
+
+        // Initialize navigation
+        function initializeNavigation() {
+            const userData = JSON.parse(localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna') || '{}');
+            const userRole = userData.role || 'Anggota';
+            
+            // Generate navigation based on Pengguna role
+            const navigationHTML = renderNavigation(userRole);
+            Dokumen.getElementById('navigationMenu').innerHTML = navigationHTML;
+            
+            // Generate top navigation based on Pengguna role
+            const topNavigationHTML = renderTopNavigation(userRole);
+            Dokumen.getElementById('topNavMenu').innerHTML = topNavigationHTML;
+            
+            // Tambah click handlers to navigation items
+            Dokumen.querySelectorAll('.nav-link, .top-nav-item').forEach(item => {
+                item.addEventListener('click', handleNavigationClick);
+            });
+        }
+
+        // Authentication check
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            if (!token || !Pengguna) {
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+            
+            const userData = JSON.parse(Pengguna);
+            if (userData.role !== 'Teller') {
+                Peringatan('Akses ditolak. Teller role Wajib.');
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+        }
+
+        // Load Dashboard Data
+        function loadDashboardData() {
+            // Simulate API calls to load Data
+            Dokumen.getElementById('newMembers').textContent = '5';
+            Dokumen.getElementById('loansProcessed').textContent = '8';
+            Dokumen.getElementById('savingsDeposits').textContent = '12';
+            Dokumen.getElementById('paymentsReceived').textContent = '6';
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Aktivitas Grafik
+            const activityCtx = Dokumen.getElementById('activityChart').getContext('2d');
+            new Grafik(activityCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Registrations', 'Pinjaman', 'Deposits', 'Pembayaran'],
+                    datasets: [{
+                        Data: [5, 8, 12, 6],
+                        backgroundColor: [
+                            '#3498db',
+                            '#27ae60',
+                            '#f39c12',
+                            '#e74c3c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Perbarui Waktu
+        function updateTime() {
+            const now = new Tanggal();
+            Dokumen.getElementById('currentTime').textContent = now.toLocaleString('id-ID');
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            Dokumen.querySelector('.sidebar').classList.toggle('show');
+        }
+
+        // Keluar
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Quick action functions
+        function registerMember() {
+            window.Lokasi.href = '/mono/Tambah-Anggota.html';
+        }
+
+        function processLoanApplication() {
+            window.Lokasi.href = '/mono/Tambah-Pinjaman.html';
+        }
+
+        function depositSavings() {
+            window.Lokasi.href = '/mono/Tambah-Simpanan.html';
+        }
+
+        function receivePayment() {
+            window.Lokasi.href = '/mono/Pinjaman-Pembayaran.html';
+        }
+    </script>
+</body>
+</html>

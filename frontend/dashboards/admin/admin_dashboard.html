@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/Semua.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --Berhasil-color: #27ae60;
+            --Peringatan-color: #f39c12;
+            --danger-color: #e74c3c;
+            --Info-color: #17a2b8;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--primary-color);
+            padding-top: 70px;
+            z-index: 999;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            padding: 14px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.Aktif {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 260px;
+        }
+
+        .top-navbar {
+            Posisi: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .top-nav-menu {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .top-nav-item {
+            color: var(--dark-color);
+            text-decoration: Tidak Ada;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: Semua 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-nav-item:hover,
+        .top-nav-item.Aktif {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .HP-menu-toggle {
+            display: Tidak Ada;
+            background: Tidak Ada;
+            border: Tidak Ada;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .HP-menu-toggle:hover {
+            background: rgba(17, 162, 184, 0.1);
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            border: Tidak Ada;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Pengguna-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-action {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s ease;
+            border: Tidak Ada;
+            Posisi: relative;
+            overflow: hidden;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        .quick-action::before {
+            content: '';
+            Posisi: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .quick-action:hover::before {
+            left: 100%;
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .quick-action h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .quick-action small {
+            opacity: 0.9;
+            font-size: 0.8rem;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .modal-header .btn-Tutup {
+            Filter: brightness(0) invert(1);
+        }
+
+        @media (max-width: 768px) {
+            .HP-menu-toggle {
+                display: block;
+            }
+            
+            .top-nav-menu {
+                display: Tidak Ada;
+            }
+            
+            .main-content {
+                padding: 80px 15px 15px;
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+            
+            .top-navbar {
+                padding: 0 15px;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .quick-action {
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .HP-menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .HP-menu-toggle {
+                display: Tidak Ada;
+            }
+            
+            .top-nav-menu {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="d-flex align-items-center gap-3 flex-grow-1">
+            <button class="HP-menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="top-nav-menu">
+                <a href="#Dashboard" class="top-nav-item Aktif">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#Anggota" class="top-nav-item">
+                    <i class="fas fa-user"></i> Anggota
+                </a>
+                <a href="#Pinjaman" class="top-nav-item">
+                    <i class="fas fa-hand-holding-usd"></i> Pinjaman
+                </a>
+                <a href="#Simpanan" class="top-nav-item">
+                    <i class="fas fa-piggy-bank"></i> Simpanan
+                </a>
+                <a href="#Laporan" class="top-nav-item">
+                    <i class="fas fa-Grafik-line"></i> Laporan
+                </a>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="Posisi-relative">
+                <i class="fas fa-bell text-muted"></i>
+                <span class="Posisi-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    4
+                </span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <div class="Pengguna-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div>
+                    <small class="d-block text-muted">Admin</small>
+                    <span id="currentTime">Memuat...</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-sm btn-outline-danger" onclick="Keluar()">
+                <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="text-center mb-4">
+            <h4 class="text-white">
+                <i class="fas fa-coop"></i> KSP Lam Gabe Jaya
+            </h4>
+            <small class="text-muted">Admin Panel</small>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link Aktif" href="#Dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Anggota">
+                    <i class="fas fa-user"></i> Anggota Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Anggota-registration">
+                    <i class="fas fa-user-plus"></i> Anggota Registration
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Pinjaman">
+                    <i class="fas fa-hand-holding-usd"></i> Pinjaman Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Pinjaman-Persetujuan">
+                    <i class="fas fa-check-circle"></i> Pinjaman Persetujuan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Simpanan">
+                    <i class="fas fa-piggy-bank"></i> Simpanan Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Transaksi">
+                    <i class="fas fa-exchange-alt"></i> Transaksi
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Staf">
+                    <i class="fas fa-user-cog"></i> Staf Manajemen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Laporan">
+                    <i class="fas fa-Grafik-line"></i> Laporan & Analytics
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#Pengaturan">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../admin/monitoring_dashboard.html" target="_blank">
+                    <i class="fas fa-chart-line"></i> System Monitoring
+                    <span class="badge bg-success ms-auto">Live</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#logout">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Dashboard Content -->
+        <div id="Dashboard-content" class="content-section">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2>
+                        <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                    </h2>
+                    <p class="text-muted">Operations Manajemen & Oversight</p>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user fa-2x mb-2"></i>
+                            <h5>Total Anggota</h5>
+                            <h3 id="totalMembers">0</h3>
+                            <p class="mb-0">Aktif Anggota</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-Berhasil text-white">
+                        <div class="card-body">
+                            <i class="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                            <h5>Total Pinjaman</h5>
+                            <h3 id="totalLoans">0</h3>
+                            <p class="mb-0">Aktif Pinjaman</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-alert text-white">
+                        <div class="card-body">
+                            <i class="fas fa-piggy-bank fa-2x mb-2"></i>
+                            <h5>Total Simpanan</h5>
+                            <h3 id="totalSavings">0</h3>
+                            <p class="mb-0">Anggota Simpanan</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-info text-white">
+                        <div class="card-body">
+                            <i class="fas fa-Grafik-line fa-2x mb-2"></i>
+                            <h5>Monthly Pendapatan</h5>
+                            <h3 id="monthlyRevenue">0</h3>
+                            <p class="mb-0">Bulan Ini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="addMember()">
+                                        <i class="fas fa-user-plus"></i>
+                                        <h6>Tambah Anggota</h6>
+                                        <small class="text-muted">Daftar new Anggota</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="processLoan()">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                        <h6>Proses Pinjaman</h6>
+                                        <small class="text-muted">New Pinjaman Aplikasi</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="savingsDeposit()">
+                                        <i class="fas fa-piggy-bank"></i>
+                                        <h6>Simpanan Setoran</h6>
+                                        <small class="text-muted">Anggota Setoran</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="quick-action" onclick="generateReport()">
+                                        <i class="fas fa-File-alt"></i>
+                                        <h6>Generate Laporan</h6>
+                                        <small class="text-muted">Monthly Laporan</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Analytics -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-Grafik-bar"></i> Financial Overview</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="Grafik-container">
+                                <canvas id="financialChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-Grafik-pie"></i> Pinjaman Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="Grafik-container">
+                                <canvas id="loanStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities and Pending Tasks -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-Riwayat"></i> Recent Activities</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentActivities">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <i class="fas fa-user-plus text-Berhasil"></i>
+                                        <span class="ms-2">New Anggota registered: Ahmad Wijaya</span>
+                                    </div>
+                                    <small class="text-muted">5 min ago</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <i class="fas fa-hand-holding-usd text-primary"></i>
+                                        <span class="ms-2">Pinjaman approved: ID-2023-001</span>
+                                    </div>
+                                    <small class="text-muted">1 hour ago</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <i class="fas fa-piggy-bank text-Berhasil"></i>
+                                        <span class="ms-2">Simpanan Setoran: Rp 500,000</span>
+                                    </div>
+                                    <small class="text-muted">2 hours ago</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-user text-info"></i>
+                                        <span class="ms-2">Staf Masuk: Budi Santoso</span>
+                                    </div>
+                                    <small class="text-muted">3 hours ago</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-tasks"></i> Menunggu Tasks</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="pendingTasks">
+                                <div class="alert alert-alert alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Pinjaman Applications:</strong> 5 Menunggu Persetujuan
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-info alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Anggota Verifikasi:</strong> 3 new Anggota need Verifikasi
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                                <div class="alert alert-Berhasil alert-dismissible fade show" role="Peringatan">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Monthly Laporan:</strong> Ready for Review
+                                    <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Members Section -->
+    <div id="Anggota-section" class="content-section" style="display: Tidak Ada;">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2><i class="fas fa-user"></i> Anggota Manajemen</h2>
+                    <p class="text-muted">Manage and monitor Semua cooperative Anggota</p>
+                </div>
+            </div>
+
+            <!-- Member Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user fa-2x mb-2"></i>
+                            <h5>Total Anggota</h5>
+                            <h3 id="totalMembers">0</h3>
+                            <p class="mb-0">Semua Anggota</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-Berhasil text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user-check fa-2x mb-2"></i>
+                            <h5>Aktif Anggota</h5>
+                            <h3 id="activeMembers">0</h3>
+                            <p class="mb-0">Currently Aktif</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-alert text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user-plus fa-2x mb-2"></i>
+                            <h5>New Anggota</h5>
+                            <h3 id="newMembers">0</h3>
+                            <p class="mb-0">Bulan Ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-info text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user-clock fa-2x mb-2"></i>
+                            <h5>Menunggu</h5>
+                            <h3 id="pendingMembers">0</h3>
+                            <p class="mb-0">Awaiting Persetujuan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-Daftar"></i> Anggota Daftar</h5>
+                </div>
+                <div class="card-body">
+                    <div class="Tabel-responsive">
+                        <table class="Tabel Tabel-striped">
+                            <thead>
+                                <tr>
+                                    <th>Anggota ID</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>Telepon</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>001</td>
+                                    <td>Ahmad Wijaya</td>
+                                    <td>ahmad@Email.com</td>
+                                    <td>08123456789</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>002</td>
+                                    <td>Siti Nurhaliza</td>
+                                    <td>siti@Email.com</td>
+                                    <td>08234567890</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>003</td>
+                                    <td>Budi Santoso</td>
+                                    <td>budi@Email.com</td>
+                                    <td>08345678901</td>
+                                    <td><span class="badge bg-alert">Menunggu</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>004</td>
+                                    <td>Dewi Lestari</td>
+                                    <td>dewi@Email.com</td>
+                                    <td>08456789012</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>005</td>
+                                    <td>Eko Prasetyo</td>
+                                    <td>eko@Email.com</td>
+                                    <td>08567890123</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loans Section -->
+    <div id="Pinjaman-section" class="content-section" style="display: Tidak Ada;">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2><i class="fas fa-hand-holding-usd"></i> Pinjaman Manajemen</h2>
+                    <p class="text-muted">Manage and monitor Semua Pinjaman applications</p>
+                </div>
+            </div>
+
+            <!-- Loan Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                            <h5>Total Pinjaman</h5>
+                            <h3 id="totalLoans">0</h3>
+                            <p class="mb-0">Semua Pinjaman</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-Berhasil text-white">
+                        <div class="card-body">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <h5>Aktif Pinjaman</h5>
+                            <h3 id="activeLoans">0</h3>
+                            <p class="mb-0">Currently Aktif</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-alert text-white">
+                        <div class="card-body">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <h5>Menunggu</h5>
+                            <h3 id="pendingLoans">0</h3>
+                            <p class="mb-0">Awaiting Persetujuan</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-danger text-white">
+                        <div class="card-body">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <h5>Telat</h5>
+                            <h3 id="overdueLoans">0</h3>
+                            <p class="mb-0">Past due Tanggal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loan List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-Daftar"></i> Pinjaman Applications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="Tabel-responsive">
+                        <table class="Tabel Tabel-striped">
+                            <thead>
+                                <tr>
+                                    <th>Pinjaman ID</th>
+                                    <th>Anggota</th>
+                                    <th>Jumlah</th>
+                                    <th>Tipe</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>L001</td>
+                                    <td>Ahmad Wijaya</td>
+                                    <td>Rp 5,000,000</td>
+                                    <td>Personal</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>L002</td>
+                                    <td>Siti Nurhaliza</td>
+                                    <td>Rp 3,000,000</td>
+                                    <td>Bisnis</td>
+                                    <td><span class="badge bg-alert">Menunggu</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>L003</td>
+                                    <td>Budi Santoso</td>
+                                    <td>Rp 7,500,000</td>
+                                    <td>Emergency</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>L004</td>
+                                    <td>Dewi Lestari</td>
+                                    <td>Rp 2,000,000</td>
+                                    <td>Personal</td>
+                                    <td><span class="badge bg-danger">Telat</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-danger">Collect</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>L005</td>
+                                    <td>Eko Prasetyo</td>
+                                    <td>Rp 4,000,000</td>
+                                    <td>Bisnis</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-alert">Edit</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings Section -->
+    <div id="Simpanan-section" class="content-section" style="display: Tidak Ada;">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2><i class="fas fa-piggy-bank"></i> Simpanan Manajemen</h2>
+                    <p class="text-muted">Manage and monitor Semua Simpanan accounts</p>
+                </div>
+            </div>
+
+            <!-- Savings Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-piggy-bank fa-2x mb-2"></i>
+                            <h5>Total Simpanan</h5>
+                            <h3 id="totalSavings">0</h3>
+                            <p class="mb-0">Semua accounts</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-Berhasil text-white">
+                        <div class="card-body">
+                            <i class="fas fa-wallet fa-2x mb-2"></i>
+                            <h5>Aktif Accounts</h5>
+                            <h3 id="activeSavings">0</h3>
+                            <p class="mb-0">Currently Aktif</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-alert text-white">
+                        <div class="card-body">
+                            <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                            <h5>New Deposits</h5>
+                            <h3 id="newDeposits">0</h3>
+                            <p class="mb-0">Bulan Ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card text-center bg-info text-white">
+                        <div class="card-body">
+                            <i class="fas fa-Grafik-line fa-2x mb-2"></i>
+                            <h5>Bunga Earned</h5>
+                            <h3 id="interestEarned">0</h3>
+                            <p class="mb-0">Bulan Ini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-Daftar"></i> Simpanan Accounts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="Tabel-responsive">
+                        <table class="Tabel Tabel-striped">
+                            <thead>
+                                <tr>
+                                    <th>Account ID</th>
+                                    <th>Anggota</th>
+                                    <th>Tipe</th>
+                                    <th>Saldo</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>S001</td>
+                                    <td>Ahmad Wijaya</td>
+                                    <td>Simpanan</td>
+                                    <td>Rp 2,500,000</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-Berhasil">Setoran</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>S002</td>
+                                    <td>Siti Nurhaliza</td>
+                                    <td>Simpanan</td>
+                                    <td>Rp 1,800,000</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-Berhasil">Setoran</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>S003</td>
+                                    <td>Budi Santoso</td>
+                                    <td>Mandatory</td>
+                                    <td>Rp 3,200,000</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-Berhasil">Setoran</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>S004</td>
+                                    <td>Dewi Lestari</td>
+                                    <td>Voluntary</td>
+                                    <td>Rp 1,500,000</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-Berhasil">Setoran</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>S005</td>
+                                    <td>Eko Prasetyo</td>
+                                    <td>Simpanan</td>
+                                    <td>Rp 2,100,000</td>
+                                    <td><span class="badge bg-Berhasil">Aktif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">View</button>
+                                        <button class="btn btn-sm btn-Berhasil">Setoran</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div id="Laporan-section" class="content-section" style="display: Tidak Ada;">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2><i class="fas fa-Grafik-line"></i> Laporan & Analytics</h2>
+                    <p class="text-muted">Generate and view various Laporan</p>
+                </div>
+            </div>
+
+            <!-- Report Options -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-File-alt fa-3x text-primary mb-3"></i>
+                            <h5>Financial Laporan</h5>
+                            <p class="text-muted">Monthly financial Ringkasan</p>
+                            <button class="btn btn-primary">Generate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-user fa-3x text-Berhasil mb-3"></i>
+                            <h5>Anggota Laporan</h5>
+                            <p class="text-muted">Anggota Statistik</p>
+                            <button class="btn btn-Berhasil">Generate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-hand-holding-usd fa-3x text-alert mb-3"></i>
+                            <h5>Pinjaman Laporan</h5>
+                            <p class="text-muted">Pinjaman portfolio Analisis</p>
+                            <button class="btn btn-alert">Generate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-piggy-bank fa-3x text-info mb-3"></i>
+                            <h5>Simpanan Laporan</h5>
+                            <p class="text-muted">Simpanan account Ringkasan</p>
+                            <button class="btn btn-info">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reports -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-Riwayat"></i> Recent Laporan</h5>
+                </div>
+                <div class="card-body">
+                    <div class="Daftar-Grup">
+                        <div class="Daftar-Grup-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Monthly Financial Laporan</h6>
+                                    <small class="text-muted">Generated: 2024-10-17</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-primary">View</button>
+                                    <button class="btn btn-sm btn-Berhasil">Unduh</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="Daftar-Grup-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Anggota Statistik Laporan</h6>
+                                    <small class="text-muted">Generated: 2024-10-16</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-primary">View</button>
+                                    <button class="btn btn-sm btn-Berhasil">Unduh</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal fade" id="addMemberModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul"><i class="fas fa-user-plus"></i> Tambah New Anggota</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMemberForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Full Nama</label>
+                                    <input type="text" class="form-control" name="Nama" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Telepon</label>
+                                    <input type="tel" class="form-control" name="Telepon" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Alamat</label>
+                                    <textarea class="form-control" name="Alamat" rows="3" required></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Tanggal of Birth</label>
+                                    <input type="Tanggal" class="form-control" name="birth_date" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Gender</label>
+                                    <select class="form-control" name="gender" required>
+                                        <option value="">Pilih Gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Occupation</label>
+                                    <input type="text" class="form-control" name="occupation">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monthly Pendapatan</label>
+                                    <input type="Nomor" class="form-control" name="monthly_income" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMember()">Simpan Anggota</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Loan Modal -->
+    <div class="modal fade" id="processLoanModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul"><i class="fas fa-hand-holding-usd"></i> Proses Pinjaman Aplikasi</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="processLoanForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Pilih Anggota</label>
+                                    <select class="form-control" name="member_id" required>
+                                        <option value="">Pilih Anggota</option>
+                                        <option value="1">Ahmad Wijaya (001)</option>
+                                        <option value="2">Siti Nurhaliza (002)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Pinjaman Tipe</label>
+                                    <select class="form-control" name="loan_type" required>
+                                        <option value="">Pilih Pinjaman Tipe</option>
+                                        <option value="personal">Personal Pinjaman</option>
+                                        <option value="Bisnis">Bisnis Pinjaman</option>
+                                        <option value="emergency">Emergency Pinjaman</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Pinjaman Jumlah (Rp)</label>
+                                    <input type="Nomor" class="form-control" name="Jumlah" min="100000" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Pinjaman Term (months)</label>
+                                    <input type="Nomor" class="form-control" name="term" min="1" max="60" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Bunga Tarif (%)</label>
+                                    <input type="Nomor" class="form-control" name="interest_rate" step="0.1" value="2.5" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monthly Pembayaran (Rp)</label>
+                                    <input type="Nomor" class="form-control" name="monthly_payment" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Purpose</label>
+                                    <textarea class="form-control" name="purpose" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Collateral</label>
+                                    <textarea class="form-control" name="collateral" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveLoan()">Proses Pinjaman</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings Deposit Modal -->
+    <div class="modal fade" id="savingsDepositModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul"><i class="fas fa-piggy-bank"></i> Simpanan Setoran</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="savingsDepositForm">
+                        <div class="mb-3">
+                            <label class="form-label">Pilih Anggota</label>
+                            <select class="form-control" name="member_id" required>
+                                <option value="">Pilih Anggota</option>
+                                <option value="1">Ahmad Wijaya (001)</option>
+                                <option value="2">Siti Nurhaliza (002)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Setoran Tipe</label>
+                            <select class="form-control" name="deposit_type" required>
+                                <option value="">Pilih Tipe</option>
+                                <option value="regular">Regular Setoran</option>
+                                <option value="mandatory">Mandatory Setoran</option>
+                                <option value="voluntary">Voluntary Setoran</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah (Rp)</label>
+                            <input type="Nomor" class="form-control" name="Jumlah" min="10000" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deskripsi</label>
+                            <textarea class="form-control" name="Deskripsi" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDeposit()">Proses Setoran</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Report Modal -->
+    <div class="modal fade" id="generateReportModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul"><i class="fas fa-File-alt"></i> Generate Laporan</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateReportForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Laporan Tipe</label>
+                                    <select class="form-control" name="report_type" required>
+                                        <option value="">Pilih Laporan Tipe</option>
+                                        <option value="financial">Financial Laporan</option>
+                                        <option value="Anggota">Anggota Laporan</option>
+                                        <option value="Pinjaman">Pinjaman Laporan</option>
+                                        <option value="Simpanan">Simpanan Laporan</option>
+                                        <option value="comprehensive">Comprehensive Laporan</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Period</label>
+                                    <select class="form-control" name="period" required>
+                                        <option value="">Pilih Period</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="quarterly">Quarterly</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Tanggal Range</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="Tanggal" class="form-control" name="start_date" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="Tanggal" class="form-control" name="end_date" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Format</label>
+                                    <select class="form-control" name="format" required>
+                                        <option value="PDF">PDF</option>
+                                        <option value="Excel">Excel</option>
+                                        <option value="csv">CSV</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Include Charts</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="include_charts" checked>
+                                        <label class="form-check-label">Include charts in Laporan</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email Laporan</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="email_report">
+                                        <label class="form-check-label">Send Laporan via Email</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="generateReportAction()">Generate Laporan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="navigation_config.js"></script>
+    
+    <script>
+        // Initialize Dashboard
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadDashboardData();
+            initializeCharts();
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Initialize navigation
+            initializeNavigation();
+            
+            // Initialize Pinjaman Formulir calculations
+            initializeLoanCalculations();
+            
+            // Set default dates for Laporan Formulir
+            setDefaultDates();
+        });
+
+        // Initialize Pinjaman calculations
+        function initializeLoanCalculations() {
+            const amountInput = Dokumen.querySelector('input[Nama="Jumlah"]');
+            const termInput = Dokumen.querySelector('input[Nama="term"]');
+            const monthlyPaymentInput = Dokumen.querySelector('input[Nama="monthly_payment"]');
+            
+            if (amountInput && termInput && monthlyPaymentInput) {
+                function calculateMonthlyPayment() {
+                    const Jumlah = parseFloat(amountInput.value) || 0;
+                    const term = parseInt(termInput.value) || 1;
+                    const interestRate = 2.5 / 100; // 2.5% annual Tarif
+                    const monthlyPayment = (Jumlah * (1 + interestRate)) / term;
+                    monthlyPaymentInput.value = monthlyPayment.toFixed(2);
+                }
+                
+                amountInput.addEventListener('input', calculateMonthlyPayment);
+                termInput.addEventListener('input', calculateMonthlyPayment);
+            }
+        }
+
+        // Set default dates for Laporan Formulir
+        function setDefaultDates() {
+            const Hari Ini = new Tanggal();
+            const firstDayOfMonth = new Tanggal(Hari Ini.getFullYear(), Hari Ini.getMonth(), 1);
+            
+            const startDateInput = Dokumen.querySelector('input[Nama="start_date"]');
+            const endDateInput = Dokumen.querySelector('input[Nama="end_date"]');
+            
+            if (startDateInput && endDateInput) {
+                startDateInput.value = firstDayOfMonth.toISOString().split('T')[0];
+                endDateInput.value = Hari Ini.toISOString().split('T')[0];
+            }
+        }
+
+        // Authentication check
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            
+            if (!token || !Pengguna) {
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+            
+            const userData = JSON.parse(Pengguna);
+            if (userData.role !== 'Admin' && userData.role !== 'super_admin') {
+                Peringatan('Akses ditolak. Admin role Wajib.');
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+        }
+
+        // Load Dashboard Data
+        function loadDashboardData() {
+            // Simulate API calls to load Data
+            Dokumen.getElementById('totalMembers').textContent = '142';
+            Dokumen.getElementById('totalLoans').textContent = '89';
+            Dokumen.getElementById('totalSavings').textContent = '156';
+            Dokumen.getElementById('monthlyRevenue').textContent = '45.2M';
+            
+            // Load section Data
+            loadSectionData();
+        }
+
+        // Load section Data
+        function loadSectionData() {
+            // Anggota section Data
+            Dokumen.getElementById('activeMembers').textContent = '128';
+            Dokumen.getElementById('newMembers').textContent = '12';
+            Dokumen.getElementById('pendingMembers').textContent = '2';
+            
+            // Pinjaman section Data
+            Dokumen.getElementById('activeLoans').textContent = '76';
+            Dokumen.getElementById('pendingLoans').textContent = '8';
+            Dokumen.getElementById('overdueLoans').textContent = '5';
+            
+            // Simpanan section Data
+            Dokumen.getElementById('activeSavings').textContent = '142';
+            Dokumen.getElementById('newDeposits').textContent = '28';
+            Dokumen.getElementById('interestEarned').textContent = '2.4M';
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Financial Grafik
+            const financialCtx = Dokumen.getElementById('financialChart').getContext('2d');
+            new Grafik(financialCtx, {
+                Tipe: 'bar',
+                Data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Pinjaman Disbursed',
+                        Data: [65, 78, 90, 81, 56, 95],
+                        backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                    }, {
+                        label: 'Simpanan Collected',
+                        Data: [45, 67, 80, 61, 46, 85],
+                        backgroundColor: 'rgba(39, 174, 96, 0.8)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Pinjaman Status Grafik
+            const loanCtx = Dokumen.getElementById('loanStatusChart').getContext('2d');
+            new Grafik(loanCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Aktif', 'Menunggu', 'Selesai', 'Telat'],
+                    datasets: [{
+                        Data: [45, 15, 25, 4],
+                        backgroundColor: [
+                            '#27ae60',
+                            '#f39c12',
+                            '#3498db',
+                            '#e74c3c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Perbarui Waktu
+        function updateTime() {
+            const now = new Tanggal();
+            Dokumen.getElementById('currentTime').textContent = now.toLocaleString('id-ID');
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = Dokumen.getElementById('sidebar');
+            const mainContent = Dokumen.getElementById('mainContent');
+            
+            sidebar.classList.toggle('show');
+            mainContent.classList.toggle('sidebar-open');
+        }
+
+        // Handle navigation clicks
+        function handleNavigation(event) {
+            event.preventDefault();
+            
+            // Remove Aktif Kelas from Semua nav items
+            Dokumen.querySelectorAll('.nav-link, .top-nav-item').forEach(item => {
+                item.classList.remove('Aktif');
+            });
+            
+            // Tambah Aktif Kelas to clicked item
+            event.Target.classList.Tambah('Aktif');
+            
+            // Get section from href
+            const href = event.Target.getAttribute('href');
+            const section = href.substring(1); // Remove # from href
+            
+            // Hide Semua sections
+            Dokumen.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'Tidak Ada';
+            });
+            
+            // Hide Dashboard content
+            const dashboardContent = Dokumen.getElementById('Dashboard-content');
+            if (dashboardContent) {
+                dashboardContent.style.display = 'Tidak Ada';
+            }
+            
+            // Show selected section
+            const targetSection = Dokumen.getElementById(`${section}-section`);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                console.Log('Showing section:', section);
+            } else {
+                console.Log('Section Tidak Ditemukan:', section);
+                // Show Dashboard content if section Tidak Ditemukan
+                if (dashboardContent) {
+                    dashboardContent.style.display = 'block';
+                }
+            }
+            
+            // Tutup sidebar on HP after navigation
+            if (window.innerWidth <= 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                sidebar.classList.remove('show');
+                mainContent.classList.remove('sidebar-open');
+            }
+        }
+
+        // Initialize navigation event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to navigation items
+            document.querySelectorAll('.nav-link, .top-nav-item').forEach(item => {
+                item.addEventListener('click', handleNavigation);
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 1024) {
+                    Dokumen.getElementById('sidebar').classList.remove('show');
+                    Dokumen.getElementById('mainContent').classList.remove('sidebar-open');
+                }
+            });
+        });
+
+        // Keluar
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        // Quick action functions
+        function addMember() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('addMemberModal'));
+            modal.show();
+        }
+
+        function processLoan() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('processLoanModal'));
+            modal.show();
+        }
+
+        function savingsDeposit() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('savingsDepositModal'));
+            modal.show();
+        }
+
+        function generateReport() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('generateReportModal'));
+            modal.show();
+        }
+
+        // Simpan functions
+        function saveMember() {
+            const Formulir = Dokumen.getElementById('addMemberForm');
+            const formData = new FormData(Formulir);
+            
+            // Validate Formulir
+            if (!Formulir.checkValidity()) {
+                Formulir.reportValidity();
+                return;
+            }
+            
+            // Show Memuat
+            const saveBtn = event.Target;
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span Kelas="spinner-border spinner-border-sm me-2"></span>Saving...';
+            saveBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Tutup modal
+                bootstrap.Modal.getInstance(Dokumen.getElementById('addMemberModal')).hide();
+                
+                // Reset Formulir
+                Formulir.Reset();
+                
+                // Show Berhasil Pesan
+                showAlert('Berhasil', 'Anggota added successfully!');
+                
+                // Perbarui Anggota Jumlah
+                const totalMembers = Dokumen.getElementById('totalMembers');
+                if (totalMembers) {
+                    totalMembers.textContent = parseInt(totalMembers.textContent) + 1;
+                }
+                
+                // Reset button
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }, 1500);
+        }
+
+        function saveLoan() {
+            const Formulir = Dokumen.getElementById('processLoanForm');
+            const formData = new FormData(Formulir);
+            
+            // Validate Formulir
+            if (!Formulir.checkValidity()) {
+                Formulir.reportValidity();
+                return;
+            }
+            
+            // Calculate monthly Pembayaran
+            const Jumlah = parseFloat(formData.get('Jumlah'));
+            const term = parseInt(formData.get('term'));
+            const interestRate = parseFloat(formData.get('interest_rate')) / 100;
+            const monthlyPayment = (Jumlah * (1 + interestRate)) / term;
+            
+            // Show Memuat
+            const saveBtn = event.Target;
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span Kelas="spinner-border spinner-border-sm me-2"></span>Memproses...';
+            saveBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Tutup modal
+                bootstrap.Modal.getInstance(Dokumen.getElementById('processLoanModal')).hide();
+                
+                // Reset Formulir
+                Formulir.Reset();
+                
+                // Show Berhasil Pesan
+                showAlert('Berhasil', 'Pinjaman Aplikasi processed successfully!');
+                
+                // Perbarui Pinjaman Jumlah
+                const totalLoans = Dokumen.getElementById('totalLoans');
+                if (totalLoans) {
+                    totalLoans.textContent = parseInt(totalLoans.textContent) + 1;
+                }
+                
+                // Reset button
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }, 1500);
+        }
+
+        function saveDeposit() {
+            const Formulir = Dokumen.getElementById('savingsDepositForm');
+            const formData = new FormData(Formulir);
+            
+            // Validate Formulir
+            if (!Formulir.checkValidity()) {
+                Formulir.reportValidity();
+                return;
+            }
+            
+            // Show Memuat
+            const saveBtn = event.Target;
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span Kelas="spinner-border spinner-border-sm me-2"></span>Memproses...';
+            saveBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Tutup modal
+                bootstrap.Modal.getInstance(Dokumen.getElementById('savingsDepositModal')).hide();
+                
+                // Reset Formulir
+                Formulir.Reset();
+                
+                // Show Berhasil Pesan
+                showAlert('Berhasil', 'Setoran processed successfully!');
+                
+                // Perbarui Simpanan Jumlah
+                const totalSavings = Dokumen.getElementById('totalSavings');
+                if (totalSavings) {
+                    totalSavings.textContent = parseInt(totalSavings.textContent) + 1;
+                }
+                
+                // Reset button
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }, 1500);
+        }
+
+        function generateReportAction() {
+            const Formulir = Dokumen.getElementById('generateReportForm');
+            const formData = new FormData(Formulir);
+            
+            // Validate Formulir
+            if (!Formulir.checkValidity()) {
+                Formulir.reportValidity();
+                return;
+            }
+            
+            // Show Memuat
+            const generateBtn = event.Target;
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '<span Kelas="spinner-border spinner-border-sm me-2"></span>Generating...';
+            generateBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Tutup modal
+                bootstrap.Modal.getInstance(Dokumen.getElementById('generateReportModal')).hide();
+                
+                // Reset Formulir
+                Formulir.Reset();
+                
+                // Show Berhasil Pesan
+                showAlert('Berhasil', 'Laporan generated successfully! Unduh will start shortly.');
+                
+                // Simulate Unduh
+                setTimeout(() => {
+                    showAlert('Info', 'Laporan Unduh started!');
+                }, 1000);
+                
+                // Reset button
+                generateBtn.innerHTML = originalText;
+                generateBtn.disabled = false;
+            }, 2000);
+        }
+
+        // Peringatan function
+        function showAlert(Tipe, Pesan) {
+            const alertDiv = Dokumen.createElement('div');
+            alertDiv.className = `Peringatan Peringatan-${Tipe} Peringatan-dismissible fade show Posisi-fixed top-0 end-0 m-3`;
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${Pesan}
+                <button type="button" class="btn-Tutup" data-bs-dismiss="Peringatan"></button>
+            `;
+            
+            Dokumen.body.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

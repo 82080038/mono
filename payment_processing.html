@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran Memproses - Kasir Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .Pembayaran-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+            border-left: 4px solid #28a745;
+        }
+        
+        .Pembayaran-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Pembayaran-method {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+        }
+        
+        .Pembayaran-method:hover, .Pembayaran-method.Aktif {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .Pembayaran-method i {
+            font-size: 2rem;
+            color: #28a745;
+        }
+        
+        .quick-Jumlah {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: Semua 0.2s;
+        }
+        
+        .quick-Jumlah:hover {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .receipt-preview {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .Status-Berhasil { color: #28a745; }
+        .Status-Menunggu { color: #ffc107; }
+        .Status-failed { color: #dc3545; }
+        
+        .Transaksi-item {
+            transition: background-color 0.2s;
+        }
+        
+        .Transaksi-item:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-money-bill-wave"></i> Pembayaran Memproses</h1>
+                <p class="mb-0">Kasir - Pembayaran Memproses & Transaksi Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Today's Ringkasan -->
+        <div Kelas="row mb-4">
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Berhasil text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-cash-Daftar fa-2x mb-2"></i>
+                        <h5>Total Transaksi</h5>
+                        <h3 id="totalTransactions">0</h3>
+                        <p Kelas="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Info text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-money-bill fa-2x mb-2"></i>
+                        <h5>Cash In</h5>
+                        <h3 id="totalCashIn">0</h3>
+                        <p Kelas="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Peringatan text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-hand-holding-usd fa-2x mb-2"></i>
+                        <h5>Disbursements</h5>
+                        <h3 id="totalDisbursements">0</h3>
+                        <p Kelas="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-primary text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-wallet fa-2x mb-2"></i>
+                        <h5>Cash Saldo</h5>
+                        <h3 id="cashBalance">0</h3>
+                        <p Kelas="mb-0">Current</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div Kelas="row">
+            <!-- Pembayaran Memproses -->
+            <div Kelas="col-md-8">
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Kredit-card"></i> New Pembayaran</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <!-- Anggota Cari -->
+                        <div Kelas="row mb-4">
+                            <div Kelas="col-md-8">
+                                <div Kelas="input-group">
+                                    <span Kelas="input-group-text"><i Kelas="fas fa-Cari"></i></span>
+                                    <input Tipe="text" Kelas="form-control" id="memberSearch" placeholder="Cari by Anggota ID, Nama, or account Nomor...">
+                                    <button Kelas="btn btn-primary" onclick="searchMember()">Cari</button>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-4">
+                                <button Kelas="btn btn-outline-Info w-100" onclick="openMemberLookup()">
+                                    <i Kelas="fas fa-user"></i> Anggota Lookup
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Anggota Info -->
+                        <div id="memberInfo" Kelas="mb-4" style="display: Tidak Ada;">
+                            <div Kelas="Peringatan Peringatan-Berhasil">
+                                <div Kelas="row">
+                                    <div Kelas="col-md-8">
+                                        <h6><i Kelas="fas fa-user"></i> <span id="memberName">-</span></h6>
+                                        <p Kelas="mb-1">ID: <strong id="memberId">-</strong></p>
+                                        <p Kelas="mb-1">Account: <strong id="memberAccount">-</strong></p>
+                                        <p Kelas="mb-0">Saldo: <strong id="memberBalance">-</strong></p>
+                                    </div>
+                                    <div Kelas="col-md-4 text-end">
+                                        <button Kelas="btn btn-sm btn-outline-secondary" onclick="clearMember()">
+                                            <i Kelas="fas fa-times"></i> Hapus
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pembayaran Detail -->
+                        <div id="paymentDetails" style="display: Tidak Ada;">
+                            <h6>Pembayaran Detail</h6>
+                            <div Kelas="row">
+                                <div Kelas="col-md-6">
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Pembayaran Tipe</label>
+                                        <Pilih Kelas="Formulir-Pilih" id="paymentType" onchange="updatePaymentFields()">
+                                            <option value="">Pilih Pembayaran Tipe</option>
+                                            <option value="loan_payment">Pinjaman Pembayaran</option>
+                                            <option value="savings_deposit">Simpanan Setoran</option>
+                                            <option value="loan_disbursement">Pinjaman Pencairan</option>
+                                            <option value="savings_withdrawal">Simpanan Penarikan</option>
+                                            <option value="fee_payment">Biaya Pembayaran</option>
+                                            <option value="other">Other</option>
+                                        </Pilih>
+                                    </div>
+                                </div>
+                                <div Kelas="col-md-6">
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Reference Nomor</label>
+                                        <input Tipe="text" Kelas="form-control" id="referenceNumber" placeholder="Auto-generated" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pinjaman Pembayaran Fields -->
+                            <div id="loanPaymentFields" style="display: Tidak Ada;">
+                                <div Kelas="row">
+                                    <div Kelas="col-md-6">
+                                        <div Kelas="mb-3">
+                                            <label Kelas="form-label">Pilih Pinjaman</label>
+                                            <Pilih Kelas="Formulir-Pilih" id="loanSelect">
+                                                <option value="">Pilih Pinjaman account</option>
+                                            </Pilih>
+                                        </div>
+                                    </div>
+                                    <div Kelas="col-md-6">
+                                        <div Kelas="mb-3">
+                                            <label Kelas="form-label">Outstanding Saldo</label>
+                                            <input Tipe="text" Kelas="form-control" id="outstandingBalance" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Jumlah Entry -->
+                            <div Kelas="row">
+                                <div Kelas="col-md-6">
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Jumlah</label>
+                                        <div Kelas="input-group">
+                                            <span Kelas="input-group-text">Rp</span>
+                                            <input Tipe="Nomor" Kelas="form-control" id="paymentAmount" placeholder="0.00" min="0" step="0.01">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div Kelas="col-md-6">
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Quick Amounts</label>
+                                        <div Kelas="d-flex flex-wrap">
+                                            <span Kelas="quick-Jumlah" onclick="setAmount(50000)">50K</span>
+                                            <span Kelas="quick-Jumlah" onclick="setAmount(100000)">100K</span>
+                                            <span Kelas="quick-Jumlah" onclick="setAmount(250000)">250K</span>
+                                            <span Kelas="quick-Jumlah" onclick="setAmount(500000)">500K</span>
+                                            <span Kelas="quick-Jumlah" onclick="setAmount(1000000)">1M</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pembayaran Method -->
+                            <div Kelas="mb-3">
+                                <label Kelas="form-label">Pembayaran Method</label>
+                                <div Kelas="row">
+                                    <div Kelas="col-md-3">
+                                        <div Kelas="Pembayaran-method" onclick="selectPaymentMethod('cash')">
+                                            <i Kelas="fas fa-money-bill-wave"></i>
+                                            <p Kelas="mb-0 mt-2">Cash</p>
+                                        </div>
+                                    </div>
+                                    <div Kelas="col-md-3">
+                                        <div Kelas="Pembayaran-method" onclick="selectPaymentMethod('transfer')">
+                                            <i Kelas="fas fa-exchange-alt"></i>
+                                            <p Kelas="mb-0 mt-2">Transfer</p>
+                                        </div>
+                                    </div>
+                                    <div Kelas="col-md-3">
+                                        <div Kelas="Pembayaran-method" onclick="selectPaymentMethod('check')">
+                                            <i Kelas="fas fa-check"></i>
+                                            <p Kelas="mb-0 mt-2">Check</p>
+                                        </div>
+                                    </div>
+                                    <div Kelas="col-md-3">
+                                        <div Kelas="Pembayaran-method" onclick="selectPaymentMethod('digital')">
+                                            <i Kelas="fas fa-HP-alt"></i>
+                                            <p Kelas="mb-0 mt-2">Digital</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div Kelas="mb-3">
+                                <label Kelas="form-label">Notes</label>
+                                <textarea Kelas="form-control" id="paymentNotes" rows="3" placeholder="Enter Pembayaran notes..."></textarea>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div Kelas="d-flex gap-2">
+                                <button Kelas="btn btn-Berhasil" onclick="processPayment()">
+                                    <i Kelas="fas fa-check"></i> Proses Pembayaran
+                                </button>
+                                <button Kelas="btn btn-secondary" onclick="clearPayment()">
+                                    <i Kelas="fas fa-redo"></i> Hapus
+                                </button>
+                                <button Kelas="btn btn-Info" onclick="printReceipt()">
+                                    <i Kelas="fas fa-Cetak"></i> Cetak Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Transaksi -->
+                <div Kelas="card mt-3">
+                    <div Kelas="card-header d-flex justify-content-between align-items-center">
+                        <h5><i Kelas="fas fa-Riwayat"></i> Recent Transaksi</h5>
+                        <span Kelas="badge bg-primary" id="transactionCount">0 Transaksi</span>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="Tabel-responsive">
+                            <Tabel Kelas="Tabel Tabel-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Reference</th>
+                                        <th>Anggota</th>
+                                        <th>Tipe</th>
+                                        <th>Jumlah</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsTable">
+                                    <!-- Transaksi will be loaded here -->
+                                </tbody>
+                            </Tabel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div Kelas="col-md-4">
+                <!-- Cash Manajemen -->
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-coins"></i> Cash Manajemen</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Opening Saldo</label>
+                            <div Kelas="input-group">
+                                <span Kelas="input-group-text">Rp</span>
+                                <input Tipe="Nomor" Kelas="form-control" id="openingBalance" value="10000000" readonly>
+                            </div>
+                        </div>
+                        
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Current Saldo</label>
+                            <div Kelas="input-group">
+                                <span Kelas="input-group-text">Rp</span>
+                                <input Tipe="Nomor" Kelas="form-control" id="currentBalance" value="10000000" readonly>
+                            </div>
+                        </div>
+                        
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Cash in Drawer</label>
+                            <div Kelas="row">
+                                <div Kelas="col-6">
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>100K:</span>
+                                        <span id="denom100k">0</span>
+                                    </div>
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>50K:</span>
+                                        <span id="denom50k">0</span>
+                                    </div>
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>20K:</span>
+                                        <span id="denom20k">0</span>
+                                    </div>
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>10K:</span>
+                                        <span id="denom10k">0</span>
+                                    </div>
+                                </div>
+                                <div Kelas="col-6">
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>5K:</span>
+                                        <span id="denom5k">0</span>
+                                    </div>
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>2K:</span>
+                                        <span id="denom2k">0</span>
+                                    </div>
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>1K:</span>
+                                        <span id="denom1k">0</span>
+                                    </div>
+                                    <div Kelas="d-flex justify-content-between">
+                                        <span>Coins:</span>
+                                        <span id="denomCoins">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button Kelas="btn btn-outline-primary w-100" onclick="openCashCount()">
+                            <i Kelas="fas fa-calculator"></i> Cash Jumlah
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Menunggu Transaksi -->
+                <div Kelas="card mt-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-clock"></i> Menunggu Transaksi</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div id="pendingTransactions">
+                            <!-- Menunggu Transaksi will be listed here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div Kelas="card mt-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="d-grid gap-2">
+                            <button Kelas="btn btn-outline-Berhasil" onclick="openDailyReconciliation()">
+                                <i Kelas="fas fa-Saldo-scale"></i> Daily Reconciliation
+                            </button>
+                            <button Kelas="btn btn-outline-Info" onclick="openTransactionHistory()">
+                                <i Kelas="fas fa-Riwayat"></i> Transaksi Riwayat
+                            </button>
+                            <button Kelas="btn btn-outline-Peringatan" onclick="openVoidTransaction()">
+                                <i Kelas="fas fa-undo"></i> Void Transaksi
+                            </button>
+                            <button Kelas="btn btn-outline-primary" onclick="openBatchPayments()">
+                                <i Kelas="fas fa-layer-Grup"></i> Batch Pembayaran
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Receipt Preview Modal -->
+    <div Kelas="modal fade" id="receiptModal" tabindex="-1">
+        <div Kelas="modal-dialog">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Pembayaran Receipt</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body">
+                    <div Kelas="receipt-preview" id="receiptContent">
+                        <!-- Receipt content will be loaded here -->
+                    </div>
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Tutup</button>
+                    <button Tipe="button" Kelas="btn btn-primary" onclick="printReceipt()">
+                        <i Kelas="fas fa-Cetak"></i> Cetak
+                    </button>
+                    <button Tipe="button" Kelas="btn btn-Berhasil" onclick="emailReceipt()">
+                        <i Kelas="fas fa-envelope"></i> Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Anggota Lookup Modal -->
+    <div Kelas="modal fade" id="memberLookupModal" tabindex="-1">
+        <div Kelas="modal-dialog modal-lg">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Anggota Lookup</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body">
+                    <div Kelas="input-group mb-3">
+                        <span Kelas="input-group-text"><i Kelas="fas fa-Cari"></i></span>
+                        <input Tipe="text" Kelas="form-control" id="memberSearchInput" placeholder="Cari Anggota...">
+                    </div>
+                    <div Kelas="Tabel-responsive">
+                        <Tabel Kelas="Tabel Tabel-hover">
+                            <thead>
+                                <tr>
+                                    <th>Anggota ID</th>
+                                    <th>Nama</th>
+                                    <th>Account Nomor</th>
+                                    <th>Saldo</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="memberSearchResults">
+                                <!-- Cari results will be loaded here -->
+                            </tbody>
+                        </Tabel>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let selectedMember = null;
+        let selectedPaymentMethod = null;
+        let Transaksi = [];
+        let cashBalance = 10000000;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadTransactions();
+            loadStatistics();
+            generateReferenceNumber();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is kasir
+            if (currentUser.role !== 'kasir') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load Transaksi
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=kasir_transactions', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        Transaksi = Data.Data;
+                        displayTransactions();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Transaksi:', Error);
+                // Use demo Data
+                Transaksi = getDemoTransactions();
+                displayTransactions();
+            }
+        }
+
+        // Display Transaksi
+        function displayTransactions() {
+            const tbody = Dokumen.getElementById('transactionsTable');
+            tbody.innerHTML = '';
+            
+            Transaksi.slice(0, 10).forEach(Transaksi => {
+                const row = Dokumen.createElement('tr');
+                row.className = 'Transaksi-item';
+                row.innerHTML = `
+                    <td>${formatTime(Transaksi.Waktu)}</td>
+                    <td><strong>${Transaksi.reference}</strong></td>
+                    <td>${Transaksi.member_name}</td>
+                    <td><span Kelas="badge bg-primary">${Transaksi.Tipe.replace('_', ' ')}</span></td>
+                    <td><strong>${formatCurrency(Transaksi.Jumlah)}</strong></td>
+                    <td><span Kelas="badge bg-secondary">${Transaksi.method}</span></td>
+                    <td><span Kelas="Status-${Transaksi.Status}">${Transaksi.Status}</span></td>
+                    <td>
+                        <div Kelas="btn-Grup" role="Grup">
+                            <button Kelas="btn btn-sm btn-outline-primary" onclick="viewTransaction('${Transaksi.id}')">
+                                <i Kelas="fas fa-eye"></i>
+                            </button>
+                            <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="printReceipt('${Transaksi.id}')">
+                                <i Kelas="fas fa-Cetak"></i>
+                            </button>
+                            <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="voidTransaction('${Transaksi.id}')" ${Transaksi.Status === 'voided' ? 'disabled' : ''}>
+                                <i Kelas="fas fa-undo"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            Dokumen.getElementById('transactionCount').textContent = `${Transaksi.length} Transaksi`;
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=kasir_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_transactions: 45,
+                    cash_in: 12500000,
+                    disbursements: 8500000,
+                    cash_balance: cashBalance
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalTransactions').textContent = stats.total_transactions || 0;
+            Dokumen.getElementById('totalCashIn').textContent = formatCurrency(stats.cash_in || 0);
+            Dokumen.getElementById('totalDisbursements').textContent = formatCurrency(stats.disbursements || 0);
+            Dokumen.getElementById('cashBalance').textContent = formatCurrency(stats.cash_balance || cashBalance);
+            Dokumen.getElementById('currentBalance').value = stats.cash_balance || cashBalance;
+        }
+
+        // Cari Anggota
+        function searchMember() {
+            const searchTerm = Dokumen.getElementById('memberSearch').value;
+            if (!searchTerm) {
+                Peringatan('Please enter Anggota ID, Nama, or account Nomor');
+                return;
+            }
+            
+            // Simulate Anggota Cari
+            const Anggota = {
+                id: 'M-001',
+                Nama: 'Ahmad Wijaya',
+                accountNumber: 'SA-001',
+                Saldo: 15000000,
+                Pinjaman: [
+                    { id: 'LN-001', Saldo: 5000000, monthly_payment: 500000 }
+                ]
+            };
+            
+            selectedMember = Anggota;
+            displayMemberInfo(Anggota);
+        }
+
+        // Display Anggota Info
+        function displayMemberInfo(Anggota) {
+            Dokumen.getElementById('memberInfo').style.display = 'block';
+            Dokumen.getElementById('memberName').textContent = Anggota.Nama;
+            Dokumen.getElementById('memberId').textContent = Anggota.id;
+            Dokumen.getElementById('memberAccount').textContent = Anggota.accountNumber;
+            Dokumen.getElementById('memberBalance').textContent = formatCurrency(Anggota.Saldo);
+            
+            // Perbarui Pinjaman options if Anggota has Pinjaman
+            if (Anggota.Pinjaman && Anggota.Pinjaman.length > 0) {
+                const loanSelect = Dokumen.getElementById('loanSelect');
+                loanSelect.innerHTML = '<option value="">Pilih Pinjaman account</option>';
+                Anggota.Pinjaman.forEach(Pinjaman => {
+                    loanSelect.innerHTML += `<option value="${Pinjaman.id}">Pinjaman ${Pinjaman.id} - Saldo: ${formatCurrency(Pinjaman.Saldo)}</option>`;
+                });
+            }
+            
+            Dokumen.getElementById('paymentDetails').style.display = 'block';
+        }
+
+        // Hapus Anggota
+        function clearMember() {
+            selectedMember = null;
+            Dokumen.getElementById('memberInfo').style.display = 'Tidak Ada';
+            Dokumen.getElementById('paymentDetails').style.display = 'Tidak Ada';
+            Dokumen.getElementById('memberSearch').value = '';
+            clearPayment();
+        }
+
+        // Perbarui Pembayaran fields based on Tipe
+        function updatePaymentFields() {
+            const paymentType = Dokumen.getElementById('paymentType').value;
+            
+            // Hide Semua specific fields
+            Dokumen.getElementById('loanPaymentFields').style.display = 'Tidak Ada';
+            
+            // Show relevant fields
+            if (paymentType === 'loan_payment') {
+                Dokumen.getElementById('loanPaymentFields').style.display = 'block';
+            }
+        }
+
+        // Pilih Pembayaran method
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Perbarui UI
+            Dokumen.querySelectorAll('.Pembayaran-method').forEach(el => {
+                el.classList.remove('Aktif');
+            });
+            event.Target.closest('.Pembayaran-method').classList.Tambah('Aktif');
+        }
+
+        // Set Jumlah
+        function setAmount(Jumlah) {
+            Dokumen.getElementById('paymentAmount').value = Jumlah;
+        }
+
+        // Proses Pembayaran
+        function processPayment() {
+            const paymentType = Dokumen.getElementById('paymentType').value;
+            const Jumlah = Dokumen.getElementById('paymentAmount').value;
+            const method = selectedPaymentMethod;
+            
+            if (!paymentType || !Jumlah || !method) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            if (!selectedMember) {
+                Peringatan('Please Pilih a Anggota');
+                return;
+            }
+            
+            // Create Transaksi
+            const Transaksi = {
+                id: 'TXN-' + Tanggal.now(),
+                reference: Dokumen.getElementById('referenceNumber').value,
+                member_id: selectedMember.id,
+                member_name: selectedMember.Nama,
+                Tipe: paymentType,
+                Jumlah: parseFloat(Jumlah),
+                method: method,
+                Status: 'Selesai',
+                Waktu: new Tanggal().toISOString(),
+                notes: Dokumen.getElementById('paymentNotes').value
+            };
+            
+            // Tambah to Transaksi
+            Transaksi.unshift(Transaksi);
+            displayTransactions();
+            
+            // Perbarui cash Saldo
+            if (paymentType === 'loan_payment' || paymentType === 'savings_deposit') {
+                cashBalance += parseFloat(Jumlah);
+            } else {
+                cashBalance -= parseFloat(Jumlah);
+            }
+            updateStatistics({ cash_balance: cashBalance });
+            
+            // Generate receipt
+            generateReceipt(Transaksi);
+            
+            // Hapus Formulir
+            clearPayment();
+            
+            // Show Berhasil Pesan
+            showSuccess('Pembayaran processed successfully!');
+        }
+
+        // Hapus Pembayaran
+        function clearPayment() {
+            Dokumen.getElementById('paymentType').value = '';
+            Dokumen.getElementById('paymentAmount').value = '';
+            Dokumen.getElementById('paymentNotes').value = '';
+            selectedPaymentMethod = null;
+            
+            // Hapus Pembayaran method selection
+            Dokumen.querySelectorAll('.Pembayaran-method').forEach(el => {
+                el.classList.remove('Aktif');
+            });
+            
+            // Generate new reference Nomor
+            generateReferenceNumber();
+        }
+
+        // Generate reference Nomor
+        function generateReferenceNumber() {
+            const reference = 'PAY-' + new Tanggal().toISOString().slice(0, 10).replace(/-/g, '') + '-' + 
+                             Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            Dokumen.getElementById('referenceNumber').value = reference;
+        }
+
+        // Generate receipt
+        function generateReceipt(Transaksi) {
+            const receiptHtml = `
+                <div Kelas="text-center mb-4">
+                    <h4>KSP LAM GABE JAYA</h4>
+                    <p Kelas="mb-0">Pembayaran Receipt</p>
+                    <small>Jl. Cooperative Tidak. 1, Jakarta</small>
+                </div>
+                
+                <div Kelas="mb-3">
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Receipt Tidak:</span>
+                        <strong>${Transaksi.reference}</strong>
+                    </div>
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Tanggal:</span>
+                        <strong>${formatDate(Transaksi.Waktu)}</strong>
+                    </div>
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Waktu:</span>
+                        <strong>${formatTime(Transaksi.Waktu)}</strong>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div Kelas="mb-3">
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Anggota ID:</span>
+                        <strong>${Transaksi.member_id}</strong>
+                    </div>
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Nama:</span>
+                        <strong>${Transaksi.member_name}</strong>
+                    </div>
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Pembayaran Tipe:</span>
+                        <strong>${Transaksi.Tipe.replace('_', ' ').toUpperCase()}</strong>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div Kelas="mb-3">
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Jumlah:</span>
+                        <strong>${formatCurrency(Transaksi.Jumlah)}</strong>
+                    </div>
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Pembayaran Method:</span>
+                        <strong>${Transaksi.method.toUpperCase()}</strong>
+                    </div>
+                    <div Kelas="d-flex justify-content-between">
+                        <span>Status:</span>
+                        <strong>${Transaksi.Status.toUpperCase()}</strong>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div Kelas="text-center">
+                    <p Kelas="mb-0">Terima Kasih for your Pembayaran!</p>
+                    <small>This is a computer-generated receipt</small>
+                </div>
+            `;
+            
+            Dokumen.getElementById('receiptContent').innerHTML = receiptHtml;
+            
+            // Show receipt modal
+            const modal = new bootstrap.Modal(Dokumen.getElementById('receiptModal'));
+            modal.show();
+        }
+
+        // Cetak receipt
+        function printReceipt(transactionId) {
+            window.Cetak();
+        }
+
+        // Email receipt
+        function emailReceipt() {
+            const Email = prompt('Enter Email Alamat:');
+            if (!Email) return;
+            
+            showSuccess(`Receipt sent to ${Email}`);
+        }
+
+        // View Transaksi
+        function viewTransaction(transactionId) {
+            const Transaksi = Transaksi.find(t => t.id === transactionId);
+            if (!Transaksi) return;
+            
+            generateReceipt(Transaksi);
+        }
+
+        // Void Transaksi
+        function voidTransaction(transactionId) {
+            if (!Konfirmasi('Are you sure you want to void this Transaksi?')) return;
+            
+            const Transaksi = Transaksi.find(t => t.id === transactionId);
+            if (Transaksi) {
+                Transaksi.Status = 'voided';
+                displayTransactions();
+                showSuccess('Transaksi voided successfully!');
+            }
+        }
+
+        // Open Anggota lookup
+        function openMemberLookup() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('memberLookupModal'));
+            modal.show();
+            loadMemberSearchResults();
+        }
+
+        // Load Anggota Cari results
+        function loadMemberSearchResults() {
+            const tbody = Dokumen.getElementById('memberSearchResults');
+            tbody.innerHTML = '';
+            
+            const Anggota = [
+                { id: 'M-001', Nama: 'Ahmad Wijaya', accountNumber: 'SA-001', Saldo: 15000000 },
+                { id: 'M-002', Nama: 'Siti Nurhaliza', accountNumber: 'SA-002', Saldo: 8500000 },
+                { id: 'M-003', Nama: 'Budi Santoso', accountNumber: 'SA-003', Saldo: 12000000 }
+            ];
+            
+            Anggota.forEach(Anggota => {
+                const row = Dokumen.createElement('tr');
+                row.innerHTML = `
+                    <td>${Anggota.id}</td>
+                    <td>${Anggota.Nama}</td>
+                    <td>${Anggota.accountNumber}</td>
+                    <td>${formatCurrency(Anggota.Saldo)}</td>
+                    <td>
+                        <button Kelas="btn btn-sm btn-primary" onclick="selectMember('${Anggota.id}')">
+                            <i Kelas="fas fa-check"></i> Pilih
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Pilih Anggota from lookup
+        function selectMember(memberId) {
+            const Anggota = [
+                { id: 'M-001', Nama: 'Ahmad Wijaya', accountNumber: 'SA-001', Saldo: 15000000 },
+                { id: 'M-002', Nama: 'Siti Nurhaliza', accountNumber: 'SA-002', Saldo: 8500000 },
+                { id: 'M-003', Nama: 'Budi Santoso', accountNumber: 'SA-003', Saldo: 12000000 }
+            ];
+            
+            const Anggota = Anggota.find(m => m.id === memberId);
+            if (Anggota) {
+                selectedMember = Anggota;
+                displayMemberInfo(Anggota);
+                
+                // Tutup modal
+                const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('memberLookupModal'));
+                modal.hide();
+            }
+        }
+
+        // Open cash Jumlah
+        function openCashCount() {
+            
+        }
+
+        // Open daily reconciliation
+        function openDailyReconciliation() {
+            
+        }
+
+        // Open Transaksi Riwayat
+        function openTransactionHistory() {
+            
+        }
+
+        // Open void Transaksi
+        function openVoidTransaction() {
+            
+        }
+
+        // Open batch Pembayaran
+        function openBatchPayments() {
+            
+        }
+
+        // Get demo Transaksi
+        function getDemoTransactions() {
+            return [
+                {
+                    id: 'TXN-001',
+                    reference: 'PAY-20260317-0001',
+                    member_name: 'Ahmad Wijaya',
+                    Tipe: 'loan_payment',
+                    Jumlah: 500000,
+                    method: 'cash',
+                    Status: 'Selesai',
+                    Waktu: '2026-03-17T09:30:00Z'
+                },
+                {
+                    id: 'TXN-002',
+                    reference: 'PAY-20260317-0002',
+                    member_name: 'Siti Nurhaliza',
+                    Tipe: 'savings_deposit',
+                    Jumlah: 1000000,
+                    method: 'transfer',
+                    Status: 'Selesai',
+                    Waktu: '2026-03-17T10:15:00Z'
+                },
+                {
+                    id: 'TXN-003',
+                    reference: 'PAY-20260317-0003',
+                    member_name: 'Budi Santoso',
+                    Tipe: 'loan_disbursement',
+                    Jumlah: 2500000,
+                    method: 'cash',
+                    Status: 'Selesai',
+                    Waktu: '2026-03-17T11:00:00Z'
+                }
+            ];
+        }
+
+        // Utility functions
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatTime(dateString) {
+            return new Tanggal(dateString).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+
+        // Anggota Cari input handler
+        Dokumen.getElementById('memberSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMember();
+            }
+        });
+
+        // Anggota Cari in modal
+        Dokumen.getElementById('memberSearchInput')?.addEventListener('input', function(e) {
+            const searchTerm = e.Target.value.toLowerCase();
+            const rows = Dokumen.querySelectorAll('#memberSearchResults tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'Tidak Ada';
+            });
+        });
+    </script>
+</body>
+</html>

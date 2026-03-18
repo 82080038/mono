@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kredit Laporan - Mantri Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@latest/dist/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Laporan-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+            border-left: 4px solid #667eea;
+        }
+        
+        .Laporan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+        
+        .Laporan-template {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: Semua 0.3s;
+        }
+        
+        .Laporan-template:hover {
+            border-color: #667eea;
+            background-color: #f8f9fa;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-Grafik-line"></i> Kredit Laporan</h1>
+                <p class="mb-0">Mantri - Kredit Analisis & Portfolio Reporting</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-Berhasil" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <i class="fas fa-File-alt fa-2x mb-2"></i>
+                    <h5>Total Laporan</h5>
+                    <h3 id="totalReports">0</h3>
+                    <p class="mb-0">Generated Bulan Ini</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <i class="fas fa-Unduh fa-2x mb-2"></i>
+                    <h5>Downloads</h5>
+                    <h3 id="totalDownloads">0</h3>
+                    <p class="mb-0">Laporan downloads</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <h5>Memproses Waktu</h5>
+                    <h3 id="avgProcessingTime">0s</h3>
+                    <p class="mb-0">Average generation</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h5>Laporan Kualitas</h5>
+                    <h3 id="reportQuality">0%</h3>
+                    <p class="mb-0">Pengguna satisfaction</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Report Generation -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-magic"></i> Quick Laporan Generation</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="Laporan-template" onclick="generateQuickReport('daily')">
+                                    <i class="fas fa-calendar-day fa-3x text-primary mb-3"></i>
+                                    <h6>Daily Laporan</h6>
+                                    <p class="text-muted">Hari Ini's Kredit activities</p>
+                                    <button Kelas="btn btn-primary btn-sm mt-2">Generate</button>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-3">
+                                <div Kelas="Laporan-template" onclick="generateQuickReport('weekly')">
+                                    <i Kelas="fas fa-calendar-week fa-3x text-Info mb-3"></i>
+                                    <h6>Weekly Laporan</h6>
+                                    <p Kelas="text-muted">7-day Ringkasan</p>
+                                    <button Kelas="btn btn-Info btn-sm mt-2">Generate</button>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-3">
+                                <div Kelas="Laporan-template" onclick="generateQuickReport('monthly')">
+                                    <i Kelas="fas fa-calendar-alt fa-3x text-Berhasil mb-3"></i>
+                                    <h6>Monthly Laporan</h6>
+                                    <p Kelas="text-muted">30-day Analisis</p>
+                                    <button Kelas="btn btn-Berhasil btn-sm mt-2">Generate</button>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-3">
+                                <div Kelas="Laporan-template" onclick="generateQuickReport('portfolio')">
+                                    <i Kelas="fas fa-briefcase fa-3x text-Peringatan mb-3"></i>
+                                    <h6>Portfolio Laporan</h6>
+                                    <p Kelas="text-muted">Complete portfolio</p>
+                                    <button Kelas="btn btn-Peringatan btn-sm mt-2">Generate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div Kelas="row">
+            <!-- Custom Laporan -->
+            <div Kelas="col-md-8">
+                <div Kelas="card">
+                    <div Kelas="card-header d-flex justify-content-between align-items-center">
+                        <h5><i Kelas="fas fa-cog"></i> Custom Laporan</h5>
+                        <button Kelas="btn btn-primary" onclick="openCustomReportBuilder()">
+                            <i Kelas="fas fa-plus"></i> Build Custom Laporan
+                        </button>
+                    </div>
+                    <div Kelas="card-body">
+                        <!-- Laporan Builder Formulir -->
+                        <div id="reportBuilder" style="display: Tidak Ada;">
+                            <div Kelas="row">
+                                <div Kelas="col-md-6">
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Laporan Nama</label>
+                                        <input Tipe="text" Kelas="form-control" id="reportName" placeholder="Enter Laporan Nama">
+                                    </div>
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Laporan Tipe</label>
+                                        <Pilih Kelas="Formulir-Pilih" id="reportType">
+                                            <option value="">Pilih Tipe</option>
+                                            <option value="Ringkasan">Ringkasan Laporan</option>
+                                            <option value="detailed">Detailed Laporan</option>
+                                            <option value="comparison">Comparison Laporan</option>
+                                            <option value="trend">Trend Analisis</option>
+                                        </Pilih>
+                                    </div>
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Tanggal Range</label>
+                                        <div Kelas="row">
+                                            <div Kelas="col-md-6">
+                                                <input Tipe="Tanggal" Kelas="form-control" id="startDate">
+                                            </div>
+                                            <div Kelas="col-md-6">
+                                                <input Tipe="Tanggal" Kelas="form-control" id="endDate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div Kelas="col-md-6">
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Data Categories</label>
+                                        <div Kelas="Formulir-check">
+                                            <input Kelas="Formulir-check-input" Tipe="checkbox" id="includeApplications" checked>
+                                            <label Kelas="Formulir-check-label" for="includeApplications">
+                                                Pinjaman Applications
+                                            </label>
+                                        </div>
+                                        <div Kelas="Formulir-check">
+                                            <input Kelas="Formulir-check-input" Tipe="checkbox" id="includePortfolio" checked>
+                                            <label Kelas="Formulir-check-label" for="includePortfolio">
+                                                Portfolio Status
+                                            </label>
+                                        </div>
+                                        <div Kelas="Formulir-check">
+                                            <input Kelas="Formulir-check-input" Tipe="checkbox" id="includeRiskAnalysis">
+                                            <label Kelas="Formulir-check-label" for="includeRiskAnalysis">
+                                                Risiko Analisis
+                                            </label>
+                                        </div>
+                                        <div Kelas="Formulir-check">
+                                            <input Kelas="Formulir-check-input" Tipe="checkbox" id="includePerformance">
+                                            <label Kelas="Formulir-check-label" for="includePerformance">
+                                                Performa Metrics
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div Kelas="mb-3">
+                                        <label Kelas="form-label">Output Format</label>
+                                        <Pilih Kelas="Formulir-Pilih" id="outputFormat">
+                                            <option value="PDF">PDF</option>
+                                            <option value="Excel">Excel</option>
+                                            <option value="csv">CSV</option>
+                                            <option value="html">HTML</option>
+                                        </Pilih>
+                                    </div>
+                                </div>
+                            </div>
+                            <div Kelas="row">
+                                <div Kelas="col-12">
+                                    <div Kelas="d-flex gap-2">
+                                        <button Kelas="btn btn-primary" onclick="generateCustomReport()">
+                                            <i Kelas="fas fa-play"></i> Generate Laporan
+                                        </button>
+                                        <button Kelas="btn btn-secondary" onclick="closeReportBuilder()">
+                                            <i Kelas="fas fa-times"></i> Batal
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Saved Laporan -->
+                        <div id="savedReports">
+                            <h6 Kelas="mb-3">Recently Generated Laporan</h6>
+                            <div Kelas="Tabel-responsive">
+                                <Tabel Kelas="Tabel Tabel-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Laporan Nama</th>
+                                            <th>Tipe</th>
+                                            <th>Generated</th>
+                                            <th>Format</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportsTable">
+                                        <!-- Laporan will be loaded here -->
+                                    </tbody>
+                                </Tabel>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Dashboard -->
+                <div Kelas="card mt-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Grafik-bar"></i> Kredit Analytics</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="row">
+                            <div Kelas="col-md-6">
+                                <h6>Aplikasi Trends</h6>
+                                <div Kelas="Grafik-container">
+                                    <canvas id="applicationTrendsChart"></canvas>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <h6>Risiko Distribution</h6>
+                                <div Kelas="Grafik-container">
+                                    <canvas id="riskDistributionChart"></canvas>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-12">
+                                <h6>Portfolio Performa</h6>
+                                <div Kelas="Grafik-container">
+                                    <canvas id="portfolioPerformanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Laporan Templates -->
+            <div Kelas="col-md-4">
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-File-alt"></i> Laporan Templates</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="Daftar-Grup">
+                            <a href="#" Kelas="Daftar-Grup-item Daftar-Grup-item-action" onclick="useTemplate('credit_analysis')">
+                                <div Kelas="d-flex w-100 justify-content-between">
+                                    <h6 Kelas="mb-1">Kredit Analisis Laporan</h6>
+                                    <small>Comprehensive Kredit assessment</small>
+                                </div>
+                            </a>
+                            <a href="#" Kelas="Daftar-Grup-item Daftar-Grup-item-action" onclick="useTemplate('portfolio_summary')">
+                                <div Kelas="d-flex w-100 justify-content-between">
+                                    <h6 Kelas="mb-1">Portfolio Ringkasan</h6>
+                                    <small>Portfolio overview and health</small>
+                                </div>
+                            </a>
+                            <a href="#" Kelas="Daftar-Grup-item Daftar-Grup-item-action" onclick="useTemplate('risk_assessment')">
+                                <div Kelas="d-flex w-100 justify-content-between">
+                                    <h6 Kelas="mb-1">Risiko Assessment</h6>
+                                    <small>Risiko Analisis and mitigation</small>
+                                </div>
+                            </a>
+                            <a href="#" Kelas="Daftar-Grup-item Daftar-Grup-item-action" onclick="useTemplate('performance_metrics')">
+                                <div Kelas="d-flex w-100 justify-content-between">
+                                    <h6 Kelas="mb-1">Performa Metrics</h6>
+                                    <small>KPIs and Performa Data</small>
+                                </div>
+                            </a>
+                            <a href="#" Kelas="Daftar-Grup-item Daftar-Grup-item-action" onclick="useTemplate('compliance_report')">
+                                <div Kelas="d-flex w-100 justify-content-between">
+                                    <h6 Kelas="mb-1">Kepatuhan Laporan</h6>
+                                    <small>Regulatory Kepatuhan check</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Schedule Laporan -->
+                <div Kelas="card mt-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-calendar-alt"></i> Scheduled Laporan</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Schedule New Laporan</label>
+                            <div Kelas="row">
+                                <div Kelas="col-md-6">
+                                    <Pilih Kelas="Formulir-Pilih Formulir-Pilih-sm" id="scheduleReportType">
+                                        <option value="">Pilih Laporan</option>
+                                        <option value="daily">Daily Ringkasan</option>
+                                        <option value="weekly">Weekly Analisis</option>
+                                        <option value="monthly">Monthly Laporan</option>
+                                    </Pilih>
+                                </div>
+                                <div Kelas="col-md-6">
+                                    <Pilih Kelas="Formulir-Pilih Formulir-Pilih-sm" id="scheduleFrequency">
+                                        <option value="">Frequency</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </Pilih>
+                                </div>
+                            </div>
+                        </div>
+                        <button Kelas="btn btn-primary btn-sm" onclick="scheduleReport()">
+                            <i Kelas="fas fa-plus"></i> Schedule
+                        </button>
+                        
+                        <hr>
+                        
+                        <h6>Aktif Schedules</h6>
+                        <div id="scheduledReports">
+                            <!-- Scheduled Laporan will be listed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Laporan Preview Modal -->
+    <div Kelas="modal fade" id="reportPreviewModal" tabindex="-1">
+        <div Kelas="modal-dialog modal-xl">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Laporan Preview</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body" id="reportPreview">
+                    <!-- Laporan preview will be loaded here -->
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Tutup</button>
+                    <button Tipe="button" Kelas="btn btn-primary" onclick="downloadReport()">
+                        <i Kelas="fas fa-Unduh"></i> Unduh
+                    </button>
+                    <button Tipe="button" Kelas="btn btn-Info" onclick="emailReport()">
+                        <i Kelas="fas fa-envelope"></i> Email
+                    </button>
+                    <button Tipe="button" Kelas="btn btn-Berhasil" onclick="saveReport()">
+                        <i Kelas="fas fa-Simpan"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let Laporan = [];
+        let charts = {};
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadReports();
+            loadAnalytics();
+            loadScheduledReports();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is mantri
+            if (currentUser.role !== 'mantri') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load Laporan
+        async function loadReports() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=credit_reports', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        Laporan = Data.Data;
+                        displayReports();
+                        updateStats();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Laporan:', Error);
+                // Use demo Data
+                Laporan = getDemoReports();
+                displayReports();
+                updateStats();
+            }
+        }
+
+        // Display Laporan
+        function displayReports() {
+            const tbody = Dokumen.getElementById('reportsTable');
+            tbody.innerHTML = '';
+            
+            Laporan.slice(0, 10).forEach(Laporan => {
+                const row = Dokumen.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${Laporan.Nama}</strong></td>
+                    <td><span Kelas="badge bg-primary">${Laporan.Tipe}</span></td>
+                    <td>${formatDate(Laporan.generated_at)}</td>
+                    <td><span Kelas="badge bg-secondary">${Laporan.format.toUpperCase()}</span></td>
+                    <td><span Kelas="badge bg-${Laporan.Status === 'Selesai' ? 'Berhasil' : 'Peringatan'}">${Laporan.Status}</span></td>
+                    <td>
+                        <div Kelas="btn-Grup" role="Grup">
+                            <button Kelas="btn btn-sm btn-outline-primary" onclick="viewReport('${Laporan.id}')">
+                                <i Kelas="fas fa-eye"></i>
+                            </button>
+                            <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="downloadReport('${Laporan.id}')" ${Laporan.Status !== 'completed' ? 'disabled' : ''}>
+                                <i Kelas="fas fa-Unduh"></i>
+                            </button>
+                            <button Kelas="btn btn-sm btn-outline-danger" onclick="deleteReport('${Laporan.id}')">
+                                <i Kelas="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Perbarui Statistik
+        function updateStats() {
+            const totalReports = Laporan.Filter(r => r.Status === 'Selesai').length;
+            const totalDownloads = Laporan.reduce((sum, r) => sum + r.downloads, 0);
+            const avgProcessingTime = 15; // seconds
+            
+            Dokumen.getElementById('totalReports').textContent = totalReports;
+            Dokumen.getElementById('totalDownloads').textContent = totalDownloads;
+            Dokumen.getElementById('avgProcessingTime').textContent = avgProcessingTime + 's';
+            Dokumen.getElementById('reportQuality').textContent = '95%';
+        }
+
+        // Load analytics
+        function loadAnalytics() {
+            // Aplikasi trends Grafik
+            const trendsCtx = Dokumen.getElementById('applicationTrendsChart').getContext('2d');
+            charts.trends = new Grafik(trendsCtx, {
+                Tipe: 'line',
+                Data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Applications Received',
+                        Data: [45, 52, 48, 58, 62, 55],
+                        borderColor: '#667eea',
+                        tension: 0.1
+                    }, {
+                        label: 'Applications Approved',
+                        Data: [38, 44, 42, 48, 52, 46],
+                        borderColor: '#28a745',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Risiko distribution Grafik
+            const riskCtx = Dokumen.getElementById('riskDistributionChart').getContext('2d');
+            charts.Risiko = new Grafik(riskCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Low Risiko', 'Medium Risiko', 'High Risiko'],
+                    datasets: [{
+                        Data: [65, 25, 10],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Portfolio Performa Grafik
+            const performanceCtx = Dokumen.getElementById('portfolioPerformanceChart').getContext('2d');
+            charts.Performa = new Grafik(performanceCtx, {
+                Tipe: 'bar',
+                Data: {
+                    labels: ['Portfolio Kualitas', 'Recovery Tarif', 'Efisiensi', 'Kepatuhan'],
+                    datasets: [{
+                        label: 'Current Month',
+                        Data: [85, 78, 92, 88],
+                        backgroundColor: '#667eea'
+                    }, {
+                        label: 'Sebelumnya Month',
+                        Data: [82, 75, 89, 85],
+                        backgroundColor: '#764ba2'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generate quick Laporan
+        function generateQuickReport(Tipe) {
+            const reportConfig = {
+                daily: {
+                    Nama: 'Daily Kredit Laporan',
+                    Tipe: 'Daily Ringkasan',
+                    dateRange: 'Hari Ini'
+                },
+                weekly: {
+                    Nama: 'Weekly Kredit Laporan',
+                    Tipe: 'Weekly Analisis',
+                    dateRange: '7days'
+                },
+                monthly: {
+                    Nama: 'Monthly Kredit Laporan',
+                    Tipe: 'Monthly Laporan',
+                    dateRange: '30days'
+                },
+                portfolio: {
+                    Nama: 'Portfolio Laporan',
+                    Tipe: 'Portfolio Ringkasan',
+                    dateRange: 'Semua'
+                }
+            };
+
+            const config = reportConfig[Tipe];
+            generateReport(config);
+        }
+
+        // Open custom Laporan builder
+        function openCustomReportBuilder() {
+            Dokumen.getElementById('reportBuilder').style.display = 'block';
+            Dokumen.getElementById('savedReports').style.display = 'Tidak Ada';
+        }
+
+        // Tutup Laporan builder
+        function closeReportBuilder() {
+            Dokumen.getElementById('reportBuilder').style.display = 'Tidak Ada';
+            Dokumen.getElementById('savedReports').style.display = 'block';
+        }
+
+        // Generate custom Laporan
+        function generateCustomReport() {
+            const Nama = Dokumen.getElementById('reportName').value;
+            const Tipe = Dokumen.getElementById('reportType').value;
+            const startDate = Dokumen.getElementById('startDate').value;
+            const endDate = Dokumen.getElementById('endDate').value;
+            const outputFormat = Dokumen.getElementById('outputFormat').value;
+
+            if (!Nama || !Tipe || !startDate || !endDate) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+
+            const config = {
+                Nama: Nama,
+                Tipe: Tipe,
+                dateRange: 'custom',
+                startDate: startDate,
+                endDate: endDate,
+                format: outputFormat,
+                includeApplications: Dokumen.getElementById('includeApplications').checked,
+                includePortfolio: Dokumen.getElementById('includePortfolio').checked,
+                includeRiskAnalysis: Dokumen.getElementById('includeRiskAnalysis').checked,
+                includePerformance: Dokumen.getElementById('includePerformance').checked
+            };
+
+            generateReport(config);
+            closeReportBuilder();
+        }
+
+        // Generate Laporan
+        function generateReport(config) {
+            // Show Memuat
+            showSuccess(`Generating ${config.Nama}...`);
+            
+            // Simulate Laporan generation
+            setTimeout(() => {
+                const Laporan = {
+                    id: 'RPT-' + Tanggal.now(),
+                    Nama: config.Nama,
+                    Tipe: config.Tipe,
+                    generated_at: new Tanggal().toISOString(),
+                    format: config.format || 'PDF',
+                    Status: 'Selesai',
+                    downloads: 0
+                };
+                
+                Laporan.unshift(Laporan);
+                displayReports();
+                updateStats();
+                
+                // Show preview
+                showReportPreview(Laporan);
+                showSuccess(`${config.Nama} generated successfully!`);
+            }, 2000);
+        }
+
+        // Show Laporan preview
+        function showReportPreview(Laporan) {
+            const previewHtml = `
+                <div Kelas="text-center mb-4">
+                    <h4>${Laporan.Nama}</h4>
+                    <p Kelas="text-muted">Generated: ${formatDate(Laporan.generated_at)}</p>
+                    <span Kelas="badge bg-primary">${Laporan.Tipe}</span>
+                    <span Kelas="badge bg-secondary ms-2">${Laporan.format.toUpperCase()}</span>
+                </div>
+                
+                <div Kelas="Laporan-preview-content">
+                    <h5>Laporan Ringkasan</h5>
+                    <div Kelas="row">
+                        <div Kelas="col-md-6">
+                            <Tabel Kelas="Tabel Tabel-sm">
+                                <tr><td>Total Applications:</td><td>156</td></tr>
+                                <tr><td>Approved:</td><td>132</td></tr>
+                                <tr><td>Rejected:</td><td>24</td></tr>
+                                <tr><td>Persetujuan Tarif:</td><td>84.6%</td></tr>
+                            </Tabel>
+                        </div>
+                        <div Kelas="col-md-6">
+                            <Tabel Kelas="Tabel Tabel-sm">
+                                <tr><td>Portfolio Size:</td><td>Rp 2.4M</td></tr>
+                                <tr><td>Performing:</td><td>85%</td></tr>
+                                <tr><td>At Risiko:</td><td>12%</td></tr>
+                                <tr><td>Non-Performing:</td><td>3%</td></tr>
+                            </Tabel>
+                        </div>
+                    </div>
+                    
+                    <h6 Kelas="mt-4">Charts and Graphs</h6>
+                    <div Kelas="text-center text-muted">
+                        <i Kelas="fas fa-Grafik-bar fa-3x"></i>
+                        <p>Charts and visualizations would be displayed here</p>
+                    </div>
+                </div>
+            `;
+            
+            Dokumen.getElementById('reportPreview').innerHTML = previewHtml;
+            const modal = new bootstrap.Modal(Dokumen.getElementById('reportPreviewModal'));
+            modal.show();
+        }
+
+        // Unduh Laporan
+        function downloadReport(reportId) {
+            const Laporan = Laporan.find(r => r.id === reportId);
+            if (!Laporan) return;
+            
+            Laporan.downloads++;
+            displayReports();
+            showSuccess(`Downloading ${Laporan.Nama}...`);
+            
+            // Simulate Unduh
+            setTimeout(() => {
+                showSuccess(`${Laporan.Nama} downloaded successfully!`);
+            }, 1000);
+        }
+
+        // Email Laporan
+        function emailReport() {
+            const Email = prompt('Enter Email Alamat:');
+            if (!Email) return;
+            
+            showSuccess(`Laporan sent to ${Email}`);
+        }
+
+        // Simpan Laporan
+        function saveReport() {
+            showSuccess('Laporan saved successfully!');
+        }
+
+        // View Laporan
+        function viewReport(reportId) {
+            const Laporan = Laporan.find(r => r.id === reportId);
+            if (!Laporan) return;
+            
+            showReportPreview(Laporan);
+        }
+
+        // Hapus Laporan
+        function deleteReport(reportId) {
+            if (!Konfirmasi('Are you sure you want to Hapus this Laporan?')) return;
+            
+            Laporan = Laporan.Filter(r => r.id !== reportId);
+            displayReports();
+            updateStats();
+            showSuccess('Laporan deleted successfully!');
+        }
+
+        // Use template
+        function useTemplate(templateType) {
+            const templates = {
+                credit_analysis: {
+                    Nama: 'Kredit Analisis Laporan',
+                    Tipe: 'Detailed Analisis',
+                    includeApplications: true,
+                    includePortfolio: true,
+                    includeRiskAnalysis: true,
+                    includePerformance: true
+                },
+                portfolio_summary: {
+                    Nama: 'Portfolio Ringkasan',
+                    Tipe: 'Ringkasan Laporan',
+                    includeApplications: false,
+                    includePortfolio: true,
+                    includeRiskAnalysis: true,
+                    includePerformance: true
+                },
+                risk_assessment: {
+                    Nama: 'Risiko Assessment',
+                    Tipe: 'Risiko Analisis',
+                    includeApplications: false,
+                    includePortfolio: true,
+                    includeRiskAnalysis: true,
+                    includePerformance: false
+                },
+                performance_metrics: {
+                    Nama: 'Performa Metrics',
+                    Tipe: 'Performa Laporan',
+                    includeApplications: false,
+                    includePortfolio: true,
+                    includeRiskAnalysis: false,
+                    includePerformance: true
+                },
+                compliance_report: {
+                    Nama: 'Kepatuhan Laporan',
+                    Tipe: 'Kepatuhan Check',
+                    includeApplications: true,
+                    includePortfolio: true,
+                    includeRiskAnalysis: true,
+                    includePerformance: false
+                }
+            };
+
+            const template = templates[templateType];
+            if (template) {
+                Dokumen.getElementById('reportName').value = template.Nama;
+                Dokumen.getElementById('reportType').value = template.Tipe;
+                Dokumen.getElementById('includeApplications').checked = template.includeApplications;
+                Dokumen.getElementById('includePortfolio').checked = template.includePortfolio;
+                Dokumen.getElementById('includeRiskAnalysis').checked = template.includeRiskAnalysis;
+                Dokumen.getElementById('includePerformance').checked = template.includePerformance;
+                
+                openCustomReportBuilder();
+            }
+        }
+
+        // Schedule Laporan
+        function scheduleReport() {
+            const reportType = Dokumen.getElementById('scheduleReportType').value;
+            const frequency = Dokumen.getElementById('scheduleFrequency').value;
+            
+            if (!reportType || !frequency) {
+                Peringatan('Please Pilih Laporan Tipe and frequency');
+                return;
+            }
+
+            const schedule = {
+                id: 'SCH-' + Tanggal.now(),
+                reportType: reportType,
+                frequency: frequency,
+                nextRun: getNextRunDate(frequency),
+                Aktif: true
+            };
+
+            showSuccess(`Laporan scheduled: ${reportType} - ${frequency}`);
+            loadScheduledReports();
+            
+            // Reset Formulir
+            Dokumen.getElementById('scheduleReportType').value = '';
+            Dokumen.getElementById('scheduleFrequency').value = '';
+        }
+
+        // Load scheduled Laporan
+        function loadScheduledReports() {
+            const scheduledReportsDiv = Dokumen.getElementById('scheduledReports');
+            
+            const schedules = [
+                {
+                    id: 'SCH-1',
+                    reportType: 'Daily Ringkasan',
+                    frequency: 'Daily',
+                    nextRun: '2026-03-18 09:00',
+                    Aktif: true
+                },
+                {
+                    id: 'SCH-2',
+                    reportType: 'Weekly Analisis',
+                    frequency: 'Weekly',
+                    nextRun: '2026-03-22 09:00',
+                    Aktif: true
+                },
+                {
+                    id: 'SCH-3',
+                    reportType: 'Monthly Laporan',
+                    frequency: 'Monthly',
+                    nextRun: '2026-04-01 09:00',
+                    Aktif: true
+                }
+            ];
+
+            scheduledReportsDiv.innerHTML = schedules.map(schedule => `
+                <div Kelas="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <strong>${schedule.reportType}</strong>
+                        <br>
+                        <small Kelas="text-muted">${schedule.frequency} - Lanjut: ${schedule.nextRun}</small>
+                    </div>
+                    <div>
+                        <span Kelas="badge bg-${schedule.Aktif ? 'Berhasil' : 'secondary'}">${schedule.Aktif ? 'Aktif' : 'Tidak Aktif'}</span>
+                        <button Kelas="btn btn-sm btn-outline-danger ms-2" onclick="deleteSchedule('${schedule.id}')">
+                            <i Kelas="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Hapus schedule
+        function deleteSchedule(scheduleId) {
+            if (!Konfirmasi('Are you sure you want to Hapus this schedule?')) return;
+            
+            showSuccess('Schedule deleted successfully!');
+            loadScheduledReports();
+        }
+
+        // Get Lanjut run Tanggal
+        function getNextRunDate(frequency) {
+            const now = new Tanggal();
+            let nextRun = new Tanggal(now);
+            
+            switch (frequency) {
+                case 'daily':
+                    nextRun.setDate(now.getDate() + 1);
+                    break;
+                case 'weekly':
+                    nextRun.setDate(now.getDate() + 7);
+                    break;
+                case 'monthly':
+                    nextRun.setMonth(now.getMonth() + 1);
+                    break;
+            }
+            
+            return nextRun.toISOString().split('T')[0] + ' 09:00';
+        }
+
+        // Get demo Laporan
+        function getDemoReports() {
+            return [
+                {
+                    id: 'RPT-1',
+                    Nama: 'Daily Kredit Laporan - March 17, 2026',
+                    Tipe: 'Daily Ringkasan',
+                    generated_at: '2026-03-17T09:00:00Z',
+                    format: 'PDF',
+                    Status: 'Selesai',
+                    downloads: 5
+                },
+                {
+                    id: 'RPT-2',
+                    Nama: 'Weekly Kredit Analisis - March 15-21, 2026',
+                    Tipe: 'Weekly Analisis',
+                    generated_at: '2026-03-22T10:30:00Z',
+                    format: 'Excel',
+                    Status: 'Selesai',
+                    downloads: 3
+                },
+                {
+                    id: 'RPT-3',
+                    Nama: 'Monthly Portfolio Laporan - March 2026',
+                    Tipe: 'Monthly Laporan',
+                    generated_at: '2026-03-31T16:45:00Z',
+                    format: 'PDF',
+                    Status: 'Selesai',
+                    downloads: 8
+                }
+            ];
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

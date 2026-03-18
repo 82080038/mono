@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Akun - Koperasi SaaS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 25px;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .badge {
+            padding: 8px 12px;
+            border-radius: 20px;
+        }
+        
+        .status-active {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-inactive {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-suspended {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .account-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .account-balance {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .account-number {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .sidebar .nav-link span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="p-3 text-center">
+            <h5 class="text-white mb-0">
+                <i class="fas fa-university me-2"></i>
+                <span>Koperasi</span>
+            </h5>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="teller_dashboard.html">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="accounts.html">
+                    <i class="fas fa-wallet me-2"></i>
+                    <span>Akun</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="loans.html">
+                    <i class="fas fa-hand-holding-usd me-2"></i>
+                    <span>Pinjaman</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="transactions.html">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    <span>Transaksi</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="reports.html">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    <span>Laporan</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="profile.html">
+                    <i class="fas fa-user me-2"></i>
+                    <span>Profil</span>
+                </a>
+            </li>
+            <li class="nav-item mt-3">
+                <a class="nav-link" href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    <span>Keluar</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h2>
+                        <i class="fas fa-wallet me-2"></i>
+                        Manajemen Akun
+                    </h2>
+                    <p class="text-muted">Kelola akun anggota dan rekening simpanan</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary" onclick="showCreateAccountModal()">
+                        <i class="fas fa-plus me-2"></i>
+                        Buka Akun Baru
+                    </button>
+                    <button class="btn btn-outline-primary ms-2" onclick="refreshAccounts()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Akun</h5>
+                            <h3 id="totalAccounts">0</h3>
+                            <small>Semua akun aktif</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Saldo</h5>
+                            <h3 id="totalBalance">Rp 0</h3>
+                            <small>Total semua saldo</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Akun Baru</h5>
+                            <h3 id="newAccounts">0</h3>
+                            <small>Bulan ini</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Akun Tidak Aktif</h5>
+                            <h3 id="inactiveAccounts">0</h3>
+                            <small>Perlu perhatian</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Cari akun...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Semua Status</option>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Tidak Aktif</option>
+                                <option value="suspended">Ditangguhkan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="typeFilter">
+                                <option value="">Semua Tipe</option>
+                                <option value="savings">Simpanan</option>
+                                <option value="current">Rekening Koran</option>
+                                <option value="deposit">Deposito</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary w-100" onclick="applyFilters()">
+                                <i class="fas fa-filter me-2"></i>
+                                Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accounts List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Daftar Akun
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>No. Akun</th>
+                                    <th>Nama Anggota</th>
+                                    <th>Tipe Akun</th>
+                                    <th>Saldo</th>
+                                    <th>Status</th>
+                                    <th>Tanggal Buka</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accountsTableBody">
+                                <!-- Account rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Account Modal -->
+    <div class="modal fade" id="createAccountModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>
+                        Buka Akun Baru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createAccountForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="memberSelect" class="form-label">Pilih Anggota</label>
+                                    <select class="form-select" id="memberSelect" required>
+                                        <option value="">-- Pilih Anggota --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="accountType" class="form-label">Tipe Akun</label>
+                                    <select class="form-select" id="accountType" required>
+                                        <option value="">-- Pilih Tipe Akun --</option>
+                                        <option value="savings">Simpanan</option>
+                                        <option value="current">Rekening Koran</option>
+                                        <option value="deposit">Deposito</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="initialDeposit" class="form-label">Setoran Awal</label>
+                                    <input type="number" class="form-control" id="initialDeposit" min="0" placeholder="0">
+                                    <small class="text-muted">Opsional</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="interestRate" class="form-label">Suku Bunga (%)</label>
+                                    <input type="number" class="form-control" id="interestRate" step="0.1" min="0" placeholder="0">
+                                    <small class="text-muted">Opsional</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Catatan</label>
+                            <textarea class="form-control" id="notes" rows="3" placeholder="Catatan pembukaan akun..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="createAccount()">
+                        <i class="fas fa-save me-2"></i>
+                        Buka Akun
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Details Modal -->
+    <div class="modal fade" id="accountDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Detail Akun
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="accountDetailsContent">
+                    <!-- Account details will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-warning" onclick="suspendAccount()">
+                        <i class="fas fa-pause me-2"></i>
+                        Tangguhkan
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closeAccount()">
+                        <i class="fas fa-times me-2"></i>
+                        Tutup Akun
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let accounts = [];
+        let currentAccount = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAccounts();
+            loadMembers();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                searchAccounts(e.target.value);
+            });
+
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('typeFilter').addEventListener('change', applyFilters);
+        }
+
+        // Load accounts from API
+        async function loadAccounts() {
+            try {
+                const response = await fetch('/mono/api/crud.php?endpoint=accounts');
+                const result = await response.json();
+                
+                if (result.success) {
+                    accounts = result.data;
+                    displayAccounts(accounts);
+                    updateStatistics();
+                } else {
+                    console.error('Failed to load accounts:', result.message);
+                    showNotification('Gagal memuat data akun', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading accounts:', error);
+                showNotification('Terjadi kesalahan saat memuat akun', 'error');
+            }
+        }
+
+        // Load members for dropdown
+        async function loadMembers() {
+            try {
+                const response = await fetch('/mono/api/crud.php?endpoint=members');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const memberSelect = document.getElementById('memberSelect');
+                    memberSelect.innerHTML = '<option value="">-- Pilih Anggota --</option>';
+                    
+                    result.data.forEach(member => {
+                        memberSelect.innerHTML += `<option value="${member.id}">${member.name}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading members:', error);
+            }
+        }
+
+        // Display accounts in table
+        function displayAccounts(accountList) {
+            const tbody = document.getElementById('accountsTableBody');
+            tbody.innerHTML = '';
+            
+            if (accountList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <p>Belum ada akun yang terdaftar</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            accountList.forEach((account, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="account-number">${account.account_number}</td>
+                    <td>${account.member_name || 'N/A'}</td>
+                    <td>${getAccountTypeLabel(account.account_type)}</td>
+                    <td class="account-balance">Rp ${formatCurrency(account.balance)}</td>
+                    <td><span class="badge status-${account.status}">${getStatusLabel(account.status)}</span></td>
+                    <td>${formatDate(account.created_at)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewAccountDetails(${account.id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning ms-1" onclick="editAccount(${account.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const totalAccounts = accounts.length;
+            const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+            const newAccounts = accounts.filter(acc => {
+                const createdDate = new Date(acc.created_at);
+                const currentDate = new Date();
+                return createdDate.getMonth() === currentDate.getMonth() && 
+                       createdDate.getFullYear() === currentDate.getFullYear();
+            }).length;
+            const inactiveAccounts = accounts.filter(acc => acc.status === 'inactive').length;
+            
+            document.getElementById('totalAccounts').textContent = totalAccounts;
+            document.getElementById('totalBalance').textContent = `Rp ${formatCurrency(totalBalance)}`;
+            document.getElementById('newAccounts').textContent = newAccounts;
+            document.getElementById('inactiveAccounts').textContent = inactiveAccounts;
+        }
+
+        // Search accounts
+        function searchAccounts(query) {
+            const filtered = accounts.filter(account => 
+                account.account_number.toLowerCase().includes(query.toLowerCase()) ||
+                (account.member_name && account.member_name.toLowerCase().includes(query.toLowerCase()))
+            );
+            displayAccounts(filtered);
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            
+            let filtered = accounts;
+            
+            if (statusFilter) {
+                filtered = filtered.filter(acc => acc.status === statusFilter);
+            }
+            
+            if (typeFilter) {
+                filtered = filtered.filter(acc => acc.account_type === typeFilter);
+            }
+            
+            displayAccounts(filtered);
+        }
+
+        // Show create account modal
+        function showCreateAccountModal() {
+            const modal = new bootstrap.Modal(document.getElementById('createAccountModal'));
+            modal.show();
+        }
+
+        // Create new account
+        async function createAccount() {
+            const form = document.getElementById('createAccountForm');
+            const formData = new FormData(form);
+            
+            const accountData = {
+                member_id: formData.get('memberSelect'),
+                account_type: formData.get('accountType'),
+                initial_deposit: formData.get('initialDeposit') || 0,
+                interest_rate: formData.get('interestRate') || 0,
+                notes: formData.get('notes')
+            };
+            
+            try {
+                const response = await fetch('/mono/api/crud.php?endpoint=accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(accountData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Akun berhasil dibuka', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('createAccountModal')).hide();
+                    form.reset();
+                    loadAccounts();
+                } else {
+                    showNotification('Gagal membuka akun: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error creating account:', error);
+                showNotification('Terjadi kesalahan saat membuka akun', 'error');
+            }
+        }
+
+        // View account details
+        function viewAccountDetails(accountId) {
+            const account = accounts.find(acc => acc.id === accountId);
+            if (!account) return;
+            
+            currentAccount = account;
+            
+            const detailsContent = document.getElementById('accountDetailsContent');
+            detailsContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informasi Akun</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td>No. Akun:</td>
+                                <td><strong>${account.account_number}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Nama Anggota:</td>
+                                <td>${account.member_name || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td>Tipe Akun:</td>
+                                <td>${getAccountTypeLabel(account.account_type)}</td>
+                            </tr>
+                            <tr>
+                                <td>Status:</td>
+                                <td><span class="badge status-${account.status}">${getStatusLabel(account.status)}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Tanggal Buka:</td>
+                                <td>${formatDate(account.created_at)}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Informasi Saldo</h6>
+                        <div class="text-center">
+                            <h4 class="account-balance">Rp ${formatCurrency(account.balance)}</h4>
+                            <p class="text-muted">Saldo saat ini</p>
+                        </div>
+                        ${account.interest_rate ? `
+                        <div class="mt-3">
+                            <h6>Suku Bunga</h6>
+                            <p class="h5">${account.interest_rate}% per tahun</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                ${account.notes ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Catatan</h6>
+                        <p>${account.notes}</p>
+                    </div>
+                </div>
+                ` : ''}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Riwayat Transaksi</h6>
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Memuat transaksi...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('accountDetailsModal'));
+            modal.show();
+            
+            // Load transaction history
+            loadTransactionHistory(accountId);
+        }
+
+        // Load transaction history
+        async function loadTransactionHistory(accountId) {
+            try {
+                const response = await fetch(`/mono/api/crud.php?endpoint=transactions&user_id=${accountId}&limit=10`);
+                const result = await response.json();
+                
+                const transactionDiv = document.querySelector('#accountDetailsModal .row:last-child .col-12');
+                
+                if (result.success && result.data.length > 0) {
+                    let transactionHtml = '<h6>Riwayat Transaksi</h6><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Tanggal</th><th>Jenis</th><th>Jumlah</th><th>Keterangan</th></tr></thead><tbody>';
+                    
+                    result.data.forEach(transaction => {
+                        transactionHtml += `
+                            <tr>
+                                <td>${formatDate(transaction.created_at)}</td>
+                                <td>${transaction.type}</td>
+                                <td>Rp ${formatCurrency(transaction.amount)}</td>
+                                <td>${transaction.description || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    transactionHtml += '</tbody></table></div>';
+                    transactionDiv.innerHTML = transactionHtml;
+                } else {
+                    transactionDiv.innerHTML = '<h6>Riwayat Transaksi</h6><p class="text-muted">Belum ada transaksi</p>';
+                }
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        // Suspend account
+        function suspendAccount() {
+            if (!currentAccount) return;
+            
+            if (confirm(`Apakah Anda yakin ingin menangguhkan akun ${currentAccount.account_number}?`)) {
+                showNotification('Akun berhasil ditangguhkan', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('accountDetailsModal')).hide();
+                loadAccounts();
+            }
+        }
+
+        // Close account
+        function closeAccount() {
+            if (!currentAccount) return;
+            
+            if (confirm(`Apakah Anda yakin ingin menutup akun ${currentAccount.account_number}? Tindakan ini tidak dapat dibatalkan.`)) {
+                showNotification('Akun berhasil ditutup', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('accountDetailsModal')).hide();
+                loadAccounts();
+            }
+        }
+
+        // Refresh accounts
+        function refreshAccounts() {
+            loadAccounts();
+            showNotification('Data akun diperbarui', 'info');
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                window.location.href = '/mono/login.html';
+            }
+        }
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID').format(amount);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function getAccountTypeLabel(type) {
+            const types = {
+                'savings': 'Simpanan',
+                'current': 'Rekening Koran',
+                'deposit': 'Deposito'
+            };
+            return types[type] || type;
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'active': 'Aktif',
+                'inactive': 'Tidak Aktif',
+                'suspended': 'Ditangguhkan'
+            };
+            return labels[status] || status;
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>

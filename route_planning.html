@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planning - Penagih Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .route-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #6f42c1;
+            cursor: pointer;
+        }
+        
+        .route-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .route-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-planned { background: #17a2b8; color: white; }
+        .Status-in-progress { background: #ffc107; color: #000; }
+        .Status-Selesai { background: #28a745; color: white; }
+        .Status-Dibatalkan { background: #dc3545; color: white; }
+        
+        .map-container {
+            height: 500px;
+            border-radius: 8px;
+            overflow: hidden;
+            Posisi: relative;
+        }
+        
+        .route-controls {
+            Posisi: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .route-Info {
+            Posisi: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+        }
+        
+        .waypoint-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: move;
+            transition: Semua 0.3s;
+        }
+        
+        .waypoint-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .waypoint-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        
+        .waypoint-Nomor {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #6f42c1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+        
+        .optimization-options {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .optimization-result {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .route-Ringkasan {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .Ringkasan-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .Ringkasan-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #6f42c1;
+        }
+        
+        .Ringkasan-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #6f42c1;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #6f42c1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .route-timeline {
+            Posisi: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            Posisi: relative;
+            padding-bottom: 1rem;
+            border-left: 2px solid #dee2e6;
+            padding-left: 1rem;
+            margin-left: -1rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            Posisi: absolute;
+            left: -6px;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #6f42c1;
+            border: 2px solid white;
+        }
+        
+        .timeline-item.Selesai::before {
+            background: #28a745;
+        }
+        
+        .timeline-item.current::before {
+            background: #ffc107;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .distance-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .Waktu-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .Prioritas-high {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .Prioritas-medium {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .Prioritas-low {
+            border-left: 4px solid #28a745;
+        }
+        
+        .Anggota-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #6f42c1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-route"></i> Route Planning</h1>
+                <p class="mb-0">Penagih - Route Optimization & Planning</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Route Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-route fa-2x mb-2"></i>
+                        <h5>Hari Ini's Routes</h5>
+                        <h3 id="todayRoutes">0</h3>
+                        <p Kelas="mb-0">Planned</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Berhasil text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-map-marked-alt fa-2x mb-2"></i>
+                        <h5>Total Distance</h5>
+                        <h3 id="totalDistance">0 km</h3>
+                        <p Kelas="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Peringatan text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-clock fa-2x mb-2"></i>
+                        <h5>Est. Waktu</h5>
+                        <h3 id="estimatedTime">0h 0m</h3>
+                        <p Kelas="mb-0">Total duration</p>
+                    </div>
+                </div>
+            </div>
+            <div Kelas="col-md-3">
+                <div Kelas="card text-center bg-Info text-white">
+                    <div Kelas="card-body">
+                        <i Kelas="fas fa-tachometer-alt fa-2x mb-2"></i>
+                        <h5>Efisiensi</h5>
+                        <h3 id="Efisiensi">0%</h3>
+                        <p Kelas="mb-0">Optimization</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div Kelas="row">
+            <!-- Route Planning -->
+            <div Kelas="col-md-8">
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header d-flex justify-content-between align-items-center">
+                        <h5><i Kelas="fas fa-map"></i> Route Planning</h5>
+                        <div>
+                            <Pilih Kelas="Formulir-Pilih Formulir-Pilih-sm d-inline-block w-auto me-2" id="routeFilter" onchange="filterRoutes()">
+                                <option value="">Semua Routes</option>
+                                <option value="planned">Planned</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="Selesai">Selesai</option>
+                                <option value="Dibatalkan">Dibatalkan</option>
+                            </Pilih>
+                            <button Kelas="btn btn-primary btn-sm" onclick="createNewRoute()">
+                                <i Kelas="fas fa-plus"></i> New Route
+                            </button>
+                            <button Kelas="btn btn-Berhasil btn-sm" onclick="optimizeAllRoutes()">
+                                <i Kelas="fas fa-magic"></i> Optimize Semua
+                            </button>
+                        </div>
+                    </div>
+                    <div Kelas="card-body">
+                        <div id="routesList">
+                            <!-- Routes will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Aktif Route -->
+                <div Kelas="card" id="activeRouteCard" style="display: Tidak Ada;">
+                    <div Kelas="card-header d-flex justify-content-between align-items-center">
+                        <h5><i Kelas="fas fa-map-marked-alt"></i> <span id="activeRouteName">Aktif Route</span></h5>
+                        <div>
+                            <span Kelas="route-Status Status-in-progress" id="routeStatus">In Progress</span>
+                            <button Kelas="btn btn-sm btn-Berhasil ms-2" onclick="startRoute()" id="startRouteBtn">
+                                <i Kelas="fas fa-play"></i> Start
+                            </button>
+                            <button Kelas="btn btn-sm btn-Peringatan ms-2" onclick="pauseRoute()" id="pauseRouteBtn" style="display: Tidak Ada;">
+                                <i Kelas="fas fa-pause"></i> Pause
+                            </button>
+                            <button Kelas="btn btn-sm btn-danger ms-2" onclick="completeRoute()" id="completeRouteBtn" style="display: Tidak Ada;">
+                                <i Kelas="fas fa-check"></i> Complete
+                            </button>
+                        </div>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="row">
+                            <div Kelas="col-md-8">
+                                <h6>Route Waypoints</h6>
+                                <div id="waypointsList">
+                                    <!-- Waypoints will be loaded here -->
+                                </div>
+                            </div>
+                            <div Kelas="col-md-4">
+                                <h6>Route Ringkasan</h6>
+                                <div Kelas="route-Ringkasan">
+                                    <div Kelas="Ringkasan-item">
+                                        <div Kelas="Ringkasan-value" id="routeWaypoints">0</div>
+                                        <div Kelas="Ringkasan-label">Waypoints</div>
+                                    </div>
+                                    <div Kelas="Ringkasan-item">
+                                        <div Kelas="Ringkasan-value" id="routeDistance">0 km</div>
+                                        <div Kelas="Ringkasan-label">Distance</div>
+                                    </div>
+                                    <div Kelas="Ringkasan-item">
+                                        <div Kelas="Ringkasan-value" id="routeTime">0h 0m</div>
+                                        <div Kelas="Ringkasan-label">Est. Waktu</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Route Map -->
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-map-marked-alt"></i> Route Map</h5>
+                    </div>
+                    <div Kelas="card-body p-0">
+                        <div id="routeMap" Kelas="map-container">
+                            <div Kelas="route-controls">
+                                <h6>Route Controls</h6>
+                                <div Kelas="d-grid gap-2">
+                                    <button Kelas="btn btn-sm btn-outline-primary" onclick="centerOnRoute()">
+                                        <i Kelas="fas fa-crosshairs"></i> Center on Route
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Info" onclick="toggleRouteDisplay()">
+                                        <i Kelas="fas fa-eye"></i> Toggle Route
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="optimizeCurrentRoute()">
+                                        <i Kelas="fas fa-magic"></i> Optimize Route
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="exportRoute()">
+                                        <i Kelas="fas fa-Unduh"></i> Ekspor Route
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div Kelas="route-Info">
+                                <h6>Current Waypoint</h6>
+                                <div id="currentWaypointInfo">
+                                    <p Kelas="mb-1"><strong>Lokasi:</strong> <span id="currentWaypointName">-</span></p>
+                                    <p Kelas="mb-1"><strong>Alamat:</strong> <span id="currentWaypointAddress">-</span></p>
+                                    <p Kelas="mb-1"><strong>Distance:</strong> <span id="currentWaypointDistance">0 km</span></p>
+                                    <p Kelas="mb-0"><strong>Waktu:</strong> <span id="currentWaypointTime">0 min</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div Kelas="col-md-4">
+                <!-- Quick Actions -->
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="row">
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="createNewRoute()">
+                                    <i Kelas="fas fa-plus-circle"></i>
+                                    <h6>New Route</h6>
+                                    <small Kelas="text-muted">Create route</small>
+                                </div>
+                            </div>
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="autoOptimize()">
+                                    <i Kelas="fas fa-magic"></i>
+                                    <h6>Auto Optimize</h6>
+                                    <small Kelas="text-muted">Smart planning</small>
+                                </div>
+                            </div>
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="importWaypoints()">
+                                    <i Kelas="fas fa-Unggah"></i>
+                                    <h6>Impor</h6>
+                                    <small Kelas="text-muted">Impor Data</small>
+                                </div>
+                            </div>
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="exportRoutes()">
+                                    <i Kelas="fas fa-Unduh"></i>
+                                    <h6>Ekspor</h6>
+                                    <small Kelas="text-muted">Ekspor routes</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Optimization Pengaturan -->
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-cog"></i> Optimization Pengaturan</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Optimization Method</label>
+                            <Pilih Kelas="Formulir-Pilih Formulir-Pilih-sm" id="optimizationMethod">
+                                <option value="shortest">Shortest Distance</option>
+                                <option value="fastest">Fastest Waktu</option>
+                                <option value="Prioritas">Prioritas Based</option>
+                                <option value="balanced">Balanced</option>
+                            </Pilih>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Start Lokasi</label>
+                            <Pilih Kelas="Formulir-Pilih Formulir-Pilih-sm" id="startLocation">
+                                <option value="office">Office</option>
+                                <option value="Beranda">Beranda</option>
+                                <option value="current">Current Lokasi</option>
+                                <option value="custom">Custom</option>
+                            </Pilih>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Max Waypoints</label>
+                            <input Tipe="Nomor" Kelas="form-control form-control-sm" id="maxWaypoints" value="10" min="1" max="20">
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Waktu Limit</label>
+                            <input Tipe="Nomor" Kelas="form-control form-control-sm" id="timeLimit" value="8" min="1" max="12">
+                            <small Kelas="text-muted">Hours</small>
+                        </div>
+                        <button Kelas="btn btn-primary btn-sm w-100" onclick="applyOptimizationSettings()">
+                            <i Kelas="fas fa-check"></i> Apply Pengaturan
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Route Progress -->
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Grafik-line"></i> Route Progress</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="route-timeline" id="routeProgress">
+                            <!-- Progress timeline will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Routes -->
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Riwayat"></i> Recent Routes</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div id="recentRoutes">
+                            <!-- Recent routes will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Route Modal -->
+    <div Kelas="modal fade" id="newRouteModal" tabindex="-1">
+        <div Kelas="modal-dialog modal-lg">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Create New Route</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body">
+                    <Formulir id="newRouteForm">
+                        <div Kelas="row">
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Route Nama *</label>
+                                    <input Tipe="text" Kelas="form-control" id="routeName" Wajib>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Route Tipe *</label>
+                                    <Pilih Kelas="Formulir-Pilih" id="routeType" Wajib>
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="Penagihan">Penagihan Route</option>
+                                        <option value="Survei">Survei Route</option>
+                                        <option value="Verifikasi">Verifikasi Route</option>
+                                        <option value="custom">Custom Route</option>
+                                    </Pilih>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-12">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Deskripsi</label>
+                                    <textarea Kelas="form-control" id="routeDescription" rows="2" placeholder="Enter route Deskripsi..."></textarea>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Prioritas</label>
+                                    <Pilih Kelas="Formulir-Pilih" id="routePriority">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </Pilih>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Scheduled Tanggal</label>
+                                    <input Tipe="Tanggal" Kelas="form-control" id="scheduledDate">
+                                </div>
+                            </div>
+                        </div>
+                    </Formulir>
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Batal</button>
+                    <button Tipe="button" Kelas="btn btn-primary" onclick="createRoute()">
+                        <i Kelas="fas fa-plus"></i> Create Route
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tambah Waypoint Modal -->
+    <div Kelas="modal fade" id="waypointModal" tabindex="-1">
+        <div Kelas="modal-dialog">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Tambah Waypoint</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body">
+                    <Formulir id="waypointForm">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Anggota/Lokasi *</label>
+                            <Pilih Kelas="Formulir-Pilih" id="waypointMember" Wajib>
+                                <option value="">Pilih Anggota/Lokasi</option>
+                            </Pilih>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Prioritas</label>
+                            <Pilih Kelas="Formulir-Pilih" id="waypointPriority">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </Pilih>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Estimated Waktu (minutes)</label>
+                            <input Tipe="Nomor" Kelas="form-control" id="waypointTime" min="5" max="120" value="30">
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Notes</label>
+                            <textarea Kelas="form-control" id="waypointNotes" rows="2" placeholder="Enter waypoint notes..."></textarea>
+                        </div>
+                    </Formulir>
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Batal</button>
+                    <button Tipe="button" Kelas="btn btn-primary" onclick="addWaypoint()">
+                        <i Kelas="fas fa-plus"></i> Tambah Waypoint
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let routes = [];
+        let activeRoute = null;
+        let map = null;
+        let routeControl = null;
+        let waypoints = [];
+        let routeMarkers = [];
+        let isRouteActive = false;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadRoutes();
+            loadStatistics();
+            initializeMap();
+            loadRecentRoutes();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Penagih
+            if (currentUser.role !== 'Penagih') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load routes
+        async function loadRoutes() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=routes', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        routes = Data.Data;
+                        displayRoutes();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat routes:', Error);
+                // Use demo Data
+                routes = getDemoRoutes();
+                displayRoutes();
+            }
+        }
+
+        // Display routes
+        function displayRoutes() {
+            const routesList = Dokumen.getElementById('routesList');
+            const routeFilter = Dokumen.getElementById('routeFilter').value;
+            
+            let filteredRoutes = routes;
+            
+            if (routeFilter) {
+                filteredRoutes = routes.Filter(route => route.Status === routeFilter);
+            }
+            
+            routesList.innerHTML = '';
+            
+            if (filteredRoutes.length === 0) {
+                routesList.innerHTML = '<div class="text-center text-muted py-4">Tidak routes found</div>';
+                return;
+            }
+            
+            filteredRoutes.forEach(route => {
+                const routeCard = Dokumen.createElement('div');
+                routeCard.className = 'route-card card mb-2';
+                routeCard.innerHTML = `
+                    <div Kelas="card-body">
+                        <div Kelas="row align-items-center">
+                            <div Kelas="col-md-8">
+                                <div Kelas="d-flex align-items-center">
+                                    <div Kelas="me-3">
+                                        <i Kelas="fas fa-route fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 Kelas="mb-1">${route.Nama}</h6>
+                                        <p Kelas="mb-1">${route.Tipe}</p>
+                                        <small Kelas="text-muted">
+                                            ${route.waypoints ? route.waypoints.length : 0} waypoints | 
+                                            ${route.distance ? route.distance.toFixed(1) + ' km' : 'N/A'} | 
+                                            ${route.estimated_time ? route.estimated_time : 'N/A'}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-4 text-end">
+                                <span Kelas="route-Status Status-${route.Status} me-2">${route.Status.replace('_', ' ')}</span>
+                                <div Kelas="mt-2">
+                                    <button Kelas="btn btn-sm btn-outline-primary" onclick="viewRoute('${route.id}')">
+                                        <i Kelas="fas fa-eye"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="startRouteFromList('${route.id}')" ${route.Status !== 'planned' ? 'disabled' : ''}>
+                                        <i Kelas="fas fa-play"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="editRoute('${route.id}')">
+                                        <i Kelas="fas fa-Edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                routesList.appendChild(routeCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=route_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    today_routes: 5,
+                    total_distance: 45.2,
+                    estimated_time: '6h 30m',
+                    Efisiensi: 85.3
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('todayRoutes').textContent = stats.today_routes || 0;
+            Dokumen.getElementById('totalDistance').textContent = (stats.total_distance || 0).toFixed(1) + ' km';
+            Dokumen.getElementById('estimatedTime').textContent = stats.estimated_time || '0h 0m';
+            Dokumen.getElementById('Efisiensi').textContent = (stats.Efisiensi || 0).toFixed(1) + '%';
+        }
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('routeMap').setView([-6.2088, 106.8456], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Load recent routes
+        function loadRecentRoutes() {
+            const recentRoutesDiv = Dokumen.getElementById('recentRoutes');
+            
+            const recentRoutes = routes
+                .Filter(route => route.Status === 'Selesai')
+                .slice(0, 5);
+            
+            if (recentRoutes.length === 0) {
+                recentRoutesDiv.innerHTML = '<div class="text-center text-muted">Tidak recent routes</div>';
+                return;
+            }
+            
+            recentRoutesDiv.innerHTML = recentRoutes.map(route => `
+                <div Kelas="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h6 Kelas="mb-0">${route.Nama}</h6>
+                        <small Kelas="text-muted">${route.waypoints.length} waypoints</small>
+                    </div>
+                    <div>
+                        <small Kelas="text-muted">${formatDate(route.completed_at || route.created_at)}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View route
+        function viewRoute(routeId) {
+            const route = routes.find(r => r.id === routeId);
+            if (!route) return;
+            
+            activeRoute = route;
+            waypoints = route.waypoints || [];
+            
+            // Show Aktif route card
+            Dokumen.getElementById('activeRouteCard').style.display = 'block';
+            Dokumen.getElementById('activeRouteName').textContent = route.Nama;
+            
+            // Perbarui route Status
+            updateRouteStatus(route.Status);
+            
+            // Load waypoints
+            loadWaypoints();
+            
+            // Perbarui route Ringkasan
+            updateRouteSummary();
+            
+            // Display route on map
+            displayRouteOnMap();
+        }
+
+        // Load waypoints
+        function loadWaypoints() {
+            const waypointsList = Dokumen.getElementById('waypointsList');
+            
+            if (waypoints.length === 0) {
+                waypointsList.innerHTML = '<div class="text-center text-muted py-4">Tidak waypoints added yet</div>';
+                return;
+            }
+            
+            waypointsList.innerHTML = waypoints.map((waypoint, index) => `
+                <div Kelas="waypoint-item Prioritas-${waypoint.Prioritas}" draggable="true" Data-index="${index}">
+                    <div Kelas="d-flex align-items-center">
+                        <div Kelas="waypoint-Nomor">${index + 1}</div>
+                        <div Kelas="flex-grow-1">
+                            <h6 Kelas="mb-1">${waypoint.member_name || waypoint.location_name}</h6>
+                            <p Kelas="mb-1 text-muted">${waypoint.Alamat}</p>
+                            <div Kelas="d-flex align-items-center">
+                                <div Kelas="distance-indicator me-3">
+                                    <i Kelas="fas fa-map-marker-alt"></i>
+                                    <span>${waypoint.distance ? waypoint.distance.toFixed(1) + ' km' : 'N/A'}</span>
+                                </div>
+                                <div Kelas="Waktu-indicator">
+                                    <i Kelas="fas fa-clock"></i>
+                                    <span>${waypoint.estimated_time || 30} min</span>
+                                </div>
+                                <span Kelas="badge bg-${getPriorityColor(waypoint.Prioritas)} ms-2">${waypoint.Prioritas}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button Kelas="btn btn-sm btn-outline-primary" onclick="viewWaypointDetails(${index})">
+                                <i Kelas="fas fa-eye"></i>
+                            </button>
+                            <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="editWaypoint(${index})">
+                                <i Kelas="fas fa-Edit"></i>
+                            </button>
+                            <button Kelas="btn btn-sm btn-outline-danger" onclick="removeWaypoint(${index})">
+                                <i Kelas="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Tambah drag and drop functionality
+            addDragAndDrop();
+        }
+
+        // Tambah drag and drop functionality
+        function addDragAndDrop() {
+            const waypointItems = Dokumen.querySelectorAll('.waypoint-item');
+            
+            waypointItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function handleDragStart(e) {
+            e.Target.classList.Tambah('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.Target.innerHTML);
+            e.dataTransfer.setData('index', e.Target.getAttribute('Data-index'));
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            }
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            const draggedIndex = parseInt(e.dataTransfer.getData('index'));
+            const targetIndex = parseInt(e.Target.getAttribute('Data-index'));
+            
+            if (draggedIndex !== targetIndex) {
+                // Swap waypoints
+                const temp = waypoints[draggedIndex];
+                waypoints[draggedIndex] = waypoints[targetIndex];
+                waypoints[targetIndex] = temp;
+                
+                // Reload waypoints
+                loadWaypoints();
+                
+                // Perbarui route on map
+                displayRouteOnMap();
+                updateRouteSummary();
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.Target.classList.remove('dragging');
+        }
+
+        // Perbarui route Ringkasan
+        function updateRouteSummary() {
+            Dokumen.getElementById('routeWaypoints').textContent = waypoints.length;
+            Dokumen.getElementById('routeDistance').textContent = calculateTotalDistance().toFixed(1) + ' km';
+            Dokumen.getElementById('routeTime').textContent = calculateTotalTime();
+        }
+
+        // Calculate Total distance
+        function calculateTotalDistance() {
+            if (waypoints.length < 2) return 0;
+            
+            let totalDistance = 0;
+            for (let i = 0; i < waypoints.length - 1; i++) {
+                const point1 = waypoints[i];
+                const point2 = waypoints[i + 1];
+                
+                if (point1.latitude && point1.longitude && point2.latitude && point2.longitude) {
+                    totalDistance += calculateDistance(
+                        point1.latitude, point1.longitude,
+                        point2.latitude, point2.longitude
+                    );
+                }
+            }
+            
+            return totalDistance;
+        }
+
+        // Calculate Total Waktu
+        function calculateTotalTime() {
+            const totalTime = waypoints.reduce((sum, waypoint) => {
+                return sum + (waypoint.estimated_time || 30);
+            }, 0);
+            
+            const hours = Math.floor(totalTime / 60);
+            const minutes = totalTime % 60;
+            
+            return `${hours}h ${minutes}m`;
+        }
+
+        // Display route on map
+        function displayRouteOnMap() {
+            // Hapus existing route
+            if (routeControl) {
+                map.removeControl(routeControl);
+            }
+            
+            // Hapus existing markers
+            routeMarkers.forEach(marker => map.removeLayer(marker));
+            routeMarkers = [];
+            
+            if (waypoints.length === 0) return;
+            
+            // Tambah route
+            const routePoints = waypoints
+                .Filter(wp => wp.latitude && wp.longitude)
+                .map(wp => L.latLng(wp.latitude, wp.longitude));
+            
+            if (routePoints.length > 1) {
+                routeControl = L.Routing.control({
+                    waypoints: routePoints,
+                    routeWhileDragging: false,
+                    addWaypoints: false,
+                    createMarker: function() { return null; },
+                    lineOptions: {
+                        styles: [
+                            { color: '#6f42c1', weight: 4, opacity: 0.7 }
+                        ]
+                    }
+                }).addTo(map);
+            }
+            
+            // Tambah waypoint markers
+            waypoints.forEach((waypoint, index) => {
+                if (waypoint.latitude && waypoint.longitude) {
+                    const marker = L.marker([waypoint.latitude, waypoint.longitude])
+                        .addTo(map)
+                        .bindPopup(`
+                            <strong>${index + 1}. ${waypoint.member_name || waypoint.location_name}</strong><br>
+                            ${waypoint.Alamat}<br>
+                            Prioritas: <span Kelas="badge bg-${getPriorityColor(waypoint.Prioritas)}">${waypoint.Prioritas}</span>
+                        `);
+                    
+                    routeMarkers.push(marker);
+                }
+            });
+            
+            // Fit map to route
+            if (routePoints.length > 0) {
+                const bounds = L.latLngBounds(routePoints);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+        // Perbarui route Status
+        function updateRouteStatus(Status) {
+            const statusElement = Dokumen.getElementById('routeStatus');
+            statusElement.className = `route-Status Status-${Status}`;
+            statusElement.textContent = Status.replace('_', ' ');
+            
+            // Perbarui buttons
+            const startBtn = Dokumen.getElementById('startRouteBtn');
+            const pauseBtn = Dokumen.getElementById('pauseRouteBtn');
+            const completeBtn = Dokumen.getElementById('completeRouteBtn');
+            
+            switch (Status) {
+                case 'planned':
+                    startBtn.style.display = 'inline-block';
+                    pauseBtn.style.display = 'Tidak Ada';
+                    completeBtn.style.display = 'Tidak Ada';
+                    break;
+                case 'in_progress':
+                    startBtn.style.display = 'Tidak Ada';
+                    pauseBtn.style.display = 'inline-block';
+                    completeBtn.style.display = 'inline-block';
+                    break;
+                case 'Selesai':
+                    startBtn.style.display = 'Tidak Ada';
+                    pauseBtn.style.display = 'Tidak Ada';
+                    completeBtn.style.display = 'Tidak Ada';
+                    break;
+                case 'Dibatalkan':
+                    startBtn.style.display = 'Tidak Ada';
+                    pauseBtn.style.display = 'Tidak Ada';
+                    completeBtn.style.display = 'Tidak Ada';
+                    break;
+            }
+        }
+
+        // Start route
+        function startRoute() {
+            if (!activeRoute) return;
+            
+            activeRoute.Status = 'in_progress';
+            activeRoute.started_at = new Tanggal().toISOString();
+            
+            updateRouteStatus('in_progress');
+            
+            // Perbarui routes Daftar
+            const routeIndex = routes.findIndex(r => r.id === activeRoute.id);
+            if (routeIndex !== -1) {
+                routes[routeIndex] = activeRoute;
+            }
+            displayRoutes();
+            
+            // Perbarui route progress
+            updateRouteProgress();
+            
+            showSuccess('Route started!');
+        }
+
+        // Pause route
+        function pauseRoute() {
+            if (!activeRoute) return;
+            
+            activeRoute.Status = 'planned';
+            updateRouteStatus('planned');
+            
+            // Perbarui routes Daftar
+            const routeIndex = routes.findIndex(r => r.id === activeRoute.id);
+            if (routeIndex !== -1) {
+                routes[routeIndex] = activeRoute;
+            }
+            displayRoutes();
+            
+            showSuccess('Route paused!');
+        }
+
+        // Complete route
+        function completeRoute() {
+            if (!activeRoute) return;
+            
+            activeRoute.Status = 'Selesai';
+            activeRoute.completed_at = new Tanggal().toISOString();
+            activeRoute.actual_distance = calculateTotalDistance();
+            activeRoute.actual_time = calculateTotalTime();
+            
+            updateRouteStatus('Selesai');
+            
+            // Perbarui routes Daftar
+            const routeIndex = routes.findIndex(r => r.id === activeRoute.id);
+            if (routeIndex !== -1) {
+                routes[routeIndex] = activeRoute;
+            }
+            displayRoutes();
+            
+            // Perbarui Statistik
+            const stats = {
+                today_routes: parseInt(Dokumen.getElementById('todayRoutes').textContent) + 1,
+                total_distance: parseFloat(Dokumen.getElementById('totalDistance').textContent) + activeRoute.actual_distance,
+                estimated_time: Dokumen.getElementById('estimatedTime').textContent,
+                Efisiensi: 85.3
+            };
+            updateStatistics(stats);
+            
+            // Hapus Aktif route
+            activeRoute = null;
+            waypoints = [];
+            Dokumen.getElementById('activeRouteCard').style.display = 'Tidak Ada';
+            
+            showSuccess('Route Selesai successfully!');
+        }
+
+        // Perbarui route progress
+        function updateRouteProgress() {
+            const progressDiv = Dokumen.getElementById('routeProgress');
+            
+            if (!activeRoute || !waypoints.length) {
+                progressDiv.innerHTML = '<div class="text-center text-muted">Tidak Aktif route</div>';
+                return;
+            }
+            
+            const completedWaypoints = activeRoute.completed_waypoints || 0;
+            
+            progressDiv.innerHTML = waypoints.map((waypoint, index) => `
+                <div Kelas="timeline-item ${index < completedWaypoints ? 'Selesai' : index === completedWaypoints ? 'current' : ''}">
+                    <div>
+                        <strong>${index + 1}. ${waypoint.member_name || waypoint.location_name}</strong>
+                        ${index < completedWaypoints ? '<br><small class="text-Berhasil">Selesai</small>' : ''}
+                        ${index === completedWaypoints ? '<br><small class="text-alert">Current</small>' : ''}
+                        <br>
+                        <small Kelas="text-muted">${formatDate(waypoint.visited_at || 'Not visited')}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Center on route
+        function centerOnRoute() {
+            if (!activeRoute || !waypoints.length) return;
+            
+            const routePoints = waypoints
+                .Filter(wp => wp.latitude && wp.longitude)
+                .map(wp => L.latLng(wp.latitude, wp.longitude));
+            
+            if (routePoints.length > 0) {
+                const bounds = L.latLngBounds(routePoints);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+        // Toggle route display
+        function toggleRouteDisplay() {
+            if (routeControl) {
+                if (map.hasLayer(routeControl)) {
+                    map.removeLayer(routeControl);
+                } else {
+                    map.addLayer(routeControl);
+                }
+            }
+        }
+
+        // Optimize current route
+        function optimizeCurrentRoute() {
+            if (!activeRoute || !waypoints.length) return;
+            
+            showSuccess('Route optimization in progress...');
+            
+            // Simulate optimization
+            setTimeout(() => {
+                // Urutkan waypoints by Prioritas
+                waypoints.Urutkan((a, b) => {
+                    const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+                    return priorityOrder[b.Prioritas] - priorityOrder[a.Prioritas];
+                });
+                
+                loadWaypoints();
+                displayRouteOnMap();
+                updateRouteSummary();
+                
+                showSuccess('Route optimized successfully!');
+            }, 1000);
+        }
+
+        // Ekspor route
+        function exportRoute() {
+            if (!activeRoute) return;
+            
+            const routeData = {
+                Nama: activeRoute.Nama,
+                Tipe: activeRoute.Tipe,
+                waypoints: waypoints,
+                distance: calculateTotalDistance(),
+                Waktu: calculateTotalTime(),
+                created_at: activeRoute.created_at
+            };
+            
+            const dataStr = JSON.stringify(routeData, null, 2);
+            const dataUri = 'Data:Aplikasi/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `route_${activeRoute.Nama}_${new Tanggal().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = Dokumen.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('Unduh', exportFileDefaultName);
+            linkElement.click();
+            
+            showSuccess('Route exported successfully!');
+        }
+
+        // Create new route
+        function createNewRoute() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newRouteModal'));
+            modal.show();
+        }
+
+        // Create route
+        function createRoute() {
+            const Nama = Dokumen.getElementById('routeName').value;
+            const Tipe = Dokumen.getElementById('routeType').value;
+            const Deskripsi = Dokumen.getElementById('routeDescription').value;
+            const Prioritas = Dokumen.getElementById('routePriority').value;
+            const scheduledDate = Dokumen.getElementById('scheduledDate').value;
+            
+            if (!Nama || !Tipe) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Create new route
+            const newRoute = {
+                id: 'ROUTE-' + Tanggal.now(),
+                Nama: Nama,
+                Tipe: Tipe,
+                Deskripsi: Deskripsi,
+                Prioritas: Prioritas,
+                Status: 'planned',
+                created_at: new Tanggal().toISOString(),
+                scheduled_date: scheduledDate,
+                waypoints: []
+            };
+            
+            routes.unshift(newRoute);
+            displayRoutes();
+            
+            // Perbarui Statistik
+            const stats = {
+                today_routes: parseInt(Dokumen.getElementById('todayRoutes').textContent) + 1,
+                total_distance: parseFloat(Dokumen.getElementById('totalDistance').textContent),
+                estimated_time: Dokumen.getElementById('estimatedTime').textContent,
+                Efisiensi: 85.3
+            };
+            updateStatistics(stats);
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newRouteModal'));
+            modal.hide();
+            Dokumen.getElementById('newRouteForm').Reset();
+            
+            // Set Hari Ini's Tanggal as default
+            Dokumen.getElementById('scheduledDate').value = new Tanggal().toISOString().split('T')[0];
+            
+            showSuccess('Route Dibuat successfully!');
+        }
+
+        // Start route from Daftar
+        function startRouteFromList(routeId) {
+            const route = routes.find(r => r.id === routeId);
+            if (!route) return;
+            
+            viewRoute(routeId);
+            startRoute();
+        }
+
+        // Edit route
+        function editRoute(routeId) {
+            const route = routes.find(r => r.id === routeId);
+            if (!route) return;
+            
+            // Load route Data into modal
+            Dokumen.getElementById('routeName').value = route.Nama;
+            Dokumen.getElementById('routeType').value = route.Tipe;
+            Dokumen.getElementById('routeDescription').value = route.Deskripsi;
+            Dokumen.getElementById('routePriority').value = route.Prioritas;
+            Dokumen.getElementById('scheduledDate').value = route.scheduled_date;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newRouteModal'));
+            modal.show();
+        }
+
+        // Tambah waypoint
+        function addWaypoint() {
+            const Anggota = Dokumen.getElementById('waypointMember').value;
+            const Prioritas = Dokumen.getElementById('waypointPriority').value;
+            const Waktu = Dokumen.getElementById('waypointTime').value;
+            const notes = Dokumen.getElementById('waypointNotes').value;
+            
+            if (!Anggota) {
+                Peringatan('Please Pilih a Anggota/Lokasi');
+                return;
+            }
+            
+            // Get Anggota Data
+            const memberData = getMemberData(Anggota);
+            
+            const waypoint = {
+                member_name: memberData.Nama,
+                location_name: memberData.Nama,
+                Alamat: memberData.Alamat,
+                latitude: memberData.latitude,
+                longitude: memberData.longitude,
+                Prioritas: Prioritas,
+                estimated_time: parseInt(Waktu),
+                notes: notes
+            };
+            
+            waypoints.push(waypoint);
+            
+            // Perbarui waypoints display
+            if (activeRoute) {
+                loadWaypoints();
+                displayRouteOnMap();
+                updateRouteSummary();
+            }
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('waypointModal'));
+            modal.hide();
+            Dokumen.getElementById('waypointForm').Reset();
+            
+            showSuccess('Waypoint added successfully!');
+        }
+
+        // View waypoint Detail
+        function viewWaypointDetails(index) {
+            const waypoint = waypoints[index];
+            if (!waypoint) return;
+            
+            Peringatan('Waypoint Detail: ' + JSON.stringify(waypoint, null, 2));
+        }
+
+        // Edit waypoint
+        function editWaypoint(index) {
+            const waypoint = waypoints[index];
+            if (!waypoint) return;
+            
+            // Load waypoint Data into modal
+            Dokumen.getElementById('waypointMember').value = waypoint.member_name;
+            Dokumen.getElementById('waypointPriority').value = waypoint.Prioritas;
+            Dokumen.getElementById('waypointTime').value = waypoint.estimated_time;
+            Dokumen.getElementById('waypointNotes').value = waypoint.notes || '';
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('waypointModal'));
+            modal.show();
+            
+            // Remove waypoint temporarily
+            waypoints.splice(index, 1);
+        }
+
+        // Remove waypoint
+        function removeWaypoint(index) {
+            if (!Konfirmasi('Are you sure you want to remove this waypoint?')) return;
+            
+            waypoints.splice(index, 1);
+            
+            loadWaypoints();
+            displayRouteOnMap();
+            updateRouteSummary();
+            
+            showSuccess('Waypoint removed!');
+        }
+
+        // Quick action functions
+        function autoOptimize() {
+            showSuccess('Auto optimization feature will be implemented');
+        }
+
+        function importWaypoints() {
+            showSuccess('Impor waypoints feature will be implemented');
+        }
+
+        function exportRoutes() {
+            showSuccess('Ekspor routes feature will be implemented');
+        }
+
+        function optimizeAllRoutes() {
+            showSuccess('Optimizing Semua routes...');
+            
+            setTimeout(() => {
+                showSuccess('Semua routes optimized successfully!');
+            }, 2000);
+        }
+
+        function applyOptimizationSettings() {
+            showSuccess('Optimization Pengaturan applied!');
+        }
+
+        // Utility functions
+        function getPriorityColor(Prioritas) {
+            const colors = {
+                'critical': 'danger',
+                'high': 'Peringatan',
+                'medium': 'Info',
+                'low': 'Berhasil'
+            };
+            return colors[Prioritas] || 'secondary';
+        }
+
+        function getMemberData(memberId) {
+            // Mock Anggota Data
+            const Anggota = {
+                'M-001': {
+                    Nama: 'Ahmad Wijaya',
+                    Alamat: 'Jl. Merdeka Tidak. 123, Jakarta',
+                    latitude: -6.2088,
+                    longitude: 106.8456
+                },
+                'M-002': {
+                    Nama: 'Siti Nurhaliza',
+                    Alamat: 'Jl. Sudirman Tidak. 456, Jakarta',
+                    latitude: -6.2150,
+                    longitude: 106.8500
+                },
+                'M-003': {
+                    Nama: 'Budi Santoso',
+                    Alamat: 'Jl. Thamrin Tidak. 789, Jakarta',
+                    latitude: -6.2000,
+                    longitude: 106.8400
+                }
+            };
+            
+            return Anggota[memberId] || {
+                Nama: 'Unknown Anggota',
+                Alamat: 'Unknown Alamat',
+                latitude: -6.2088,
+                longitude: 106.8456
+            };
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo routes
+        function getDemoRoutes() {
+            return [
+                {
+                    id: '1',
+                    Nama: 'Morning Penagihan Route',
+                    Tipe: 'Penagihan',
+                    Deskripsi: 'Penagihan route for morning shift',
+                    Prioritas: 'high',
+                    Status: 'Selesai',
+                    created_at: '2026-03-17T08:00:00Z',
+                    completed_at: '2026-03-17T12:30:00Z',
+                    distance: 12.5,
+                    estimated_time: '2h 30m',
+                    waypoints: [
+                        {
+                            member_name: 'Ahmad Wijaya',
+                            location_name: 'Ahmad Wijaya',
+                            Alamat: 'Jl. Merdeka Tidak. 123, Jakarta',
+                            latitude: -6.2088,
+                            longitude: 106.8456,
+                            Prioritas: 'high',
+                            estimated_time: 30,
+                            notes: 'Telat Pembayaran Penagihan'
+                        },
+                        {
+                            member_name: 'Siti Nurhaliza',
+                            location_name: 'Siti Nurhaliza',
+                            Alamat: 'Jl. Sudirman Tidak. 456, Jakarta',
+                            latitude: -6.2150,
+                            longitude: 106.8500,
+                            Prioritas: 'critical',
+                            estimated_time: 45,
+                            notes: 'Legal notice delivery'
+                        },
+                        {
+                            member_name: 'Budi Santoso',
+                            location_name: 'Budi Santoso',
+                            Alamat: 'Jl. Thamrin Tidak. 789, Jakarta',
+                            latitude: -6.2000,
+                            longitude: 106.8400,
+                            Prioritas: 'medium',
+                            estimated_time: 20,
+                            notes: 'Pembayaran Pengingat'
+                        }
+                    ]
+                },
+                {
+                    id: '2',
+                    Nama: 'Afternoon Survei Route',
+                    Tipe: 'Survei',
+                    Deskripsi: 'Survei route for afternoon shift',
+                    Prioritas: 'medium',
+                    Status: 'in_progress',
+                    created_at: '2026-03-17T13:00:00Z',
+                    distance: 8.3,
+                    estimated_time: '1h 45m',
+                    waypoints: [
+                        {
+                            member_name: 'Dian Kartika',
+                            location_name: 'Dian Kartika',
+                            Alamat: 'Jl. Gatot Subroto Tidak. 321, Jakarta',
+                            latitude: -6.1950,
+                            longitude: 106.8350,
+                            Prioritas: 'medium',
+                            estimated_time: 25,
+                            notes: 'Property Verifikasi'
+                        },
+                        {
+                            member_name: 'Eko Prasetyo',
+                            location_name: 'Eko Prasetyo',
+                            Alamat: 'Jl. Rasuna Said Tidak. 456, Jakarta',
+                            latitude: -6.2250,
+                            longitude: 106.8550,
+                            Prioritas: 'low',
+                            estimated_time: 15,
+                            notes: 'Dokumen Penagihan'
+                        }
+                    ]
+                },
+                {
+                    id: '3',
+                    Nama: 'Evening Verifikasi Route',
+                    Tipe: 'Verifikasi',
+                    Deskripsi: 'Verifikasi route for evening shift',
+                    Prioritas: 'low',
+                    Status: 'planned',
+                    created_at: '2026-03-17T17:00:00Z',
+                    distance: 15.7,
+                    estimated_time: '3h 15m',
+                    waypoints: [
+                        {
+                            member_name: 'Fajar Hidayat',
+                            location_name: 'Fajar Hidayat',
+                            Alamat: 'Jl. MH Thamrin Tidak. 123, Jakarta',
+                            latitude: -6.1850,
+                            longitude: 106.8300,
+                            Prioritas: 'low',
+                            estimated_time: 35,
+                            notes: 'Identity Verifikasi'
+                        },
+                        {
+                            member_name: 'Rina Susanti',
+                            location_name: 'Rina Susanti',
+                            Alamat: 'Jl. Sudirman Tidak. 789, Jakarta',
+                            latitude: -6.2100,
+                            longitude: 106.8456,
+                            Prioritas: 'medium',
+                            estimated_time: 40,
+                            notes: 'Alamat Verifikasi'
+                        },
+                        {
+                            member_name: 'Andi Wijaya',
+                            location_name: 'Andi Wijaya',
+                            Alamat: 'Jl. MH Thamrin Tidak. 456, Jakarta',
+                            latitude: -6.1950,
+                            longitude: 106.8250,
+                            Prioritas: 'low',
+                            estimated_time: 30,
+                            notes: 'Employment Verifikasi'
+                        }
+                    ]
+                }
+            ];
+        }
+
+        // Filter routes
+        function filterRoutes() {
+            displayRoutes();
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

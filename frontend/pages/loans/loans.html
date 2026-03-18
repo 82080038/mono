@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinjaman - KSP Lam Gabe Jaya</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .Pengguna-Info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: Tidak Ada;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            padding: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            border: Tidak Ada;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .Tabel {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .Tabel th,
+        .Tabel td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .Tabel th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-Berhasil {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-Peringatan {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .Cari-box {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>💳 Pinjaman Manajemen</h1>
+        <div class="Pengguna-info">
+            <span id="Nama Pengguna">Memuat...</span>
+            <a href="/loans_crud.html" class="btn">← CRUD Pinjaman</a>
+            <button class="btn" onclick="Keluar()">Keluar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>2</h3>
+                <p>Total Pinjaman</p>
+            </div>
+            <div class="stat-card">
+                <h3>1</h3>
+                <p>Aktif Pinjaman</p>
+            </div>
+            <div class="stat-card">
+                <h3>Rp 20M</h3>
+                <p>Total Disbursed</p>
+            </div>
+            <div class="stat-card">
+                <h3>Rp 15M</h3>
+                <p>Outstanding</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Daftar Pengajuan Pinjaman</h2>
+            <button class="btn-primary" onclick="newLoanApplication()">+ Pengajuan Pinjaman Baru</button>
+            <input type="text" class="Cari-box" placeholder="Cari pinjaman..." onkeyup="searchLoans(this.value)">
+
+            <table class="Tabel">
+                <thead>
+                    <tr>
+                        <th>Nomor Pinjaman</th>
+                        <th>Anggota</th>
+                        <th>Jumlah</th>
+                        <th>Jangka Waktu</th>
+                        <th>Suku Bunga</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="loansList">
+                    <tr>
+                        <td>LN202603160001</td>
+                        <td>Budi Santoso</td>
+                        <td>Rp 10.000.000</td>
+                        <td>12 bulan</td>
+                        <td>1,5%/bulan</td>
+                        <td><span class="badge badge-alert">Menunggu</span></td>
+                        <td>
+                            <button class="btn" onclick="viewLoan('LN202603160001')">Lihat</button>
+                            <button class="btn" onclick="approveLoan('LN202603160001')">Setujui</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>LOAN20260316054433</td>
+                        <td>Budi Santoso</td>
+                        <td>Rp 10.000.000</td>
+                        <td>12 bulan</td>
+                        <td>1,5%/bulan</td>
+                        <td><span class="badge badge-Berhasil">Aktif</span></td>
+                        <td>
+                            <button class="btn" onclick="viewLoan('LOAN20260316054433')">Lihat</button>
+                            <button class="btn" onclick="processPayment('LOAN20260316054433')">Pembayaran</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            const Pengguna = localStorage.getItem('Pengguna');
+
+            if (!token || !Pengguna) {
+                window.Lokasi.href = '/mono/Masuk.html';
+                return;
+            }
+
+            const userData = JSON.parse(Pengguna);
+            Dokumen.getElementById('Nama Pengguna').textContent = userData.Nama || 'Pengguna';
+        }
+
+        function Keluar() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('Pengguna');
+            window.Lokasi.href = '/mono/Masuk.html';
+        }
+
+        function newLoanApplication() {
+            Peringatan('New Pinjaman Aplikasi - This feature is under development');
+        }
+
+        function viewLoan(loanId) {
+            Peringatan(`View Pinjaman ${loanId} - This feature is under development`);
+        }
+
+        function approveLoan(loanId) {
+            if (Konfirmasi(`Approve Pinjaman ${loanId}?`)) {
+                Peringatan(`Pinjaman ${loanId} approved successfully!`);
+                Lokasi.reload();
+            }
+        }
+
+        function processPayment(loanId) {
+            Peringatan(`Proses Pembayaran for ${loanId} - This feature is under development`);
+        }
+
+        function searchLoans(query) {
+            // Implement Cari functionality
+            
+        }
+
+        // Initialize
+        checkAuth();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

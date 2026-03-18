@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Pesan - Anggota Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Pesan-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #20c997;
+            cursor: pointer;
+        }
+        
+        .Pesan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Pesan-card.unread {
+            background: #f8f9fa;
+            border-left-color: #007bff;
+        }
+        
+        .Pesan-Status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .Status-unread { background: #007bff; color: white; }
+        .Status-read { background: #6c757d; color: white; }
+        .Status-important { background: #dc3545; color: white; }
+        .Status-archived { background: #28a745; color: white; }
+        
+        .Pesan-Tipe {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .Tipe-Sistem { background: #17a2b8; color: white; }
+        .Tipe-Pinjaman { background: #fd7e14; color: white; }
+        .Tipe-account { background: #28a745; color: white; }
+        .Tipe-promotion { background: #6f42c1; color: white; }
+        .Tipe-Pengingat { background: #ffc107; color: #000; }
+        
+        .Pesan-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .icon-Sistem { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .icon-Pinjaman { background: linear-gradient(135deg, #fd7e14, #e8590c); }
+        .icon-account { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        .icon-promotion { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
+        .icon-Pengingat { background: linear-gradient(135deg, #ffc107, #e0a800); }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #20c997;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Pesan-content {
+            max-height: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        .Pesan-preview {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .Pesan-sender {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .Pesan-Waktu {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .Pesan-Jumlah {
+            Posisi: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .compose-Formulir {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .Lampiran-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Lampiran-Nama {
+            font-weight: 500;
+        }
+        
+        .Lampiran-size {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .Lampiran-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .Pesan-Detail {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .detail-value {
+            color: #6c757d;
+        }
+        
+        .Pesan-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .Pesan-actions .btn {
+            flex: 1;
+        }
+        
+        .thread-item {
+            display: flex;
+            align-items: start;
+            padding: 1rem;
+            border: 1px solid #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .thread-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #20c997;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .thread-content {
+            flex-grow: 1;
+        }
+        
+        .thread-sender {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .thread-Pesan {
+            font-size: 0.875rem;
+            color: #495057;
+            margin-bottom: 0.25rem;
+        }
+        
+        .thread-Waktu {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .Cari-box {
+            Posisi: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .Cari-box input {
+            padding-left: 2.5rem;
+        }
+        
+        .Cari-box i {
+            Posisi: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        .Filter-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .Filter-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            border: 1px solid #dee2e6;
+        }
+        
+        .Filter-tag:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+        }
+        
+        .Filter-tag.Aktif {
+            background-color: #20c997;
+            color: white;
+            border-color: #20c997;
+        }
+        
+        .Pesan-Ringkasan {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .Ringkasan-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Ringkasan-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .Ringkasan-label {
+            opacity: 0.9;
+        }
+        
+        .Ringkasan-value {
+            font-weight: bold;
+        }
+        
+        .Notifikasi-Pengaturan {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+        
+        .setting-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .toggle-switch {
+            Posisi: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.Aktif {
+            background: #20c997;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            Posisi: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.Aktif::after {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-envelope"></i> Anggota Pesan</h1>
+                <p class="mb-0">Anggota - Communication Center & Notifications</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Message Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="Pesan-Ringkasan">
+                    <h5 class="mb-3">Pesan Ringkasan</h5>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Unread Pesan:</span>
+                        <span class="Ringkasan-value">3</span>
+                    </div>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Total Pesan:</span>
+                        <span class="Ringkasan-value">15</span>
+                    </div>
+                    <div class="Ringkasan-item">
+                        <span class="Ringkasan-label">Important:</span>
+                        <span class="Ringkasan-value">1</span>
+                    </div>
+                    <div class="trend-indicator">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+2 new Pesan Hari Ini</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <i class="fas fa-envelope fa-2x mb-2"></i>
+                                <h6>Total</h6>
+                                <h3 id="totalMessages">0</h3>
+                                <p class="mb-0">Pesan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-Berhasil text-white">
+                            <div class="card-body">
+                                <i class="fas fa-envelope-open fa-2x mb-2"></i>
+                                <h6>Read</h6>
+                                <h3 id="readMessages">0</h3>
+                                <p class="mb-0">Pesan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-alert text-white">
+                            <div class="card-body">
+                                <i class="fas fa-envelope-open-text fa-2x mb-2"></i>
+                                <h6>Unread</h6>
+                                <h3 id="unreadMessages">0</h3>
+                                <p class="mb-0">Pesan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-danger text-white">
+                            <div class="card-body">
+                                <i class="fas fa-star fa-2x mb-2"></i>
+                                <h6>Important</h6>
+                                <h3 id="importantMessages">0</h3>
+                                <p class="mb-0">Pesan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <!-- Compose Message -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-pen"></i> Compose Pesan</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="compose-form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">To *</label>
+                                        <select class="form-Pilih" id="messageTo">
+                                            <option value="">Pilih recipient</option>
+                                            <option value="Admin">Admin</option>
+                                            <option value="mantri">Mantri</option>
+                                            <option value="kasir">Kasir</option>
+                                            <option value="Teller">Teller</option>
+                                            <option value="support">Support</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Subject *</label>
+                                        <input type="text" class="form-control" id="messageSubject" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Pesan *</label>
+                                        <textarea class="form-control" id="messageContent" rows="4" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Prioritas</label>
+                                        <select class="form-Pilih" id="messagePriority">
+                                            <option value="normal">Normal</option>
+                                            <option value="urgent">Urgent</option>
+                                            <option value="important">Important</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Attachments</label>
+                                        <input type="File" class="form-control" id="messageAttachments" multiple>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane"></i> Send Pesan
+                                </button>
+                                <button class="btn btn-secondary" onclick="saveDraft()">
+                                    <i class="fas fa-Simpan"></i> Simpan Draft
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearCompose()">
+                                    <i class="fas fa-undo"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Messages List -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-inbox"></i> Pesan</h5>
+                        <div>
+                            <div class="Cari-box d-inline-block me-2" style="width: 200px;">
+                                <i class="fas fa-Cari"></i>
+                                <input type="text" class="form-control form-control-sm" placeholder="Cari..." id="searchInput" oninput="searchMessages()">
+                            </div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="typeFilter" onchange="filterMessages()">
+                                <option value="">Semua Types</option>
+                                <option value="Sistem">Sistem</option>
+                                <option value="Pinjaman">Pinjaman</option>
+                                <option value="account">Account</option>
+                                <option value="promotion">Promotion</option>
+                                <option value="Pengingat">Pengingat</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto" id="statusFilter" onchange="filterMessages()">
+                                <option value="">Semua Status</option>
+                                <option value="unread">Unread</option>
+                                <option value="read">Read</option>
+                                <option value="important">Important</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="Filter-tags">
+                            <div class="Filter-tag Aktif" onclick="setFilter('Semua')">Semua</div>
+                            <div class="Filter-tag" onclick="setFilter('unread')">Unread</div>
+                            <div class="Filter-tag" onclick="setFilter('important')">Important</div>
+                            <div class="Filter-tag" onclick="setFilter('Sistem')">Sistem</div>
+                            <div class="Filter-tag" onclick="setFilter('Pinjaman')">Pinjaman</div>
+                        </div>
+                        <div id="messagesList">
+                            <!-- Messages will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="markAllAsRead()">
+                                    <i class="fas fa-envelope-open"></i>
+                                    <h6>Mark Semua Read</h6>
+                                    <small class="text-muted">Hapus unread</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="archiveRead()">
+                                    <i class="fas fa-archive"></i>
+                                    <h6>Archive</h6>
+                                    <small class="text-muted">Store Pesan</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="exportMessages()">
+                                    <i class="fas fa-Unduh"></i>
+                                    <h6>Ekspor</h6>
+                                    <small class="text-muted">Unduh</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="Pengaturan()">
+                                    <i class="fas fa-cog"></i>
+                                    <h6>Pengaturan</h6>
+                                    <small class="text-muted">Preferences</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notification Settings -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bell"></i> Notifikasi Pengaturan</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Notifikasi-Pengaturan">
+                            <div class="setting-item">
+                                <span class="setting-label">Email Notifications</span>
+                                <div class="toggle-switch Aktif" onclick="toggleSetting('Email')"></div>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">SMS Notifications</span>
+                                <div class="toggle-switch" onclick="toggleSetting('sms')"></div>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">Push Notifications</span>
+                                <div class="toggle-switch Aktif" onclick="toggleSetting('push')"></div>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">Pinjaman Updates</span>
+                                <div class="toggle-switch Aktif" onclick="toggleSetting('Pinjaman')"></div>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">Account Alerts</span>
+                                <div class="toggle-switch Aktif" onclick="toggleSetting('account')"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Contacts -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user"></i> Recent Contacts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentContacts">
+                            <!-- Recent contacts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Message Details Modal -->
+    <div class="modal fade" id="messageDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Pesan Detail</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="messageDetails">
+                    <!-- Message details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="replyToMessage()">
+                        <i class="fas fa-reply"></i> Reply
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="forwardMessage()">
+                        <i class="fas fa-share"></i> Forward
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let Pesan = [];
+        let currentFilter = 'Semua';
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadMessages();
+            loadStatistics();
+            loadRecentContacts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Anggota
+            if (currentUser.role !== 'Anggota') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load Pesan
+        async function loadMessages() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_messages', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        Pesan = Data.Data;
+                        displayMessages();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Pesan:', Error);
+                // Use demo Data
+                Pesan = getDemoMessages();
+                displayMessages();
+            }
+        }
+
+        // Display Pesan
+        function displayMessages() {
+            const messagesList = Dokumen.getElementById('messagesList');
+            const typeFilter = Dokumen.getElementById('typeFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            const searchInput = Dokumen.getElementById('searchInput').value;
+            
+            let filteredMessages = Pesan;
+            
+            // Filter by Tipe
+            if (typeFilter) {
+                filteredMessages = filteredMessages.Filter(msg => msg.Tipe === typeFilter);
+            }
+            
+            // Filter by Status
+            if (statusFilter) {
+                filteredMessages = filteredMessages.Filter(msg => msg.Status === statusFilter);
+            }
+            
+            // Filter by current Filter tag
+            if (currentFilter !== 'Semua') {
+                if (currentFilter === 'unread') {
+                    filteredMessages = filteredMessages.Filter(msg => msg.Status === 'unread');
+                } else if (currentFilter === 'important') {
+                    filteredMessages = filteredMessages.Filter(msg => msg.Prioritas === 'important');
+                } else {
+                    filteredMessages = filteredMessages.Filter(msg => msg.Tipe === currentFilter);
+                }
+            }
+            
+            // Cari Filter
+            if (searchInput) {
+                const searchTerm = searchInput.toLowerCase();
+                filteredMessages = filteredMessages.Filter(msg => 
+                    msg.subject.toLowerCase().includes(searchTerm) ||
+                    msg.content.toLowerCase().includes(searchTerm) ||
+                    msg.sender.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            messagesList.innerHTML = '';
+            
+            if (filteredMessages.length === 0) {
+                messagesList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak Pesan found</div>';
+                return;
+            }
+            
+            filteredMessages.forEach(Pesan => {
+                const messageCard = Dokumen.createElement('div');
+                messageCard.className = `Pesan-card card mb-2 ${Pesan.Status === 'unread' ? 'unread' : ''}`;
+                messageCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="Pesan-icon icon-${Pesan.Tipe} me-3">
+                                        <i class="fas fa-${getMessageIcon(Pesan.Tipe)}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">${Pesan.subject}</h6>
+                                                <div class="Pesan-sender">${Pesan.sender}</div>
+                                                <div class="Pesan-content">${Pesan.content}</div>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="Pesan-Status Status-${Pesan.Status}">${Pesan.Status}</span>
+                                                <span class="Pesan-Tipe Tipe-${Pesan.Tipe}">${Pesan.Tipe}</span>
+                                            </div>
+                                        </div>
+                                        <div class="Pesan-Waktu">${formatDate(Pesan.Tanggal)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="Pesan-actions">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewMessageDetails('${Pesan.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="markAsRead('${Pesan.id}')" ${message.status === 'read' ? 'disabled' : ''}>
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="toggleImportant('${Pesan.id}')">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMessage('${Pesan.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                messagesList.appendChild(messageCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_message_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_messages: 15,
+                    read_messages: 12,
+                    unread_messages: 3,
+                    important_messages: 1
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalMessages').textContent = stats.total_messages || 0;
+            Dokumen.getElementById('readMessages').textContent = stats.read_messages || 0;
+            Dokumen.getElementById('unreadMessages').textContent = stats.unread_messages || 0;
+            Dokumen.getElementById('importantMessages').textContent = stats.important_messages || 0;
+        }
+
+        // Load recent contacts
+        function loadRecentContacts() {
+            const contactsDiv = Dokumen.getElementById('recentContacts');
+            
+            const contacts = [
+                { Nama: 'Admin', role: 'Sistem Administrator', last_contact: '2 hours ago' },
+                { Nama: 'Ahmad Wijaya', role: 'Mantri', last_contact: '1 day ago' },
+                { Nama: 'Siti Nurhaliza', role: 'Kasir', last_contact: '3 days ago' },
+                { Nama: 'Support Tim', role: 'Pelanggan Support', last_contact: '1 week ago' }
+            ];
+            
+            contactsDiv.innerHTML = contacts.map(Kontak => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <div class="fw-bold">${Kontak.Nama}</div>
+                        <small class="text-muted">${Kontak.role}</small>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">${Kontak.last_contact}</small>
+                        <br>
+                        <button class="btn btn-sm btn-outline-primary" onclick="composeMessage('${Kontak.Nama}')">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View Pesan Detail
+        function viewMessageDetails(messageId) {
+            const Pesan = Pesan.find(m => m.id === messageId);
+            if (!Pesan) return;
+            
+            const Detail = Dokumen.getElementById('messageDetails');
+            
+            Detail.innerHTML = `
+                <div class="Pesan-Detail">
+                    <div class="detail-header">
+                        <h6>${Pesan.subject}</h6>
+                        <div>
+                            <span class="Pesan-Status Status-${Pesan.Status}">${Pesan.Status}</span>
+                            <span class="Pesan-Tipe Tipe-${Pesan.Tipe}">${Pesan.Tipe}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">From:</span>
+                        <span class="detail-value">${Pesan.sender}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">To:</span>
+                        <span class="detail-value">${Pesan.recipient}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tanggal:</span>
+                        <span class="detail-value">${formatDateTime(Pesan.Tanggal)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Prioritas:</span>
+                        <span class="detail-value">${Pesan.Prioritas || 'Normal'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Attachments:</span>
+                        <span class="detail-value">${Pesan.attachments ? Pesan.attachments.length : 0} files</span>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Pesan Content</h6>
+                        <div class="p-3 bg-light rounded">
+                            ${Pesan.content}
+                        </div>
+                    </div>
+                    ${Pesan.attachments && Pesan.attachments.length > 0 ? `
+                        <div class="mt-3">
+                            <h6>Attachments</h6>
+                            ${Pesan.attachments.map(att => `
+                                <div class="Lampiran-item">
+                                    <div>
+                                        <div class="Lampiran-Nama">${att.Nama}</div>
+                                        <div class="Lampiran-size">${att.size}</div>
+                                    </div>
+                                    <div class="Lampiran-actions">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="downloadAttachment('${att.Nama}')">
+                                            <i class="fas fa-Unduh"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Mark as read
+            if (Pesan.Status === 'unread') {
+                markAsRead(messageId);
+            }
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('messageDetailsModal'));
+            modal.show();
+        }
+
+        // Compose functions
+        function sendMessage() {
+            const to = Dokumen.getElementById('messageTo').value;
+            const subject = Dokumen.getElementById('messageSubject').value;
+            const content = Dokumen.getElementById('messageContent').value;
+            const Prioritas = Dokumen.getElementById('messagePriority').value;
+            
+            if (!to || !subject || !content) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            showSuccess('Pesan sent successfully!');
+            clearCompose();
+        }
+
+        function saveDraft() {
+            const subject = Dokumen.getElementById('messageSubject').value;
+            const content = Dokumen.getElementById('messageContent').value;
+            
+            if (!subject || !content) {
+                Peringatan('Please enter subject and content');
+                return;
+            }
+            
+            showSuccess('Pesan saved as draft!');
+        }
+
+        function clearCompose() {
+            Dokumen.getElementById('messageTo').value = '';
+            Dokumen.getElementById('messageSubject').value = '';
+            Dokumen.getElementById('messageContent').value = '';
+            Dokumen.getElementById('messagePriority').value = 'normal';
+            Dokumen.getElementById('messageAttachments').value = '';
+        }
+
+        function composeMessage(recipient) {
+            Dokumen.getElementById('messageTo').value = recipient.toLowerCase().replace(' ', '_');
+            
+            // Scroll to compose Formulir
+            Dokumen.querySelector('.compose-Formulir').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Pesan actions
+        function markAsRead(messageId) {
+            const Pesan = Pesan.find(m => m.id === messageId);
+            if (!Pesan) return;
+            
+            Pesan.Status = 'read';
+            displayMessages();
+            loadStatistics();
+            
+            showSuccess('Pesan marked as read');
+        }
+
+        function toggleImportant(messageId) {
+            const Pesan = Pesan.find(m => m.id === messageId);
+            if (!Pesan) return;
+            
+            Pesan.Prioritas = Pesan.Prioritas === 'important' ? 'normal' : 'important';
+            displayMessages();
+            
+            showSuccess(`Pesan ${Pesan.Prioritas === 'important' ? 'marked as' : 'unmarked as'} important`);
+        }
+
+        function deleteMessage(messageId) {
+            if (!Konfirmasi('Are you sure you want to Hapus this Pesan?')) return;
+            
+            const index = Pesan.findIndex(m => m.id === messageId);
+            if (index > -1) {
+                Pesan.splice(index, 1);
+                displayMessages();
+                loadStatistics();
+                
+                showSuccess('Pesan deleted successfully');
+            }
+        }
+
+        function replyToMessage() {
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('messageDetailsModal'));
+            modal.hide();
+            
+            // Scroll to compose Formulir
+            Dokumen.querySelector('.compose-Formulir').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function forwardMessage() {
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('messageDetailsModal'));
+            modal.hide();
+            
+            // Scroll to compose Formulir
+            Dokumen.querySelector('.compose-Formulir').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadAttachment(fileName) {
+            showSuccess(`Downloading Lampiran: ${fileName}`);
+        }
+
+        // Quick action functions
+        function markAllAsRead() {
+            Pesan.forEach(Pesan => {
+                if (Pesan.Status === 'unread') {
+                    Pesan.Status = 'read';
+                }
+            });
+            
+            displayMessages();
+            loadStatistics();
+            
+            showSuccess('Semua Pesan marked as read');
+        }
+
+        function archiveRead() {
+            const readMessages = Pesan.Filter(m => m.Status === 'read');
+            
+            if (readMessages.length === 0) {
+                showSuccess('Tidak read Pesan to archive');
+                return;
+            }
+            
+            if (!Konfirmasi(`Archive ${readMessages.length} read Pesan?`)) return;
+            
+            Pesan = Pesan.Filter(m => m.Status !== 'read');
+            displayMessages();
+            loadStatistics();
+            
+            showSuccess(`${readMessages.length} Pesan archived`);
+        }
+
+        function exportMessages() {
+            showSuccess('Pesan Ekspor initiated...');
+        }
+
+        function Pengaturan() {
+            
+        }
+
+        function toggleSetting(setting) {
+            const toggle = event.currentTarget;
+            toggle.classList.toggle('Aktif');
+            
+            const isActive = toggle.classList.contains('Aktif');
+            showSuccess(`${setting} notifications ${isActive ? 'enabled' : 'disabled'}`);
+        }
+
+        // Filter functions
+        function setFilter(Filter) {
+            currentFilter = Filter;
+            
+            // Perbarui Filter tags
+            Dokumen.querySelectorAll('.Filter-tag').forEach(tag => {
+                tag.classList.remove('Aktif');
+            });
+            event.currentTarget.classList.Tambah('Aktif');
+            
+            displayMessages();
+        }
+
+        function filterMessages() {
+            displayMessages();
+        }
+
+        function searchMessages() {
+            displayMessages();
+        }
+
+        // Utility functions
+        function getMessageIcon(Tipe) {
+            const icons = {
+                'Sistem': 'bell',
+                'Pinjaman': 'hand-holding-usd',
+                'account': 'university',
+                'promotion': 'tag',
+                'Pengingat': 'clock'
+            };
+            return icons[Tipe] || 'envelope';
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Tanggal(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo Pesan
+        function getDemoMessages() {
+            return [
+                {
+                    id: '1',
+                    subject: 'Pinjaman Aplikasi Approved',
+                    content: 'Congratulations! Your Pinjaman Aplikasi for Bisnis Expansion has been approved. The Pinjaman Jumlah of Rp 50,000,000 has been approved with an Bunga Tarif of 14.0% per annum. Please visit our branch to complete the documentation.',
+                    sender: 'Admin',
+                    recipient: 'Anggota',
+                    Tipe: 'Pinjaman',
+                    Status: 'unread',
+                    Prioritas: 'important',
+                    Tanggal: '2026-03-17T09:00:00Z',
+                    attachments: [
+                        { Nama: 'loan_approval.PDF', size: '245 KB' },
+                        { Nama: 'terms_conditions.PDF', size: '128 KB' }
+                    ]
+                },
+                {
+                    id: '2',
+                    subject: 'Monthly Account Statement',
+                    content: 'Your monthly account statement for March 2026 is now available. Total Saldo: Rp 15,750,000. Total Transaksi: 28. Please Review your statement and Kontak us if you have any questions.',
+                    sender: 'Sistem',
+                    recipient: 'Anggota',
+                    Tipe: 'account',
+                    Status: 'read',
+                    Prioritas: 'normal',
+                    Tanggal: '2026-03-16T08:00:00Z',
+                    attachments: [
+                        { Nama: 'statement_march_2026.PDF', size: '156 KB' }
+                    ]
+                },
+                {
+                    id: '3',
+                    subject: 'Pinjaman Pembayaran Pengingat',
+                    content: 'This is a Pengingat that your Pinjaman Pembayaran of Rp 2,500,000 is due on March 25, 2026. Please ensure sufficient funds are available in your account for automatic debit.',
+                    sender: 'Sistem',
+                    recipient: 'Anggota',
+                    Tipe: 'Pengingat',
+                    Status: 'unread',
+                    Prioritas: 'normal',
+                    Tanggal: '2026-03-15T10:00:00Z',
+                    attachments: []
+                },
+                {
+                    id: '4',
+                    subject: 'New Bunga Rates',
+                    content: 'We are pleased to announce our new competitive Bunga rates for Simpanan and Pinjaman products. Simpanan rates now start from 3.5% p.a. and Pinjaman rates from 7.5% p.a.',
+                    sender: 'Marketing',
+                    recipient: 'Anggota',
+                    Tipe: 'promotion',
+                    Status: 'read',
+                    Prioritas: 'normal',
+                    Tanggal: '2026-03-14T14:00:00Z',
+                    attachments: [
+                        { Nama: 'new_rates.PDF', size: '89 KB' }
+                    ]
+                },
+                {
+                    id: '5',
+                    subject: 'Sistem Maintenance Notice',
+                    content: 'Our online banking Sistem will undergo scheduled maintenance on March 20, 2026 from 02:00 AM to 06:00 AM. Services may be temporarily unavailable during this period.',
+                    sender: 'Sistem',
+                    recipient: 'Anggota',
+                    Tipe: 'Sistem',
+                    Status: 'read',
+                    Prioritas: 'normal',
+                    Tanggal: '2026-03-13T16:00:00Z',
+                    attachments: []
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

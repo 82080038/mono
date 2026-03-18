@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keamanan Center - Super Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Keamanan-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #dc3545;
+            cursor: pointer;
+        }
+        
+        .Keamanan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .threat-Level {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Level-critical { background: #dc3545; color: white; }
+        .Level-high { background: #fd7e14; color: white; }
+        .Level-medium { background: #ffc107; color: #000; }
+        .Level-low { background: #28a745; color: white; }
+        .Level-Info { background: #17a2b8; color: white; }
+        
+        .Keamanan-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .icon-firewall { background: linear-gradient(135deg, #dc3545, #c82333); }
+        .icon-intrusion { background: linear-gradient(135deg, #fd7e14, #e8590c); }
+        .icon-access { background: linear-gradient(135deg, #6f42c1, #5a2d91); }
+        .icon-Audit { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .icon-vulnerability { background: linear-gradient(135deg, #ffc107, #e0a800); }
+        .icon-policy { background: linear-gradient(135deg, #28a745, #1e7e34); }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #dc3545;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #dc3545;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Keamanan-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .metric-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .threat-timeline {
+            Posisi: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            Posisi: relative;
+            padding-bottom: 1rem;
+            border-left: 2px solid #dee2e6;
+            padding-left: 1rem;
+            margin-left: -1px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            Posisi: absolute;
+            left: -6px;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #dc3545;
+            border: 2px solid white;
+        }
+        
+        .timeline-item.resolved::before {
+            background: #28a745;
+        }
+        
+        .timeline-item.Monitoring::before {
+            background: #ffc107;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .Keamanan-Skor {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        
+        .Skor-excellent { color: #28a745; }
+        .Skor-good { color: #17a2b8; }
+        .Skor-Peringatan { color: #ffc107; }
+        .Skor-danger { color: #dc3545; }
+        
+        .policy-Status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .Status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .Status-Aktif { background: #28a745; }
+        .Status-Tidak Aktif { background: #6c757d; }
+        .Status-Peringatan { background: #ffc107; }
+        .Status-Error { background: #dc3545; }
+        
+        .Peringatan-Keamanan {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .Peringatan-Peringatan {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .Peringatan-Berhasil {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-shield-alt"></i> Keamanan Center</h1>
+                <p class="mb-0">Super Admin - Sistem Keamanan & Threat Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Security Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-danger text-white">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <h5>Aktif Threats</h5>
+                        <h3 id="activeThreats">0</h3>
+                        <p class="mb-0">Currently Monitoring</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                        <h5>Keamanan Skor</h5>
+                        <h3 id="securityScore">0</h3>
+                        <p class="mb-0">Overall Rating</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user-shield fa-2x mb-2"></i>
+                        <h5>Keamanan Events</h5>
+                        <h3 id="securityEvents">0</h3>
+                        <p class="mb-0">Last 24 hours</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h5>Resolved</h5>
+                        <h3 id="resolvedThreats">0</h3>
+                        <p class="mb-0">Minggu Ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Alerts -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-Keamanan" role="Peringatan" id="criticalAlert" style="display: Tidak Ada;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">Critical Keamanan Peringatan</h6>
+                            <p class="mb-0" id="criticalAlertMessage">Multiple failed Masuk attempts detected from suspicious IP addresses</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-danger btn-sm" onclick="viewCriticalThreat()">
+                                <i class="fas fa-eye"></i> View Detail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Security Threats -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Keamanan Threats</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="levelFilter" onchange="filterThreats()">
+                                <option value="">Semua Levels</option>
+                                <option value="critical">Critical</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                                <option value="Info">Info</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter" onchange="filterThreats()">
+                                <option value="">Semua Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Monitoring">Monitoring</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                            <button class="btn btn-danger btn-sm" onclick="scanForThreats()">
+                                <i class="fas fa-Cari"></i> Scan Now
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="threatsList">
+                            <!-- Threats will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Policies -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-shield-alt"></i> Keamanan Policies</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="policiesList">
+                            <!-- Policies will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="scanForThreats()">
+                                    <i class="fas fa-Cari"></i>
+                                    <h6>Scan Sistem</h6>
+                                    <small class="text-muted">Keamanan scan</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="lockdownSystem()">
+                                    <i class="fas fa-lock"></i>
+                                    <h6>Lockdown</h6>
+                                    <small class="text-muted">Emergency</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="updatePolicies()">
+                                    <i class="fas fa-sync"></i>
+                                    <h6>Perbarui</h6>
+                                    <small class="text-muted">Policies</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="generateReport()">
+                                    <i class="fas fa-File-alt"></i>
+                                    <h6>Laporan</h6>
+                                    <small class="text-muted">Keamanan</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Metrics -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-line"></i> Keamanan Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Keamanan-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value" id="firewallStatus">Aktif</div>
+                                <div class="metric-label">Firewall</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="intrusionStatus">0</div>
+                                <div class="metric-label">Intrusions</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="failedLogins">0</div>
+                                <div class="metric-label">Failed Logins</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="blockedIPs">0</div>
+                                <div class="metric-label">Blocked IPs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Riwayat"></i> Keamanan Events</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="threat-timeline" id="securityEvents">
+                            <!-- Security events will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Threat Details Modal -->
+    <div class="modal fade" id="threatModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Threat Detail</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="threatDetails">
+                    <!-- Threat details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-alert" onclick="monitorThreat()">
+                        <i class="fas fa-eye"></i> Monitor
+                    </button>
+                    <button type="button" class="btn btn-Berhasil" onclick="resolveThreat()">
+                        <i class="fas fa-check"></i> Resolve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let threats = [];
+        let policies = [];
+        let selectedThreat = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadThreats();
+            loadPolicies();
+            loadSecurityMetrics();
+            loadSecurityEvents();
+            checkCriticalAlerts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Super Admin
+            if (currentUser.role !== 'super_admin') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load threats
+        async function loadThreats() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=security_threats', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        threats = Data.Data;
+                        displayThreats();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat threats:', Error);
+                // Use demo Data
+                threats = getDemoThreats();
+                displayThreats();
+            }
+        }
+
+        // Display threats
+        function displayThreats() {
+            const threatsList = Dokumen.getElementById('threatsList');
+            const levelFilter = Dokumen.getElementById('levelFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            
+            let filteredThreats = threats;
+            
+            // Filter by Level
+            if (levelFilter) {
+                filteredThreats = filteredThreats.Filter(threat => threat.Level === levelFilter);
+            }
+            
+            // Filter by Status
+            if (statusFilter) {
+                filteredThreats = filteredThreats.Filter(threat => threat.Status === statusFilter);
+            }
+            
+            threatsList.innerHTML = '';
+            
+            if (filteredThreats.length === 0) {
+                threatsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak threats found</div>';
+                return;
+            }
+            
+            filteredThreats.forEach(threat => {
+                const threatCard = Dokumen.createElement('div');
+                threatCard.className = 'Keamanan-card card mb-2';
+                threatCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="Keamanan-icon icon-${threat.Kategori} me-3">
+                                        <i class="fas fa-${getThreatIcon(threat.Kategori)}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${threat.Judul}</h6>
+                                        <p class="mb-1">${threat.Deskripsi}</p>
+                                        <small class="text-muted">
+                                            <span class="threat-Level Level-${threat.Level}">${threat.Level}</span>
+                                            Detected: ${formatDate(threat.detected_at)} | 
+                                            Source: ${threat.source || 'Unknown'}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="threat-Level Level-${threat.Level}">${threat.Status}</span>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewThreatDetails('${threat.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="monitorThreat('${threat.id}')" ${threat.status === 'Monitoring' ? 'disabled' : ''}>
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="resolveThreat('${threat.id}')" ${threat.status === 'resolved' ? 'disabled' : ''}>
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                threatsList.appendChild(threatCard);
+            });
+        }
+
+        // Load policies
+        function loadPolicies() {
+            const policiesList = Dokumen.getElementById('policiesList');
+            
+            policies = [
+                {
+                    id: '1',
+                    Nama: 'Kata Sandi Policy',
+                    Deskripsi: 'Minimum 8 characters, uppercase, lowercase, numbers',
+                    Status: 'Aktif',
+                    last_updated: '2026-03-15T10:00:00Z'
+                },
+                {
+                    id: '2',
+                    Nama: 'Session Timeout',
+                    Deskripsi: 'Automatic Keluar after 30 minutes of inactivity',
+                    Status: 'Aktif',
+                    last_updated: '2026-03-15T10:00:00Z'
+                },
+                {
+                    id: '3',
+                    Nama: 'Two-Factor Authentication',
+                    Deskripsi: '2FA Wajib for Admin Pengguna',
+                    Status: 'Peringatan',
+                    last_updated: '2026-03-15T10:00:00Z'
+                },
+                {
+                    id: '4',
+                    Nama: 'IP Whitelisting',
+                    Deskripsi: 'Only allowed IP addresses can access Admin panel',
+                    Status: 'Aktif',
+                    last_updated: '2026-03-15T10:00:00Z'
+                },
+                {
+                    id: '5',
+                    Nama: 'Audit Logging',
+                    Deskripsi: 'Semua Pengguna actions are logged and monitored',
+                    Status: 'Aktif',
+                    last_updated: '2026-03-15T10:00:00Z'
+                }
+            ];
+            
+            policiesList.innerHTML = policies.map(policy => `
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${policy.Nama}</h6>
+                        <small class="text-muted">${policy.Deskripsi}</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="policy-Status me-3">
+                            <div class="Status-indicator Status-${policy.Status}"></div>
+                            <small class="text-muted">${policy.Status}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editPolicy('${policy.id}')">
+                            <i class="fas fa-Edit"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Keamanan metrics
+        async function loadSecurityMetrics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=security_metrics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateSecurityMetrics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Keamanan metrics:', Error);
+                // Use demo Data
+                updateSecurityMetrics({
+                    active_threats: 3,
+                    security_score: 85,
+                    security_events: 12,
+                    resolved_threats: 8,
+                    firewall_status: 'Aktif',
+                    intrusions: 0,
+                    failed_logins: 5,
+                    blocked_ips: 12
+                });
+            }
+        }
+
+        // Perbarui Keamanan metrics
+        function updateSecurityMetrics(metrics) {
+            Dokumen.getElementById('activeThreats').textContent = metrics.active_threats || 0;
+            Dokumen.getElementById('securityScore').textContent = metrics.security_score || 0;
+            Dokumen.getElementById('securityEvents').textContent = metrics.security_events || 0;
+            Dokumen.getElementById('resolvedThreats').textContent = metrics.resolved_threats || 0;
+            
+            // Perbarui Keamanan Skor color
+            const scoreElement = Dokumen.getElementById('securityScore');
+            scoreElement.className = 'Keamanan-Skor';
+            if (metrics.security_score >= 90) {
+                scoreElement.classList.Tambah('Skor-excellent');
+            } else if (metrics.security_score >= 75) {
+                scoreElement.classList.Tambah('Skor-good');
+            } else if (metrics.security_score >= 60) {
+                scoreElement.classList.Tambah('Skor-Peringatan');
+            } else {
+                scoreElement.classList.Tambah('Skor-danger');
+            }
+            
+            // Perbarui sidebar metrics
+            Dokumen.getElementById('firewallStatus').textContent = metrics.firewall_status || 'Aktif';
+            Dokumen.getElementById('intrusionStatus').textContent = metrics.intrusions || 0;
+            Dokumen.getElementById('failedLogins').textContent = metrics.failed_logins || 0;
+            Dokumen.getElementById('blockedIPs').textContent = metrics.blocked_ips || 0;
+        }
+
+        // Load Keamanan events
+        function loadSecurityEvents() {
+            const eventsDiv = Dokumen.getElementById('securityEvents');
+            
+            const events = [
+                { Tipe: 'threat_detected', Deskripsi: 'Suspicious Masuk attempt blocked', Waktu: '5 minutes ago', Status: 'resolved' },
+                { Tipe: 'policy_violation', Deskripsi: 'Pengguna attempted to access restricted resource', Waktu: '15 minutes ago', Status: 'resolved' },
+                { Tipe: 'system_alert', Deskripsi: 'Unusual Jaringan Aktivitas detected', Waktu: '1 hour ago', Status: 'Monitoring' },
+                { Tipe: 'security_scan', Deskripsi: 'Automated Keamanan scan Selesai', Waktu: '2 hours ago', Status: 'resolved' },
+                { Tipe: 'firewall_block', Deskripsi: 'IP Alamat blocked by firewall', Waktu: '3 hours ago', Status: 'resolved' }
+            ];
+            
+            eventsDiv.innerHTML = events.map(event => `
+                <div class="timeline-item ${event.Status}">
+                    <div>
+                        <strong>${event.Deskripsi}</strong>
+                        <br>
+                        <small class="text-muted">${event.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Check critical alerts
+        function checkCriticalAlerts() {
+            const criticalThreats = threats.Filter(t => t.Level === 'critical' && t.Status !== 'resolved');
+            
+            if (criticalThreats.length > 0) {
+                const alertDiv = Dokumen.getElementById('criticalAlert');
+                const alertMessage = Dokumen.getElementById('criticalAlertMessage');
+                
+                alertDiv.style.display = 'block';
+                alertMessage.textContent = `${criticalThreats.length} critical Keamanan threat(s) detected and require immediate attention`;
+            }
+        }
+
+        // View threat Detail
+        function viewThreatDetails(threatId) {
+            const threat = threats.find(t => t.id === threatId);
+            if (!threat) return;
+            
+            selectedThreat = threat;
+            
+            const Detail = Dokumen.getElementById('threatDetails');
+            
+            Detail.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Threat Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Threat ID:</td><td><strong>${threat.id}</strong></td></tr>
+                            <tr><td>Judul:</td><td>${threat.Judul}</td></tr>
+                            <tr><td>Kategori:</td><td>${threat.Kategori}</td></tr>
+                            <tr><td>Level:</td><td><span class="threat-Level Level-${threat.Level}">${threat.Level}</span></td></tr>
+                            <tr><td>Status:</td><td><span class="threat-Level Level-${threat.Status}">${threat.Status}</span></td></tr>
+                            <tr><td>Detected:</td><td>${formatDateTime(threat.detected_at)}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Impact Assessment</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Severity:</td><td><strong>${threat.severity || 'Medium'}</strong></td></tr>
+                            <tr><td>Affected Systems:</td><td>${threat.affected_systems || 'N/A'}</td></tr>
+                            <tr><td>Risiko Skor:</td><td><strong>${threat.risk_score || '65'}/100</strong></td></tr>
+                            <tr><td>Source:</td><td>${threat.source || 'Unknown'}</td></tr>
+                            <tr><td>IP Alamat:</td><td>${threat.ip_address || 'N/A'}</td></tr>
+                            <tr><td>Pengguna Agent:</td><td>${threat.user_agent || 'N/A'}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Deskripsi</h6>
+                        <p>${threat.Deskripsi}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Recommended Actions</h6>
+                        <ul>
+                            <li>Investigate the source of the threat</li>
+                            <li>Block the suspicious IP Alamat if necessary</li>
+                            <li>Review Sistem logs for related activities</li>
+                            <li>Perbarui Keamanan policies if needed</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Action Riwayat</h6>
+                        <div class="Tabel-responsive">
+                            <table class="Tabel Tabel-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Action</th>
+                                        <th>Pengguna</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>${formatDateTime(threat.detected_at)}</td>
+                                        <td>Threat Detected</td>
+                                        <td>Sistem</td>
+                                        <td>Automatic detection</td>
+                                    </tr>
+                                    ${threat.actions ? threat.actions.map(action => `
+                                        <tr>
+                                            <td>${formatDateTime(action.timestamp)}</td>
+                                            <td>${action.action}</td>
+                                            <td>${action.Pengguna}</td>
+                                            <td>${action.notes}</td>
+                                        </tr>
+                                    `).join('') : ''}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('threatModal'));
+            modal.show();
+        }
+
+        // Monitor threat
+        function monitorThreat(threatId) {
+            const threat = threats.find(t => t.id === threatId);
+            if (!threat) return;
+            
+            threat.Status = 'Monitoring';
+            threat.monitored_at = new Tanggal().toISOString();
+            
+            displayThreats();
+            
+            showSuccess(`Threat "${threat.Judul}" is now being monitored`);
+        }
+
+        // Resolve threat
+        function resolveThreat(threatId) {
+            const threat = threats.find(t => t.id === threatId);
+            if (!threat) return;
+            
+            if (!Konfirmasi('Are you sure you want to mark this threat as resolved?')) return;
+            
+            threat.Status = 'resolved';
+            threat.resolved_at = new Tanggal().toISOString();
+            
+            displayThreats();
+            checkCriticalAlerts();
+            
+            showSuccess(`Threat "${threat.Judul}" has been resolved`);
+        }
+
+        // Quick action functions
+        function scanForThreats() {
+            showSuccess('Keamanan scan initiated...');
+            
+            setTimeout(() => {
+                const newThreat = {
+                    id: 'THREAT-' + Tanggal.now(),
+                    Judul: 'Potential Keamanan Vulnerability',
+                    Deskripsi: 'Sistem scan detected potential vulnerability in authentication module',
+                    Kategori: 'vulnerability',
+                    Level: 'medium',
+                    Status: 'Monitoring',
+                    detected_at: new Tanggal().toISOString(),
+                    source: 'Keamanan Scanner'
+                };
+                
+                threats.unshift(newThreat);
+                displayThreats();
+                checkCriticalAlerts();
+                
+                showSuccess('Keamanan scan Selesai. 1 potential threat detected.');
+            }, 2000);
+        }
+
+        function lockdownSystem() {
+            if (!Konfirmasi('Are you sure you want to initiate Sistem lockdown? This will restrict access to Semua Pengguna except administrators.')) return;
+            
+            showSuccess('Sistem lockdown initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Sistem is now in lockdown mode. Only administrators can access the Sistem.');
+            }, 1000);
+        }
+
+        function updatePolicies() {
+            showSuccess('Keamanan policies Perbarui initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Keamanan policies Diperbarui successfully.');
+            }, 1500);
+        }
+
+        function generateReport() {
+            showSuccess('Keamanan Laporan generation initiated...');
+            
+            setTimeout(() => {
+                showSuccess('Keamanan Laporan generated successfully.');
+            }, 1000);
+        }
+
+        function viewCriticalThreat() {
+            const criticalThreat = threats.find(t => t.Level === 'critical' && t.Status !== 'resolved');
+            if (criticalThreat) {
+                viewThreatDetails(criticalThreat.id);
+            }
+        }
+
+        function editPolicy(policyId) {
+            const policy = policies.find(p => p.id === policyId);
+            if (!policy) return;
+            
+            
+        }
+
+        // Filter threats
+        function filterThreats() {
+            displayThreats();
+        }
+
+        // Utility functions
+        function getThreatIcon(Kategori) {
+            const icons = {
+                'firewall': 'fire',
+                'intrusion': 'Pengguna-secret',
+                'access': 'key',
+                'Audit': 'clipboard-check',
+                'vulnerability': 'bug',
+                'policy': 'shield-alt'
+            };
+            return icons[Kategori] || 'exclamation-triangle';
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Tanggal(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo threats
+        function getDemoThreats() {
+            return [
+                {
+                    id: '1',
+                    Judul: 'Multiple Failed Masuk Attempts',
+                    Deskripsi: 'Multiple failed Masuk attempts detected from IP 192.168.1.100',
+                    Kategori: 'intrusion',
+                    Level: 'critical',
+                    Status: 'Monitoring',
+                    detected_at: '2026-03-17T10:30:00Z',
+                    source: 'Authentication Sistem',
+                    ip_address: '192.168.1.100',
+                    severity: 'High',
+                    risk_score: 85,
+                    affected_systems: 'Authentication Module'
+                },
+                {
+                    id: '2',
+                    Judul: 'Unusual Jaringan Traffic',
+                    Deskripsi: 'Unusual spike in Jaringan traffic detected from external source',
+                    Kategori: 'firewall',
+                    Level: 'high',
+                    Status: 'Aktif',
+                    detected_at: '2026-03-17T09:15:00Z',
+                    source: 'Firewall',
+                    ip_address: '203.45.67.89',
+                    severity: 'Medium',
+                    risk_score: 70,
+                    affected_systems: 'Jaringan Infrastructure'
+                },
+                {
+                    id: '3',
+                    Judul: 'Unauthorized Access Attempt',
+                    Deskripsi: 'Pengguna attempted to access restricted Admin Area',
+                    Kategori: 'access',
+                    Level: 'medium',
+                    Status: 'resolved',
+                    detected_at: '2026-03-17T08:45:00Z',
+                    resolved_at: '2026-03-17T08:50:00Z',
+                    source: 'Access Control',
+                    severity: 'Medium',
+                    risk_score: 60,
+                    affected_systems: 'Admin Panel'
+                },
+                {
+                    id: '4',
+                    Judul: 'Keamanan Policy Violation',
+                    Deskripsi: 'Pengguna violated Kata Sandi policy requirements',
+                    Kategori: 'policy',
+                    Level: 'low',
+                    Status: 'resolved',
+                    detected_at: '2026-03-17T07:30:00Z',
+                    resolved_at: '2026-03-17T07:35:00Z',
+                    source: 'Policy Engine',
+                    severity: 'Low',
+                    risk_score: 30,
+                    affected_systems: 'Pengguna Manajemen'
+                },
+                {
+                    id: '5',
+                    Judul: 'Sistem Vulnerability Detected',
+                    Deskripsi: 'Potential vulnerability detected in authentication module',
+                    Kategori: 'vulnerability',
+                    Level: 'medium',
+                    Status: 'Monitoring',
+                    detected_at: '2026-03-17T06:00:00Z',
+                    source: 'Keamanan Scanner',
+                    severity: 'Medium',
+                    risk_score: 65,
+                    affected_systems: 'Authentication Module'
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

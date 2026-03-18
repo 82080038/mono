@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Registration - Teller Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .registration-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #007bff;
+        }
+        
+        .registration-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .step-indicator {
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .step-indicator.Selesai {
+            background: #28a745;
+        }
+        
+        .step-indicator.Aktif {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .Formulir-section {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .Dokumen-Unggah {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: Semua 0.3s;
+            cursor: pointer;
+        }
+        
+        .Dokumen-Unggah:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .Dokumen-Unggah.has-File {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .Status-badge {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            Posisi: relative;
+        }
+        
+        .progress-step::after {
+            content: '';
+            Posisi: absolute;
+            top: 15px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #dee2e6;
+            z-index: -1;
+        }
+        
+        .progress-step:last-child::after {
+            display: Tidak Ada;
+        }
+        
+        .progress-step.Selesai::after {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-user-plus"></i> Anggota Registration</h1>
+                <p class="mb-0">Teller - New Anggota Registration & Onboarding</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Registration Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-2x mb-2"></i>
+                        <h5>Total Anggota</h5>
+                        <h3 id="totalMembers">0</h3>
+                        <p class="mb-0">Registered</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user-check fa-2x mb-2"></i>
+                        <h5>Bulan Ini</h5>
+                        <h3 id="monthlyRegistrations">0</h3>
+                        <p class="mb-0">New registrations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h5>Menunggu</h5>
+                        <h3 id="pendingRegistrations">0</h3>
+                        <p class="mb-0">Awaiting Persetujuan</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Grafik-line fa-2x mb-2"></i>
+                        <h5>Growth Tarif</h5>
+                        <h3 id="growthRate">0%</h3>
+                        <p class="mb-0">Monthly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Registration Progress -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-tasks"></i> Registration Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="progress-step" id="step1">
+                                <div class="step-indicator Aktif">1</div>
+                                <small class="d-block mt-2">Personal Info</small>
+                            </div>
+                            <div class="progress-step" id="step2">
+                                <div class="step-indicator">2</div>
+                                <small class="d-block mt-2">Kontak Info</small>
+                            </div>
+                            <div class="progress-step" id="step3">
+                                <div class="step-indicator">3</div>
+                                <small class="d-block mt-2">Documents</small>
+                            </div>
+                            <div class="progress-step" id="step4">
+                                <div class="step-indicator">4</div>
+                                <small class="d-block mt-2">Account Setup</small>
+                            </div>
+                            <div class="progress-step" id="step5">
+                                <div class="step-indicator">5</div>
+                                <small class="d-block mt-2">Review & Kirim</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Registration Form -->
+                        <form id="registrationForm">
+                            <!-- Step 1: Personal Information -->
+                            <div id="step1Content" class="form-section">
+                                <h6><i class="fas fa-user"></i> Personal Informasi</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Full Nama *</label>
+                                            <input type="text" class="form-control" id="fullName" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Place of Birth *</label>
+                                            <input type="text" class="form-control" id="placeOfBirth" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Tanggal of Birth *</label>
+                                            <input type="Tanggal" class="form-control" id="dateOfBirth" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Gender *</label>
+                                            <select class="form-Pilih" id="gender" required>
+                                                <option value="">Pilih gender</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">ID Nomor (KTP) *</label>
+                                            <input type="text" class="form-control" id="idNumber" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Marital Status *</label>
+                                            <select class="form-Pilih" id="maritalStatus" required>
+                                                <option value="">Pilih Status</option>
+                                                <option value="single">Single</option>
+                                                <option value="married">Married</option>
+                                                <option value="divorced">Divorced</option>
+                                                <option value="widowed">Widowed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Alamat *</label>
+                                            <textarea class="form-control" id="Alamat" rows="2" required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                        <i class="fas fa-redo"></i> Reset
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(1)">
+                                        Lanjut <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Contact Information -->
+                            <div id="step2Content" class="form-section" style="display: Tidak Ada;">
+                                <h6><i class="fas fa-Telepon"></i> Kontak Informasi</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Telepon Nomor *</label>
+                                            <input type="tel" class="form-control" id="phoneNumber" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">HP Nomor *</label>
+                                            <input type="tel" class="form-control" id="mobileNumber" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Email Alamat</label>
+                                            <input type="email" class="form-control" id="email">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Emergency Kontak Nama *</label>
+                                            <input type="text" class="form-control" id="emergencyContactName" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Emergency Kontak Telepon *</label>
+                                            <input type="tel" class="form-control" id="emergencyContactPhone" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Relationship *</label>
+                                            <select class="form-Pilih" id="emergencyRelationship" required>
+                                                <option value="">Pilih relationship</option>
+                                                <option value="spouse">Spouse</option>
+                                                <option value="parent">Parent</option>
+                                                <option value="sibling">Sibling</option>
+                                                <option value="friend">Friend</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="previousStep(2)">
+                                        <i class="fas fa-arrow-left"></i> Sebelumnya
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                        Lanjut <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3: Documents -->
+                            <div id="step3Content" class="form-section" style="display: Tidak Ada;">
+                                <h6><i class="fas fa-File-alt"></i> Wajib Documents</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">KTP (Identity Card) *</label>
+                                            <div class="Dokumen-Unggah" onclick="Dokumen.getElementById('ktpFile').click()">
+                                                <i class="fas fa-cloud-Unggah-alt fa-3x mb-2"></i>
+                                                <p>Click to Unggah KTP</p>
+                                                <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                                <input type="File" id="ktpFile" accept=".PDF,.jpg,.jpeg,.png" style="display: Tidak Ada;" onchange="handleFileUpload('ktp', this)">
+                                            </div>
+                                            <div id="ktpPreview" class="mt-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Family Card (KK) *</label>
+                                            <div class="Dokumen-Unggah" onclick="Dokumen.getElementById('kkFile').click()">
+                                                <i class="fas fa-cloud-Unggah-alt fa-3x mb-2"></i>
+                                                <p>Click to Unggah KK</p>
+                                                <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                                <input type="File" id="kkFile" accept=".PDF,.jpg,.jpeg,.png" style="display: Tidak Ada;" onchange="handleFileUpload('kk', this)">
+                                            </div>
+                                            <div id="kkPreview" class="mt-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Passport Foto *</label>
+                                            <div class="Dokumen-Unggah" onclick="Dokumen.getElementById('photoFile').click()">
+                                                <i class="fas fa-camera fa-3x mb-2"></i>
+                                                <p>Click to Unggah Foto</p>
+                                                <small class="text-muted">JPG, PNG (Max 2MB)</small>
+                                                <input type="File" id="photoFile" accept=".jpg,.jpeg,.png" style="display: Tidak Ada;" onchange="handleFileUpload('Foto', this)">
+                                            </div>
+                                            <div id="photoPreview" class="mt-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Proof of Alamat *</label>
+                                            <div class="Dokumen-Unggah" onclick="Dokumen.getElementById('addressFile').click()">
+                                                <i class="fas fa-Beranda fa-3x mb-2"></i>
+                                                <p>Click to Unggah proof</p>
+                                                <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                                <input type="File" id="addressFile" accept=".PDF,.jpg,.jpeg,.png" style="display: Tidak Ada;" onchange="handleFileUpload('Alamat', this)">
+                                            </div>
+                                            <div id="addressPreview" class="mt-2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="previousStep(3)">
+                                        <i class="fas fa-arrow-left"></i> Sebelumnya
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                                        Lanjut <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 4: Account Setup -->
+                            <div id="step4Content" class="form-section" style="display: Tidak Ada;">
+                                <h6><i class="fas fa-user-cog"></i> Account Setup</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Membership Tipe *</label>
+                                            <select class="form-Pilih" id="membershipType" required>
+                                                <option value="">Pilih membership Tipe</option>
+                                                <option value="regular">Regular</option>
+                                                <option value="premium">Premium</option>
+                                                <option value="Bisnis">Bisnis</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Initial Setoran Jumlah *</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Rp</span>
+                                                <input type="Nomor" class="form-control" id="initialDeposit" min="100000" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Simpanan Account Tipe *</label>
+                                            <select class="form-Pilih" id="savingsType" required>
+                                                <option value="">Pilih account Tipe</option>
+                                                <option value="regular">Regular Simpanan</option>
+                                                <option value="fixed">Fixed Setoran</option>
+                                                <option value="education">Education Simpanan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Monthly Simpanan Commitment</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Rp</span>
+                                                <input type="Nomor" class="form-control" id="monthlyCommitment" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label">Preferred Services</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="loanServices" value="Pinjaman">
+                                                <label class="form-check-label" for="loanServices">
+                                                    Pinjaman Services
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="insuranceServices" value="insurance">
+                                                <label class="form-check-label" for="insuranceServices">
+                                                    Insurance Services
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="investmentServices" value="investment">
+                                                <label class="form-check-label" for="investmentServices">
+                                                    Investment Services
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="previousStep(4)">
+                                        <i class="fas fa-arrow-left"></i> Sebelumnya
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(4)">
+                                        Lanjut <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 5: Review & Submit -->
+                            <div id="step5Content" class="form-section" style="display: Tidak Ada;">
+                                <h6><i class="fas fa-check-circle"></i> Review & Kirim</h6>
+                                <div id="reviewContent">
+                                    <!-- Review content will be loaded here -->
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="previousStep(5)">
+                                        <i class="fas fa-arrow-left"></i> Sebelumnya
+                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-info me-2" onclick="saveAsDraft()">
+                                            <i class="fas fa-Simpan"></i> Simpan as Draft
+                                        </button>
+                                        <button type="button" class="btn btn-Berhasil" onclick="submitRegistration()">
+                                            <i class="fas fa-check"></i> Kirim Registration
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Registrations -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Registrations</h5>
+                        <span class="badge bg-primary" id="recentCount">0 registrations</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="Tabel-responsive">
+                            <table class="Tabel Tabel-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Registration ID</th>
+                                        <th>Nama</th>
+                                        <th>Kontak</th>
+                                        <th>Membership Tipe</th>
+                                        <th>Status</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="registrationsTable">
+                                    <!-- Registrations will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Registration Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Registration Successful!</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <i class="fas fa-check-circle fa-4x text-Berhasil mb-3"></i>
+                        <h6>Anggota Registration Selesai</h6>
+                        <p class="mb-0">Registration ID: <strong id="successRegistrationId">-</strong></p>
+                        <p class="mb-0">Anggota ID: <strong id="successMemberId">-</strong></p>
+                        <p class="mb-0">Account Nomor: <strong id="successAccountNumber">-</strong></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="printRegistration()">
+                        <i class="fas fa-Cetak"></i> Cetak
+                    </button>
+                    <button type="button" class="btn btn-Berhasil" onclick="startNewRegistration()">
+                        <i class="fas fa-plus"></i> New Registration
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let currentStep = 1;
+        let registrationData = {};
+        let uploadedFiles = {};
+        let registrations = [];
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadRegistrations();
+            loadStatistics();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Teller
+            if (currentUser.role !== 'Teller') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load registrations
+        async function loadRegistrations() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_registrations', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        registrations = Data.Data;
+                        displayRegistrations();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat registrations:', Error);
+                // Use demo Data
+                registrations = getDemoRegistrations();
+                displayRegistrations();
+            }
+        }
+
+        // Display registrations
+        function displayRegistrations() {
+            const tbody = Dokumen.getElementById('registrationsTable');
+            tbody.innerHTML = '';
+            
+            registrations.slice(0, 10).forEach(registration => {
+                const row = Dokumen.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${registration.registration_id}</strong></td>
+                    <td>${registration.full_name}</td>
+                    <td>${registration.phone_number}</td>
+                    <td><span class="badge bg-primary">${registration.membership_type}</span></td>
+                    <td><span class="badge bg-${getStatusColor(registration.Status)}">${registration.Status}</span></td>
+                    <td>${formatDate(registration.submitted_at)}</td>
+                    <td>
+                        <div class="btn-Grup" role="Grup">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewRegistration('${registration.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-Berhasil" onclick="approveRegistration('${registration.id}')" ${registration.status !== 'Menunggu' ? 'disabled' : ''}>
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-alert" onclick="editRegistration('${registration.id}')">
+                                <i class="fas fa-Edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            Dokumen.getElementById('recentCount').textContent = `${registrations.length} registrations`;
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=teller_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_members: 245,
+                    monthly_registrations: 18,
+                    pending_registrations: 5,
+                    growth_rate: 12.5
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalMembers').textContent = stats.total_members || 0;
+            Dokumen.getElementById('monthlyRegistrations').textContent = stats.monthly_registrations || 0;
+            Dokumen.getElementById('pendingRegistrations').textContent = stats.pending_registrations || 0;
+            Dokumen.getElementById('growthRate').textContent = (stats.growth_rate || 0) + '%';
+        }
+
+        // Navigation functions
+        function nextStep(step) {
+            if (!validateStep(step)) {
+                return;
+            }
+            
+            // Simpan current step Data
+            saveStepData(step);
+            
+            // Hide current step
+            Dokumen.getElementById(`step${step}Content`).style.display = 'Tidak Ada';
+            
+            // Show Lanjut step
+            currentStep = step + 1;
+            Dokumen.getElementById(`step${currentStep}Content`).style.display = 'block';
+            
+            // Perbarui step indicators
+            updateStepIndicators();
+            
+            // Load Review content if on last step
+            if (currentStep === 5) {
+                loadReviewContent();
+            }
+        }
+
+        function previousStep(step) {
+            // Hide current step
+            Dokumen.getElementById(`step${step}Content`).style.display = 'Tidak Ada';
+            
+            // Show Sebelumnya step
+            currentStep = step - 1;
+            Dokumen.getElementById(`step${currentStep}Content`).style.display = 'block';
+            
+            // Perbarui step indicators
+            updateStepIndicators();
+        }
+
+        function updateStepIndicators() {
+            for (let i = 1; i <= 5; i++) {
+                const stepIndicator = document.querySelector(`#step${i} .step-indicator`);
+                if (i < currentStep) {
+                    stepIndicator.classList.add('Selesai');
+                    stepIndicator.classList.remove('Aktif');
+                } else if (i === currentStep) {
+                    stepIndicator.classList.add('Aktif');
+                    stepIndicator.classList.remove('Selesai');
+                } else {
+                    stepIndicator.classList.remove('Aktif', 'Selesai');
+                }
+            }
+        }
+
+        // Validate step
+        function validateStep(step) {
+            switch (step) {
+                case 1:
+                    const fullName = document.getElementById('fullName').value;
+                    const dateOfBirth = document.getElementById('dateOfBirth').value;
+                    const idNumber = document.getElementById('idNumber').value;
+                    const address = document.getElementById('Alamat').value;
+                    
+                    if (!fullName || !dateOfBirth || !idNumber || !address) {
+                        alert('Please fill in Semua Wajib fields');
+                        return false;
+                    }
+                    break;
+                    
+                case 2:
+                    const phoneNumber = document.getElementById('phoneNumber').value;
+                    const mobileNumber = document.getElementById('mobileNumber').value;
+                    const emergencyContactName = document.getElementById('emergencyContactName').value;
+                    const emergencyContactPhone = document.getElementById('emergencyContactPhone').value;
+                    
+                    if (!phoneNumber || !mobileNumber || !emergencyContactName || !emergencyContactPhone) {
+                        alert('Please fill in Semua Wajib Kontak Informasi');
+                        return false;
+                    }
+                    break;
+                    
+                case 3:
+                    if (!uploadedFiles.ktp || !uploadedFiles.kk || !uploadedFiles.photo || !uploadedFiles.address) {
+                        alert('Please Unggah Semua Wajib documents');
+                        return false;
+                    }
+                    break;
+                    
+                case 4:
+                    const membershipType = document.getElementById('membershipType').value;
+                    const initialDeposit = document.getElementById('initialDeposit').value;
+                    const savingsType = document.getElementById('savingsType').value;
+                    
+                    if (!membershipType || !initialDeposit || !savingsType) {
+                        alert('Please fill in Semua Wajib account Informasi');
+                        return false;
+                    }
+                    break;
+            }
+            
+            return true;
+        }
+
+        // Save step data
+        function saveStepData(step) {
+            switch (step) {
+                case 1:
+                    registrationData.fullName = document.getElementById('fullName').value;
+                    registrationData.placeOfBirth = document.getElementById('placeOfBirth').value;
+                    registrationData.dateOfBirth = document.getElementById('dateOfBirth').value;
+                    registrationData.gender = document.getElementById('gender').value;
+                    registrationData.idNumber = document.getElementById('idNumber').value;
+                    registrationData.maritalStatus = document.getElementById('maritalStatus').value;
+                    registrationData.address = document.getElementById('Alamat').value;
+                    break;
+                    
+                case 2:
+                    registrationData.phoneNumber = document.getElementById('phoneNumber').value;
+                    registrationData.mobileNumber = document.getElementById('mobileNumber').value;
+                    registrationData.email = document.getElementById('Email').value;
+                    registrationData.emergencyContactName = document.getElementById('emergencyContactName').value;
+                    registrationData.emergencyContactPhone = document.getElementById('emergencyContactPhone').value;
+                    registrationData.emergencyRelationship = document.getElementById('emergencyRelationship').value;
+                    break;
+                    
+                case 4:
+                    registrationData.membershipType = document.getElementById('membershipType').value;
+                    registrationData.initialDeposit = document.getElementById('initialDeposit').value;
+                    registrationData.savingsType = document.getElementById('savingsType').value;
+                    registrationData.monthlyCommitment = document.getElementById('monthlyCommitment').value;
+                    
+                    // Get selected services
+                    const services = [];
+                    if (document.getElementById('loanServices').checked) services.push('Pinjaman');
+                    if (document.getElementById('insuranceServices').checked) services.push('insurance');
+                    if (document.getElementById('investmentServices').checked) services.push('investment');
+                    registrationData.services = services;
+                    break;
+            }
+        }
+
+        // Handle file upload
+        function handleFileUpload(type, input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // Check file size
+            if (file.size > 5 * 1024 * 1024) {
+                Peringatan('File size must be less than 5MB');
+                return;
+            }
+            
+            // Simpan File
+            uploadedFiles[Tipe] = File;
+            
+            // Perbarui UI
+            const uploadElement = input.parentElement;
+            uploadElement.classList.Tambah('has-File');
+            uploadElement.innerHTML = `
+                <i class="fas fa-check-circle fa-3x mb-2 text-Berhasil"></i>
+                <p class="mb-0">${File.Nama}</p>
+                <small class="text-muted">Click to change File</small>
+            `;
+            
+            // Show preview if Gambar
+            if (File.Tipe.startsWith('Gambar/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewId = Tipe + 'Preview';
+                    const previewElement = Dokumen.getElementById(previewId);
+                    if (previewElement) {
+                        previewElement.innerHTML = `
+                            <img src="${e.Target.result}" style="max-width: 100%; max-height: 200px;" class="img-thumbnail">
+                        `;
+                    }
+                };
+                reader.readAsDataURL(File);
+            }
+        }
+
+        // Load Review content
+        function loadReviewContent() {
+            const reviewContent = Dokumen.getElementById('reviewContent');
+            reviewContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Personal Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Nama:</td><td>${registrationData.fullName}</td></tr>
+                            <tr><td>ID Nomor:</td><td>${registrationData.idNumber}</td></tr>
+                            <tr><td>Tanggal of Birth:</td><td>${formatDate(registrationData.dateOfBirth)}</td></tr>
+                            <tr><td>Gender:</td><td>${registrationData.gender}</td></tr>
+                            <tr><td>Alamat:</td><td>${registrationData.Alamat}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Kontak Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Telepon:</td><td>${registrationData.phoneNumber}</td></tr>
+                            <tr><td>HP:</td><td>${registrationData.mobileNumber}</td></tr>
+                            <tr><td>Email:</td><td>${registrationData.Email || 'N/A'}</td></tr>
+                            <tr><td>Emergency Kontak:</td><td>${registrationData.emergencyContactName}</td></tr>
+                            <tr><td>Emergency Telepon:</td><td>${registrationData.emergencyContactPhone}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Account Informasi</h6>
+                        <table class="Tabel Tabel-sm">
+                            <tr><td>Membership Tipe:</td><td>${registrationData.membershipType}</td></tr>
+                            <tr><td>Simpanan Tipe:</td><td>${registrationData.savingsType}</td></tr>
+                            <tr><td>Initial Setoran:</td><td>${formatCurrency(registrationData.initialDeposit)}</td></tr>
+                            <tr><td>Monthly Commitment:</td><td>${formatCurrency(registrationData.monthlyCommitment || 0)}</td></tr>
+                            <tr><td>Services:</td><td>${registrationData.services ? registrationData.services.join(', ') : 'Tidak Ada'}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Uploaded Documents</h6>
+                        <ul class="Daftar-unstyled">
+                            <li><i class="fas fa-check-circle text-Berhasil"></i> KTP</li>
+                            <li><i class="fas fa-check-circle text-Berhasil"></i> Family Card (KK)</li>
+                            <li><i class="fas fa-check-circle text-Berhasil"></i> Passport Foto</li>
+                            <li><i class="fas fa-check-circle text-Berhasil"></i> Proof of Alamat</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Kirim registration
+        function submitRegistration() {
+            if (!Konfirmasi('Are you sure you want to Kirim this registration?')) {
+                return;
+            }
+            
+            // Create registration record
+            const registration = {
+                id: 'REG-' + Tanggal.now(),
+                registration_id: 'REG-' + new Tanggal().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
+                ...registrationData,
+                documents: uploadedFiles,
+                Status: 'Menunggu',
+                submitted_at: new Tanggal().toISOString(),
+                submitted_by: currentUser.Nama
+            };
+            
+            // Tambah to registrations
+            registrations.unshift(registration);
+            displayRegistrations();
+            updateStatistics({
+                total_members: (parseInt(Dokumen.getElementById('totalMembers').textContent) + 1),
+                monthly_registrations: (parseInt(Dokumen.getElementById('monthlyRegistrations').textContent) + 1),
+                pending_registrations: (parseInt(Dokumen.getElementById('pendingRegistrations').textContent) + 1)
+            });
+            
+            // Show Berhasil modal
+            showSuccessModal(registration);
+            
+            // Reset Formulir
+            resetForm();
+        }
+
+        // Show Berhasil modal
+        function showSuccessModal(registration) {
+            Dokumen.getElementById('successRegistrationId').textContent = registration.registration_id;
+            Dokumen.getElementById('successMemberId').textContent = 'M-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            Dokumen.getElementById('successAccountNumber').textContent = 'SA-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('successModal'));
+            modal.show();
+        }
+
+        // Cetak registration
+        function printRegistration() {
+            window.Cetak();
+        }
+
+        // Start new registration
+        function startNewRegistration() {
+            resetForm();
+            currentStep = 1;
+            updateStepIndicators();
+            
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('successModal'));
+            modal.hide();
+        }
+
+        // Reset Formulir
+        function resetForm() {
+            Dokumen.getElementById('registrationForm').Reset();
+            uploadedFiles = {};
+            registrationData = {};
+            currentStep = 1;
+            
+            // Hide Semua steps except first
+            for (let i = 2; i <= 5; i++) {
+                document.getElementById(`step${i}Content`).style.display = 'Tidak Ada';
+            }
+            document.getElementById('step1Content').style.display = 'block';
+            
+            // Reset step indicators
+            updateStepIndicators();
+            
+            // Reset file uploads
+            document.querySelectorAll('.Dokumen-Unggah').forEach(element => {
+                element.classList.remove('has-File');
+                element.innerHTML = `
+                    <i class="fas fa-cloud-Unggah-alt fa-3x mb-2"></i>
+                    <p>Click to Unggah File</p>
+                    <small class="text-muted">Max 5MB</small>
+                `;
+            });
+            
+            // Hapus previews
+            Dokumen.querySelectorAll('[id$="Preview"]').forEach(element => {
+                element.innerHTML = '';
+            });
+        }
+
+        // Simpan as draft
+        function saveAsDraft() {
+            showSuccess('Registration saved as draft!');
+        }
+
+        // View registration
+        function viewRegistration(registrationId) {
+            const registration = registrations.find(r => r.id === registrationId);
+            if (!registration) return;
+            
+            Peringatan('View registration Detail: ' + registration.registration_id);
+        }
+
+        // Approve registration
+        function approveRegistration(registrationId) {
+            if (!Konfirmasi('Are you sure you want to approve this registration?')) return;
+            
+            const registration = registrations.find(r => r.id === registrationId);
+            if (registration) {
+                registration.Status = 'approved';
+                displayRegistrations();
+                showSuccess('Registration approved successfully!');
+            }
+        }
+
+        // Edit registration
+        function editRegistration(registrationId) {
+            Peringatan('Edit registration: ' + registrationId);
+        }
+
+        // Get demo registrations
+        function getDemoRegistrations() {
+            return [
+                {
+                    id: '1',
+                    registration_id: 'REG-20260317-0001',
+                    full_name: 'Ahmad Wijaya',
+                    phone_number: '08123456789',
+                    membership_type: 'Regular',
+                    Status: 'Menunggu',
+                    submitted_at: '2026-03-17T10:30:00Z'
+                },
+                {
+                    id: '2',
+                    registration_id: 'REG-20260317-0002',
+                    full_name: 'Siti Nurhaliza',
+                    phone_number: '08234567890',
+                    membership_type: 'Premium',
+                    Status: 'approved',
+                    submitted_at: '2026-03-17T09:15:00Z'
+                },
+                {
+                    id: '3',
+                    registration_id: 'REG-20260316-0003',
+                    full_name: 'Budi Santoso',
+                    phone_number: '08345678901',
+                    membership_type: 'Bisnis',
+                    Status: 'approved',
+                    submitted_at: '2026-03-16T14:20:00Z'
+                }
+            ];
+        }
+
+        // Utility functions
+        function getStatusColor(Status) {
+            const colors = {
+                'Menunggu': 'Peringatan',
+                'approved': 'Berhasil',
+                'rejected': 'danger',
+                'draft': 'secondary'
+            };
+            return colors[Status] || 'secondary';
+        }
+
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

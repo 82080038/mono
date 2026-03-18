@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staf Manajemen - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+
+    <style>
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+
+        .btn-Keluar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+
+        .btn-Keluar:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .Staf-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #28a745;
+            cursor: pointer;
+        }
+
+        .Staf-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .Status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .Status-Aktif {
+            background: #28a745;
+            color: white;
+        }
+
+        .Status-Tidak Aktif {
+            background: #6c757d;
+            color: white;
+        }
+
+        .Status-on-leave {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .Status-suspended {
+            background: #dc3545;
+            color: white;
+        }
+
+        .Departemen-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .dept-mantri {
+            background: #007bff;
+            color: white;
+        }
+
+        .dept-kasir {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .dept-Teller {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .dept-Surveyor {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .dept-Penagih {
+            background: #dc3545;
+            color: white;
+        }
+
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+
+        .quick-action:hover {
+            border-color: #28a745;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 0.5rem;
+        }
+
+        .Grafik-container {
+            Posisi: relative;
+            height: 300px;
+        }
+
+        .Staf-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .Performa-Skor {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .Skor-excellent {
+            color: #28a745;
+        }
+
+        .Skor-good {
+            color: #17a2b8;
+        }
+
+        .Skor-average {
+            color: #ffc107;
+        }
+
+        .Skor-poor {
+            color: #dc3545;
+        }
+
+        .attendance-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        .attendance-present {
+            background: #28a745;
+        }
+
+        .attendance-absent {
+            background: #dc3545;
+        }
+
+        .attendance-late {
+            background: #ffc107;
+        }
+
+        .Staf-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+            Posisi: relative;
+        }
+
+        .progress-ring circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .skill-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+
+        .skill-progress {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: start;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .timeline-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        .timeline-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .icon-hire {
+            background: #28a745;
+        }
+
+        .icon-promotion {
+            background: #007bff;
+        }
+
+        .icon-leave {
+            background: #ffc107;
+        }
+
+        .icon-training {
+            background: #17a2b8;
+        }
+
+        .icon-Performa {
+            background: #6f42c1;
+        }
+
+        .icon-termination {
+            background: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-user-cog"></i> Staf Manajemen</h1>
+                <p class="mb-0">Admin - Employee Manajemen & Performa Tracking</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Staff Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-2x mb-2"></i>
+                        <h5>Total Staf</h5>
+                        <h3 id="totalStaff">0</h3>
+                        <p class="mb-0">Employees</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-user-check fa-2x mb-2"></i>
+                        <h5>Aktif Now</h5>
+                        <h3 id="activeStaff">0</h3>
+                        <p class="mb-0">Currently working</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                        <h5>Attendance</h5>
+                        <h3 id="attendanceRate">0%</h3>
+                        <p class="mb-0">Bulan Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Grafik-line fa-2x mb-2"></i>
+                        <h5>Avg Performa</h5>
+                        <h3 id="avgPerformance">0%</h3>
+                        <p class="mb-0">Overall</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Staff List -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-user"></i> Staf Directory</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="departmentFilter"
+                                onchange="filterStaff()">
+                                <option value="">Semua Departments</option>
+                                <option value="mantri">Mantri</option>
+                                <option value="kasir">Kasir</option>
+                                <option value="Teller">Teller</option>
+                                <option value="Surveyor">Surveyor</option>
+                                <option value="Penagih">Penagih</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter"
+                                onchange="filterStaff()">
+                                <option value="">Semua Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Tidak Aktif">Tidak Aktif</option>
+                                <option value="on_leave">On Leave</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                            <button class="btn btn-Berhasil btn-sm" onclick="addStaff()">
+                                <i class="fas fa-plus"></i> Tambah Staf
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="staffList">
+                            <!-- Staff list will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-bar"></i> Performa Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Departemen Performa</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="departmentChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Performa Distribution</h6>
+                                <div class="Grafik-container">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="addStaff()">
+                                    <i class="fas fa-user-plus"></i>
+                                    <h6>Tambah Staf</h6>
+                                    <small class="text-muted">New employee</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="scheduleTraining()">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <h6>Training</h6>
+                                    <small class="text-muted">Schedule</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="performanceReview()">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    <h6>Review</h6>
+                                    <small class="text-muted">Performa</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="attendanceReport()">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <h6>Attendance</h6>
+                                    <small class="text-muted">Laporan</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Metrics -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Grafik-pie"></i> Staf Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Staf-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value" id="newHires">0</div>
+                                <div class="metric-label">New Hires</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="onLeave">0</div>
+                                <div class="metric-label">On Leave</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="training">0</div>
+                                <div class="metric-label">In Training</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value" id="highPerformers">0</div>
+                                <div class="metric-label">Top Performers</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Overview -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calendar-check"></i> Hari Ini's Attendance</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div id="attendanceOverview">
+                            <!-- Attendance overview will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Riwayat"></i> Recent Activities</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div id="recentActivities">
+                            <!-- Recent activities will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tambah/Edit Staf Modal -->
+    <div Kelas="modal fade" id="staffModal" tabindex="-1">
+        <div Kelas="modal-dialog modal-lg">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul" id="staffModalTitle">Tambah New Staf</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body">
+                    <Formulir id="staffForm">
+                        <input Tipe="hidden" id="csrfToken" Nama="csrf_token" value="">
+                        <div Kelas="row">
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Full Nama *</label>
+                                    <input Tipe="text" Kelas="form-control" id="staffName" Wajib>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Email *</label>
+                                    <input Tipe="Email" Kelas="form-control" id="staffEmail" Wajib>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Departemen *</label>
+                                    <Pilih Kelas="Formulir-Pilih" id="staffDepartment" Wajib>
+                                        <option value="">Pilih Departemen</option>
+                                        <option value="mantri">Mantri</option>
+                                        <option value="kasir">Kasir</option>
+                                        <option value="Teller">Teller</option>
+                                        <option value="Surveyor">Surveyor</option>
+                                        <option value="Penagih">Penagih</option>
+                                    </Pilih>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Posisi</label>
+                                    <input Tipe="text" Kelas="form-control" id="staffPosition">
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Telepon Nomor</label>
+                                    <input Tipe="tel" Kelas="form-control" id="staffPhone">
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Status</label>
+                                    <Pilih Kelas="Formulir-Pilih" id="staffStatus">
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Tidak Aktif">Tidak Aktif</option>
+                                        <option value="on_leave">On Leave</option>
+                                        <option value="suspended">Suspended</option>
+                                    </Pilih>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Join Tanggal</label>
+                                    <input Tipe="Tanggal" Kelas="form-control" id="joinDate">
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Salary</label>
+                                    <input Tipe="Nomor" Kelas="form-control" id="staffSalary" min="0">
+                                </div>
+                            </div>
+                            <div Kelas="col-md-12">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Skills</label>
+                                    <input Tipe="text" Kelas="form-control" id="staffSkills"
+                                        placeholder="e.g., Pelanggan Service, Data Analisis, Communication">
+                                </div>
+                            </div>
+                            <div Kelas="col-md-12">
+                                <div Kelas="mb-3">
+                                    <label Kelas="form-label">Notes</label>
+                                    <textarea Kelas="form-control" id="staffNotes" rows="2"
+                                        placeholder="Additional notes..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </Formulir>
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Batal</button>
+                    <button Tipe="button" Kelas="btn btn-Berhasil" onclick="saveStaff()">
+                        <i Kelas="fas fa-Simpan"></i> Simpan Staf
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staf Detail Modal -->
+    <div Kelas="modal fade" id="staffDetailsModal" tabindex="-1">
+        <div Kelas="modal-dialog modal-xl">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Staf Detail</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body" id="staffDetails">
+                    <!-- Staf Detail will be loaded here -->
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Tutup</button>
+                    <button Tipe="button" Kelas="btn btn-Peringatan" onclick="editCurrentStaff()">
+                        <i Kelas="fas fa-Edit"></i> Edit
+                    </button>
+                    <button Tipe="button" Kelas="btn btn-Info" onclick="viewPerformance()">
+                        <i Kelas="fas fa-Grafik-line"></i> Performa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let Staf = [];
+        let selectedStaff = null;
+        let departmentChart = null;
+        let performanceChart = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function () {
+            initializePage();
+            loadStaff();
+            loadStatistics();
+            loadAttendanceOverview();
+            loadRecentActivities();
+            initializeCharts();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+
+            // Check if Pengguna is Admin
+            if (currentUser.role !== 'Admin') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load Staf
+        async function loadStaff() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=Staf', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        Staf = Data.Data;
+                        displayStaff();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Staf:', Error);
+                // Use demo Data
+                Staf = getDemoStaff();
+                displayStaff();
+            }
+        }
+
+        // Display Staf
+        function displayStaff() {
+            const staffList = Dokumen.getElementById('staffList');
+            const departmentFilter = Dokumen.getElementById('departmentFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+
+            let filteredStaff = Staf;
+
+            // Filter by Departemen
+            if (departmentFilter) {
+                filteredStaff = filteredStaff.Filter(s => s.Departemen === departmentFilter);
+            }
+
+            // Filter by Status
+            if (statusFilter) {
+                filteredStaff = filteredStaff.Filter(s => s.Status === statusFilter);
+            }
+
+            staffList.innerHTML = '';
+
+            if (filteredStaff.length === 0) {
+                staffList.innerHTML = '<div class="text-center text-muted py-4">Tidak Staf found</div>';
+                return;
+            }
+
+            filteredStaff.forEach(Anggota => {
+                const staffCard = Dokumen.createElement('div');
+                staffCard.className = 'Staf-card card mb-2';
+                staffCard.innerHTML = `
+                    <div Kelas="card-body">
+                        <div Kelas="row align-items-center">
+                            <div Kelas="col-md-2">
+                                <div Kelas="Staf-avatar">
+                                    ${Anggota.Nama.charAt(0)}
+                                </div>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <h6 Kelas="mb-1">${Anggota.Nama}</h6>
+                                <p Kelas="mb-1">${Anggota.Posisi || 'Staf'}</p>
+                                <small Kelas="text-muted">
+                                    <span Kelas="Departemen-badge dept-${Anggota.Departemen}">${Anggota.Departemen}</span>
+                                    <span Kelas="Status-badge Status-${Anggota.Status}">${Anggota.Status.replace('_', ' ')}</span>
+                                    | ${Anggota.Email} | ${Anggota.Telepon || 'Tidak Telepon'}
+                                </small>
+                            </div>
+                            <div Kelas="col-md-2">
+                                <div Kelas="text-center">
+                                    <div Kelas="Performa-Skor ${getPerformanceClass(Anggota.Performa)}">${Anggota.Performa || 0}%</div>
+                                    <small Kelas="text-muted">Performa</small>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-2 text-end">
+                                <div Kelas="mb-2">
+                                    <small Kelas="text-muted">Tasks: ${Anggota.tasks || 0}</small>
+                                </div>
+                                <div>
+                                    <button Kelas="btn btn-sm btn-outline-primary" onclick="viewStaffDetails('${Anggota.id}')">
+                                        <i Kelas="fas fa-eye"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="assignTask('${Anggota.id}')">
+                                        <i Kelas="fas fa-tasks"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="editStaff('${Anggota.id}')">
+                                        <i Kelas="fas fa-Edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                staffList.appendChild(staffCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=staff_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_staff: 25,
+                    active_staff: 18,
+                    attendance_rate: 92.5,
+                    avg_performance: 85.3,
+                    new_hires: 3,
+                    on_leave: 2,
+                    training: 4,
+                    high_performers: 8
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalStaff').textContent = stats.total_staff || 0;
+            Dokumen.getElementById('activeStaff').textContent = stats.active_staff || 0;
+            Dokumen.getElementById('attendanceRate').textContent = (stats.attendance_rate || 0).toFixed(1) + '%';
+            Dokumen.getElementById('avgPerformance').textContent = (stats.avg_performance || 0).toFixed(1) + '%';
+
+            // Perbarui metrics
+            Dokumen.getElementById('newHires').textContent = stats.new_hires || 0;
+            Dokumen.getElementById('onLeave').textContent = stats.on_leave || 0;
+            Dokumen.getElementById('training').textContent = stats.training || 0;
+            Dokumen.getElementById('highPerformers').textContent = stats.high_performers || 0;
+        }
+
+        // Load attendance overview
+        function loadAttendanceOverview() {
+            const attendanceDiv = Dokumen.getElementById('attendanceOverview');
+
+            const attendance = [
+                { Nama: 'Ahmad Wijaya', Status: 'present', Waktu: '08:15' },
+                { Nama: 'Siti Nurhaliza', Status: 'present', Waktu: '08:30' },
+                { Nama: 'Budi Santoso', Status: 'late', Waktu: '09:15' },
+                { Nama: 'Dian Kartika', Status: 'absent', Waktu: '-' },
+                { Nama: 'Eko Prasetyo', Status: 'present', Waktu: '08:00' }
+            ];
+
+            attendanceDiv.innerHTML = attendance.map(att => `
+                <div Kelas="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span Kelas="attendance-indicator attendance-${att.Status}"></span>
+                        <small>${att.Nama}</small>
+                    </div>
+                    <div>
+                        <small Kelas="text-muted">${att.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load recent activities
+        function loadRecentActivities() {
+            const activitiesDiv = Dokumen.getElementById('recentActivities');
+
+            const activities = [
+                { Tipe: 'hire', Judul: 'New Staf Anggota hired', person: 'Rina Wijaya', Waktu: '2 days ago' },
+                { Tipe: 'promotion', Judul: 'Staf promoted to Senior Mantri', person: 'Ahmad Wijaya', Waktu: '1 week ago' },
+                { Tipe: 'leave', Judul: 'Staf on leave', person: 'Dian Kartika', Waktu: '2 weeks ago' },
+                { Tipe: 'training', Judul: 'Training Selesai', person: 'Budi Santoso', Waktu: '3 weeks ago' },
+                { Tipe: 'Performa', Judul: 'Performa Review Selesai', person: 'Siti Nurhaliza', Waktu: '1 month ago' }
+            ];
+
+            activitiesDiv.innerHTML = activities.map(Aktivitas => `
+                <div Kelas="timeline-item">
+                    <div Kelas="timeline-icon icon-${Aktivitas.Tipe}">
+                        <i Kelas="fas fa-${getActivityIcon(Aktivitas.Tipe)}"></i>
+                    </div>
+                    <div Kelas="flex-grow-1">
+                        <div Kelas="Aktivitas-Judul">${Aktivitas.Judul}</div>
+                        <div Kelas="Aktivitas-Waktu">${Aktivitas.person} - ${Aktivitas.Waktu}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Departemen Grafik
+            const departmentCtx = Dokumen.getElementById('departmentChart').getContext('2d');
+            departmentChart = new Grafik(departmentCtx, {
+                Tipe: 'bar',
+                Data: {
+                    labels: ['Mantri', 'Kasir', 'Teller', 'Surveyor', 'Penagih'],
+                    datasets: [{
+                        label: 'Performa Skor',
+                        Data: [88, 92, 85, 78, 82],
+                        backgroundColor: [
+                            'rgba(0, 123, 255, 0.8)',
+                            'rgba(23, 162, 184, 0.8)',
+                            'rgba(253, 126, 20, 0.8)',
+                            'rgba(111, 66, 193, 0.8)',
+                            'rgba(220, 53, 69, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Performa Grafik
+            const performanceCtx = Dokumen.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Grafik(performanceCtx, {
+                Tipe: 'doughnut',
+                Data: {
+                    labels: ['Excellent', 'Good', 'Average', 'Poor'],
+                    datasets: [{
+                        Data: [8, 10, 5, 2],
+                        backgroundColor: [
+                            '#28a745',
+                            '#17a2b8',
+                            '#ffc107',
+                            '#dc3545'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            Posisi: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // View Staf Detail
+        function viewStaffDetails(staffId) {
+            const Anggota = Staf.find(s => s.id === staffId);
+            if (!Anggota) return;
+
+            selectedStaff = Anggota;
+
+            const Detail = Dokumen.getElementById('staffDetails');
+
+            Detail.innerHTML = `
+                <div Kelas="row">
+                    <div Kelas="col-md-4">
+                        <div Kelas="text-center">
+                            <div Kelas="Staf-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2rem;">
+                                ${Anggota.Nama.charAt(0)}
+                            </div>
+                            <h5>${Anggota.Nama}</h5>
+                            <p Kelas="text-muted">${Anggota.Posisi || 'Staf'}</p>
+                            <span Kelas="Departemen-badge dept-${Anggota.Departemen}">${Anggota.Departemen}</span>
+                            <span Kelas="Status-badge Status-${Anggota.Status}">${Anggota.Status.replace('_', ' ')}</span>
+                        </div>
+                    </div>
+                    <div Kelas="col-md-8">
+                        <div Kelas="row">
+                            <div Kelas="col-md-6">
+                                <h6>Kontak Informasi</h6>
+                                <Tabel Kelas="Tabel Tabel-sm">
+                                    <tr><td>Email:</td><td>${Anggota.Email}</td></tr>
+                                    <tr><td>Telepon:</td><td>${Anggota.Telepon || 'N/A'}</td></tr>
+                                    <tr><td>Join Tanggal:</td><td>${formatDate(Anggota.join_date)}</td></tr>
+                                </Tabel>
+                            </div>
+                            <div Kelas="col-md-6">
+                                <h6>Performa Metrics</h6>
+                                <Tabel Kelas="Tabel Tabel-sm">
+                                    <tr><td>Performa:</td><td><span Kelas="Performa-Skor ${getPerformanceClass(Anggota.Performa)}">${Anggota.Performa || 0}%</span></td></tr>
+                                    <tr><td>Tasks:</td><td>${Anggota.tasks || 0}</td></tr>
+                                    <tr><td>Attendance:</td><td>${Anggota.attendance || 95}%</td></tr>
+                                </Tabel>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div Kelas="row mt-4">
+                    <div Kelas="col-md-6">
+                        <h6>Skills</h6>
+                        <div Kelas="mb-3">
+                            ${Anggota.skills ? Anggota.skills.split(',').map(skill => `
+                                <span Kelas="badge bg-primary me-1">${skill.trim()}</span>
+                            `).join('') : '<span class="text-muted">Tidak skills specified</span>'}
+                        </div>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <h6>Salary Informasi</h6>
+                        <Tabel Kelas="Tabel Tabel-sm">
+                            <tr><td>Base Salary:</td><td>${formatCurrency(Anggota.salary || 0)}</td></tr>
+                            <tr><td>Allowances:</td><td>${formatCurrency(Anggota.allowances || 0)}</td></tr>
+                            <tr><td>Total:</td><td>${formatCurrency((Anggota.salary || 0) + (Anggota.allowances || 0))}</td></tr>
+                        </Tabel>
+                    </div>
+                </div>
+                
+                <div Kelas="row mt-4">
+                    <div Kelas="col-md-12">
+                        <h6>Notes</h6>
+                        <p>${Anggota.notes || 'Tidak notes available'}</p>
+                    </div>
+                </div>
+                
+                <div Kelas="row mt-4">
+                    <div Kelas="col-md-12">
+                        <h6>Recent Activities</h6>
+                        <div Kelas="timeline">
+                            <div Kelas="timeline-item">
+                                <div Kelas="timeline-icon icon-hire">
+                                    <i Kelas="fas fa-user-plus"></i>
+                                </div>
+                                <div>
+                                    <strong>Joined Perusahaan</strong>
+                                    <br>
+                                    <small Kelas="text-muted">${formatDate(Anggota.join_date)}</small>
+                                </div>
+                            </div>
+                            ${Anggota.activities ? Anggota.activities.map(Aktivitas => `
+                                <div Kelas="timeline-item">
+                                    <div Kelas="timeline-icon icon-${Aktivitas.Tipe}">
+                                        <i Kelas="fas fa-${getActivityIcon(Aktivitas.Tipe)}"></i>
+                                    </div>
+                                    <div>
+                                        <strong>${Aktivitas.Judul}</strong>
+                                        <br>
+                                        <small Kelas="text-muted">${formatDate(Aktivitas.Tanggal)}</small>
+                                    </div>
+                                </div>
+                            `).join('') : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = new bootstrap.Modal(Dokumen.getElementById('staffDetailsModal'));
+            modal.show();
+        }
+
+        // Tambah Staf
+        function addStaff() {
+            selectedStaff = null;
+            Dokumen.getElementById('staffModalTitle').textContent = 'Tambah New Staf';
+            Dokumen.getElementById('staffForm').Reset();
+
+            // Set default join Tanggal to Hari Ini
+            Dokumen.getElementById('joinDate').value = new Tanggal().toISOString().split('T')[0];
+
+            const modal = new bootstrap.Modal(Dokumen.getElementById('staffModal'));
+            modal.show();
+        }
+
+        // Edit Staf
+        function editStaff(staffId) {
+            const Anggota = Staf.find(s => s.id === staffId);
+            if (!Anggota) return;
+
+            selectedStaff = Anggota;
+            Dokumen.getElementById('staffModalTitle').textContent = 'Edit Staf';
+
+            // Load Staf Data into Formulir
+            Dokumen.getElementById('staffName').value = Anggota.Nama;
+            Dokumen.getElementById('staffEmail').value = Anggota.Email;
+            Dokumen.getElementById('staffDepartment').value = Anggota.Departemen;
+            Dokumen.getElementById('staffPosition').value = Anggota.Posisi;
+            Dokumen.getElementById('staffPhone').value = Anggota.Telepon;
+            Dokumen.getElementById('staffStatus').value = Anggota.Status;
+            Dokumen.getElementById('joinDate').value = Anggota.join_date;
+            Dokumen.getElementById('staffSalary').value = Anggota.salary || '';
+            Dokumen.getElementById('staffSkills').value = Anggota.skills || '';
+            Dokumen.getElementById('staffNotes').value = Anggota.notes || '';
+
+            const modal = new bootstrap.Modal(Dokumen.getElementById('staffModal'));
+            modal.show();
+        }
+
+        // Simpan Staf
+        function saveStaff() {
+            const Nama = Dokumen.getElementById('staffName').value;
+            const Email = Dokumen.getElementById('staffEmail').value;
+            const Departemen = Dokumen.getElementById('staffDepartment').value;
+            const Posisi = Dokumen.getElementById('staffPosition').value;
+            const Telepon = Dokumen.getElementById('staffPhone').value;
+            const Status = Dokumen.getElementById('staffStatus').value;
+            const joinDate = Dokumen.getElementById('joinDate').value;
+            const salary = Dokumen.getElementById('staffSalary').value;
+            const skills = Dokumen.getElementById('staffSkills').value;
+            const notes = Dokumen.getElementById('staffNotes').value;
+
+            if (!Nama || !Email || !Departemen) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+
+            if (selectedStaff) {
+                // Perbarui existing Staf
+                selectedStaff.Nama = Nama;
+                selectedStaff.Email = Email;
+                selectedStaff.Departemen = Departemen;
+                selectedStaff.Posisi = Posisi;
+                selectedStaff.Telepon = Telepon;
+                selectedStaff.Status = Status;
+                selectedStaff.join_date = joinDate;
+                selectedStaff.salary = parseInt(salary) || 0;
+                selectedStaff.skills = skills;
+                selectedStaff.notes = notes;
+                selectedStaff.updated_at = new Tanggal().toISOString();
+
+                showSuccess('Staf Diperbarui successfully!');
+            } else {
+                // Create new Staf
+                const newStaff = {
+                    id: 'Staf-' + Tanggal.now(),
+                    Nama: Nama,
+                    Email: Email,
+                    Departemen: Departemen,
+                    Posisi: Posisi,
+                    Telepon: Telepon,
+                    Status: Status,
+                    join_date: joinDate,
+                    salary: parseInt(salary) || 0,
+                    skills: skills,
+                    notes: notes,
+                    Performa: 85,
+                    tasks: 0,
+                    attendance: 95,
+                    created_at: new Tanggal().toISOString()
+                };
+
+                Staf.unshift(newStaff);
+
+                // Perbarui Statistik
+                const stats = {
+                    total_staff: parseInt(Dokumen.getElementById('totalStaff').textContent) + 1,
+                    active_staff: parseInt(Dokumen.getElementById('activeStaff').textContent),
+                    attendance_rate: parseFloat(Dokumen.getElementById('attendanceRate').textContent),
+                    avg_performance: parseFloat(Dokumen.getElementById('avgPerformance').textContent),
+                    new_hires: parseInt(Dokumen.getElementById('newHires').textContent) + 1,
+                    on_leave: parseInt(Dokumen.getElementById('onLeave').textContent),
+                    training: parseInt(Dokumen.getElementById('training').textContent),
+                    high_performers: parseInt(Dokumen.getElementById('highPerformers').textContent)
+                };
+                updateStatistics(stats);
+
+                showSuccess('Staf added successfully!');
+            }
+
+            displayStaff();
+
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('staffModal'));
+            modal.hide();
+            Dokumen.getElementById('staffForm').Reset();
+        }
+
+        // Edit current Staf (from Detail modal)
+        function editCurrentStaff() {
+            if (!selectedStaff) return;
+
+            // Tutup Detail modal
+            const detailsModal = bootstrap.Modal.getInstance(Dokumen.getElementById('staffDetailsModal'));
+            detailsModal.hide();
+
+            // Open Edit modal
+            setTimeout(() => {
+                editStaff(selectedStaff.id);
+            }, 300);
+        }
+
+        // View Performa
+        function viewPerformance() {
+            if (!selectedStaff) return;
+
+            
+        }
+
+        // Assign Tugas
+        function assignTask(staffId) {
+            const Anggota = Staf.find(s => s.id === staffId);
+            if (!Anggota) return;
+
+            const taskCount = prompt(`Assign tasks to ${Anggota.Nama} (current: ${Anggota.tasks || 0}):`);
+            if (taskCount === null) return;
+
+            Anggota.tasks = parseInt(taskCount) || 0;
+            displayStaff();
+
+            showSuccess(`Tasks assigned to ${Anggota.Nama}: ${Anggota.tasks}`);
+        }
+
+        // Quick action functions
+        function scheduleTraining() {
+            showSuccess('Training scheduling feature will be implemented');
+        }
+
+        function performanceReview() {
+            showSuccess('Performa Review feature will be implemented');
+        }
+
+        function attendanceReport() {
+            showSuccess('Attendance Laporan generation initiated...');
+
+            setTimeout(() => {
+                showSuccess('Attendance Laporan generated successfully!');
+            }, 1500);
+        }
+
+        // Filter Staf
+        function filterStaff() {
+            displayStaff();
+        }
+
+        // Utility functions
+        function getActivityIcon(Tipe) {
+            const icons = {
+                'hire': 'Pengguna-plus',
+                'promotion': 'arrow-up',
+                'leave': 'calendar-times',
+                'training': 'graduation-cap',
+                'Performa': 'Grafik-line',
+                'termination': 'Pengguna-times'
+            };
+            return icons[Tipe] || 'circle';
+        }
+
+        function getPerformanceClass(Skor) {
+            if (Skor >= 90) return 'Skor-excellent';
+            if (Skor >= 80) return 'Skor-good';
+            if (Skor >= 70) return 'Skor-average';
+            return 'Skor-poor';
+        }
+
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo Staf
+        function getDemoStaff() {
+            return [
+                {
+                    id: '1',
+                    Nama: 'Ahmad Wijaya',
+                    Email: 'ahmad@ksp-lamgabejaya.co.id',
+                    Departemen: 'mantri',
+                    Posisi: 'Senior Mantri',
+                    Telepon: '08123456789',
+                    Status: 'Aktif',
+                    join_date: '2020-01-15',
+                    salary: 8500000,
+                    skills: 'Kredit Analisis, Risiko Assessment, Pelanggan Service',
+                    notes: 'Experienced Kredit analyst with excellent track record',
+                    Performa: 92,
+                    tasks: 15,
+                    attendance: 98,
+                    created_at: '2020-01-15T00:00:00Z'
+                },
+                {
+                    id: '2',
+                    Nama: 'Siti Nurhaliza',
+                    Email: 'siti@ksp-lamgabejaya.co.id',
+                    Departemen: 'kasir',
+                    Posisi: 'Head Kasir',
+                    Telepon: '08234567890',
+                    Status: 'Aktif',
+                    join_date: '2019-06-20',
+                    salary: 7500000,
+                    skills: 'Cash Manajemen, Accounting, Pelanggan Service',
+                    notes: 'Responsible for daily cash Manajemen and reconciliation',
+                    Performa: 95,
+                    tasks: 12,
+                    attendance: 99,
+                    created_at: '2019-06-20T00:00:00Z'
+                },
+                {
+                    id: '3',
+                    Nama: 'Budi Santoso',
+                    Email: 'budi@ksp-lamgabejaya.co.id',
+                    Departemen: 'Teller',
+                    Posisi: 'Senior Teller',
+                    Telepon: '08345678901',
+                    Status: 'Aktif',
+                    join_date: '2021-03-10',
+                    salary: 6500000,
+                    skills: 'Pelanggan Service, Data Entry, Communication',
+                    notes: 'Excellent Pelanggan service skills',
+                    Performa: 88,
+                    tasks: 18,
+                    attendance: 95,
+                    created_at: '2021-03-10T00:00:00Z'
+                },
+                {
+                    id: '4',
+                    Nama: 'Dian Kartika',
+                    Email: 'dian@ksp-lamgabejaya.co.id',
+                    Departemen: 'Surveyor',
+                    Posisi: 'Field Surveyor',
+                    Telepon: '08456789012',
+                    Status: 'on_leave',
+                    join_date: '2022-08-15',
+                    salary: 6000000,
+                    skills: 'Field Survei, GPS Navigation, Documentation',
+                    notes: 'On leave until March 25',
+                    Performa: 78,
+                    tasks: 0,
+                    attendance: 90,
+                    created_at: '2022-08-15T00:00:00Z'
+                },
+                {
+                    id: '5',
+                    Nama: 'Eko Prasetyo',
+                    Email: 'eko@ksp-lamgabejaya.co.id',
+                    Departemen: 'Penagih',
+                    Posisi: 'Penagihan Agent',
+                    Telepon: '08567890123',
+                    Status: 'Aktif',
+                    join_date: '2023-02-01',
+                    salary: 5500000,
+                    skills: 'Penagihan, Negotiation, Communication',
+                    notes: 'Specialized in Telat collections',
+                    Performa: 82,
+                    tasks: 8,
+                    attendance: 92,
+                    created_at: '2023-02-01T00:00:00Z'
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+
+</html>

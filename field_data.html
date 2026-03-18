@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Data Penagihan - Surveyor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Data-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #17a2b8;
+            cursor: pointer;
+        }
+        
+        .Data-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Formulir-section {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+        }
+        
+        .Formulir-builder {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            min-height: 200px;
+            transition: Semua 0.3s;
+        }
+        
+        .Formulir-builder:hover {
+            border-color: #17a2b8;
+            background-color: #f8f9fa;
+        }
+        
+        .field-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            Posisi: relative;
+        }
+        
+        .field-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .field-Tipe-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .field-Tipe-text { background: #007bff; }
+        .field-Tipe-Nomor { background: #28a745; }
+        .field-Tipe-Tanggal { background: #ffc107; color: #000; }
+        .field-Tipe-Pilih { background: #17a2b8; }
+        .field-Tipe-checkbox { background: #6f42c1; }
+        .field-Tipe-Foto { background: #fd7e14; }
+        
+        .Foto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .Foto-item {
+            Posisi: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 150px;
+            cursor: pointer;
+        }
+        
+        .Foto-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .Foto-item .Foto-overlay {
+            Posisi: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .Foto-item:hover .Foto-overlay {
+            opacity: 1;
+        }
+        
+        .Data-Penagihan-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-not-started { background: #f8d7da; color: #721c24; }
+        .Status-in-progress { background: #fff3cd; color: #856404; }
+        .Status-Selesai { background: #d4edda; color: #155724; }
+        .Status-synced { background: #cce5ff; color: #004085; }
+        
+        .sync-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        .sync-online { background: #28a745; }
+        .sync-offline { background: #dc3545; }
+        .sync-Menunggu { background: #ffc107; }
+        
+        .map-container {
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #17a2b8;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #17a2b8;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-Database"></i> Field Data Penagihan</h1>
+                <p class="mb-0">Surveyor - HP Data Penagihan & Forms</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Data Collection Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clipboard-Daftar fa-2x mb-2"></i>
+                        <h5>Forms Hari Ini</h5>
+                        <h3 id="formsToday">0</h3>
+                        <p class="mb-0">Selesai</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-camera fa-2x mb-2"></i>
+                        <h5>Photos</h5>
+                        <h3 id="photosCount">0</h3>
+                        <p class="mb-0">Captured</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-wifi fa-2x mb-2"></i>
+                        <h5>Sync Status</h5>
+                        <h3 id="syncStatus">Online</h3>
+                        <p class="mb-0">Connection</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-cloud-Unggah-alt fa-2x mb-2"></i>
+                        <h5>Data Synced</h5>
+                        <h3 id="dataSynced">0</h3>
+                        <p class="mb-0">Records</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Data Collection Forms -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-wpforms"></i> Data Penagihan Forms</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="formFilter" onchange="filterForms()">
+                                <option value="">Semua Forms</option>
+                                <option value="Survei">Survei Forms</option>
+                                <option value="Verifikasi">Verifikasi Forms</option>
+                                <option value="assessment">Assessment Forms</option>
+                                <option value="Penagihan">Penagihan Forms</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="createNewForm()">
+                                <i class="fas fa-plus"></i> New Formulir
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="formsList">
+                            <!-- Forms will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Active Form -->
+                <div class="card" id="activeFormCard" style="display: Tidak Ada;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-Edit"></i> <span id="activeFormTitle">Formulir Judul</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="formBuilder">
+                            <!-- Form builder will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Preview -->
+                <div class="card" id="formPreviewCard" style="display: Tidak Ada;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-eye"></i> Formulir Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="formPreview">
+                            <!-- Form preview will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="startNewCollection()">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <h6>New Penagihan</h6>
+                                    <small class="text-muted">Start Formulir</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="viewCollections()">
+                                    <i class="fas fa-Daftar"></i>
+                                    <h6>View Semua</h6>
+                                    <small class="text-muted">Collections</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="syncData()">
+                                    <i class="fas fa-sync"></i>
+                                    <h6>Sync Data</h6>
+                                    <small class="text-muted">Unggah now</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="openFormTemplates()">
+                                    <i class="fas fa-clipboard"></i>
+                                    <h6>Templates</h6>
+                                    <small class="text-muted">Formulir library</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Active Collection -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-tasks"></i> Aktif Penagihan</h5>
+                    </div>
+                    <div class="card-body" id="activeCollection">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-clipboard-Daftar fa-3x mb-3"></i>
+                            <p>Tidak Aktif Penagihan</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Photos -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-camera"></i> Recent Photos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="Foto-grid" id="recentPhotos">
+                            <!-- Recent photos will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sync Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-cloud"></i> Sync Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="sync-indicator sync-online"></span>
+                            <span>Online - Ready to sync</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Last sync: 2 minutes ago</small>
+                        </div>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-Berhasil" style="width: 85%">85% synced</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary w-100" onclick="syncData()">
+                            <i class="fas fa-sync"></i> Sync Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Form Modal -->
+    <div class="modal fade" id="newFormModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Create New Formulir</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newFormForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Formulir Nama *</label>
+                                    <input type="text" class="form-control" id="formName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Formulir Tipe *</label>
+                                    <select class="form-Pilih" id="formType" required>
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="Survei">Survei Formulir</option>
+                                        <option value="Verifikasi">Verifikasi Formulir</option>
+                                        <option value="assessment">Assessment Formulir</option>
+                                        <option value="Penagihan">Penagihan Formulir</option>
+                                        <option value="custom">Custom Formulir</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Deskripsi</label>
+                                    <textarea class="form-control" id="formDescription" rows="3" placeholder="Enter Formulir Deskripsi..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Target Anggota</label>
+                                    <select class="form-Pilih" id="targetMember">
+                                        <option value="">Semua Anggota</option>
+                                        <option value="new">New Anggota</option>
+                                        <option value="existing">Existing Anggota</option>
+                                        <option value="delinquent">Delinquent Anggota</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Prioritas</label>
+                                    <select class="form-Pilih" id="formPriority">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="createForm()">
+                        <i class="fas fa-plus"></i> Create Formulir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Field Modal -->
+    <div class="modal fade" id="addFieldModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Tambah Field</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addFieldForm">
+                        <div class="mb-3">
+                            <label class="form-label">Field Tipe *</label>
+                            <select class="form-Pilih" id="fieldType" required onchange="updateFieldOptions()">
+                                <option value="">Pilih field Tipe</option>
+                                <option value="text">Text Input</option>
+                                <option value="Nomor">Nomor Input</option>
+                                <option value="Tanggal">Tanggal Picker</option>
+                                <option value="Pilih">Dropdown Pilih</option>
+                                <option value="checkbox">Checkbox</option>
+                                <option value="radio">Radio Button</option>
+                                <option value="textarea">Text Area</option>
+                                <option value="Foto">Foto Unggah</option>
+                                <option value="signature">Signature</option>
+                                <option value="Lokasi">GPS Lokasi</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Field Label *</label>
+                            <input type="text" class="form-control" id="fieldLabel" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Field Nama *</label>
+                            <input type="text" class="form-control" id="fieldName" placeholder="field_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="fieldRequired">
+                                <label class="form-check-label" for="fieldRequired">
+                                    Wajib Field
+                                </label>
+                            </div>
+                        </div>
+                        <div id="fieldOptions" style="display: Tidak Ada;">
+                            <div class="mb-3">
+                                <label class="form-label">Options (one per line)</label>
+                                <textarea class="form-control" id="fieldOptionsText" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="addField()">
+                        <i class="fas fa-plus"></i> Tambah Field
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let forms = [];
+        let activeForm = null;
+        let activeCollection = null;
+        let formFields = [];
+        let collectedData = [];
+        let recentPhotos = [];
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadForms();
+            loadStatistics();
+            loadRecentPhotos();
+            checkSyncStatus();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Surveyor
+            if (currentUser.role !== 'Surveyor') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load forms
+        async function loadForms() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=data_collection_forms', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        forms = Data.Data;
+                        displayForms();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat forms:', Error);
+                // Use demo Data
+                forms = getDemoForms();
+                displayForms();
+            }
+        }
+
+        // Display forms
+        function displayForms() {
+            const formsList = Dokumen.getElementById('formsList');
+            const formFilter = Dokumen.getElementById('formFilter').value;
+            
+            let filteredForms = forms;
+            
+            if (formFilter) {
+                filteredForms = forms.Filter(Formulir => Formulir.Tipe === formFilter);
+            }
+            
+            formsList.innerHTML = '';
+            
+            if (filteredForms.length === 0) {
+                formsList.innerHTML = '<div Kelas="text-center text-muted py-4">Tidak forms found</div>';
+                return;
+            }
+            
+            filteredForms.forEach(Formulir => {
+                const formCard = Dokumen.createElement('div');
+                formCard.className = 'Data-card card mb-2';
+                formCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-wpforms fa-2x text-info"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${Formulir.Nama}</h6>
+                                        <p class="mb-1">${Formulir.Tipe}</p>
+                                        <small class="text-muted">
+                                            ${Formulir.fields ? Formulir.fields.length : 0} fields | 
+                                            Dibuat: ${formatDate(Formulir.created_at)}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="Data-Penagihan-Status Status-${form.Status || 'not-started'} me-2">${(Formulir.Status || 'not-started').replace('-', ' ')}</span>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewForm('${Formulir.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-Berhasil" onclick="startCollection('${Formulir.id}')">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-alert" onclick="editForm('${Formulir.id}')">
+                                        <i class="fas fa-Edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                formsList.appendChild(formCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=field_data_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    forms_today: 12,
+                    photos_count: 45,
+                    sync_status: 'Online',
+                    data_synced: 38
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('formsToday').textContent = stats.forms_today || 0;
+            Dokumen.getElementById('photosCount').textContent = stats.photos_count || 0;
+            Dokumen.getElementById('syncStatus').textContent = stats.sync_status || 'Offline';
+            Dokumen.getElementById('dataSynced').textContent = stats.data_synced || 0;
+        }
+
+        // Load recent photos
+        function loadRecentPhotos() {
+            // Get photos from localStorage (in real app, from Database)
+            const photos = JSON.parse(localStorage.getItem('field_photos') || '[]');
+            recentPhotos = photos.slice(0, 6);
+            
+            const photosGrid = Dokumen.getElementById('recentPhotos');
+            
+            if (recentPhotos.length === 0) {
+                photosGrid.innerHTML = '<div Kelas="text-center text-muted">Tidak photos yet</div>';
+                return;
+            }
+            
+            photosGrid.innerHTML = recentPhotos.map(Foto => `
+                <div class="Foto-item" onclick="viewPhoto('${Foto.url}')">
+                    <img src="${Foto.url}" alt="Field Foto">
+                    <div class="Foto-overlay">
+                        <button class="btn btn-sm btn-light">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Check sync Status
+        function checkSyncStatus() {
+            // Check online Status
+            const isOnline = navigator.onLine;
+            
+            if (isOnline) {
+                Dokumen.getElementById('syncStatus').textContent = 'Online';
+                Dokumen.querySelector('.sync-indicator').className = 'sync-indicator sync-online';
+            } else {
+                Dokumen.getElementById('syncStatus').textContent = 'Offline';
+                Dokumen.querySelector('.sync-indicator').className = 'sync-indicator sync-offline';
+            }
+        }
+
+        // View Formulir
+        function viewForm(formId) {
+            const Formulir = forms.find(f => f.id === formId);
+            if (!Formulir) return;
+            
+            activeForm = Formulir;
+            
+            // Show Formulir preview
+            Dokumen.getElementById('formPreviewCard').style.display = 'block';
+            Dokumen.getElementById('activeFormCard').style.display = 'Tidak Ada';
+            
+            const preview = Dokumen.getElementById('formPreview');
+            
+            let previewHtml = `
+                <div class="mb-3">
+                    <h6>${Formulir.Nama}</h6>
+                    <p class="text-muted">${Formulir.Deskripsi || 'Tidak Deskripsi'}</p>
+                    <span class="badge bg-info">${Formulir.Tipe}</span>
+                </div>
+                
+                <div class="form-section">
+                    <h6>Formulir Fields</h6>
+            `;
+            
+            if (Formulir.fields && Formulir.fields.length > 0) {
+                Formulir.fields.forEach(field => {
+                    previewHtml += `
+                        <div class="mb-3">
+                            <label class="form-label">${field.label} ${field.Wajib ? '*' : ''}</label>
+                            ${getFieldPreview(field)}
+                        </div>
+                    `;
+                });
+            } else {
+                previewHtml += '<p Kelas="text-muted">Tidak fields defined yet</p>';
+            }
+            
+            previewHtml += `
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="startCollection('${Formulir.id}')">
+                        <i class="fas fa-play"></i> Start Penagihan
+                    </button>
+                    <button class="btn btn-alert" onclick="editForm('${Formulir.id}')">
+                        <i class="fas fa-Edit"></i> Edit Formulir
+                    </button>
+                </div>
+            `;
+            
+            preview.innerHTML = previewHtml;
+        }
+
+        // Get field preview
+        function getFieldPreview(field) {
+            switch (field.Tipe) {
+                case 'text':
+                    return `<input type="text" class="form-control" placeholder="${field.placeholder || ''}" disabled>`;
+                case 'Nomor':
+                    return `<input type="Nomor" class="form-control" placeholder="${field.placeholder || ''}" disabled>`;
+                case 'Tanggal':
+                    return `<input type="Tanggal" class="form-control" disabled>`;
+                case 'Pilih':
+                    const options = field.options ? field.options.map(opt => `<option>${opt}</option>`).join('') : '';
+                    return `<select class="form-Pilih" disabled>${options}</select>`;
+                case 'checkbox':
+                    return `<div class="form-check">
+                        <input class="form-check-input" type="checkbox" disabled>
+                        <label class="form-check-label">${field.label}</label>
+                    </div>`;
+                case 'textarea':
+                    return `<textarea class="form-control" rows="3" placeholder="${field.placeholder || ''}" disabled></textarea>`;
+                case 'Foto':
+                    return `<div class="text-center text-muted p-3 border rounded">
+                        <i class="fas fa-camera fa-2x mb-2"></i>
+                        <p>Foto Unggah Area</p>
+                    </div>`;
+                case 'signature':
+                    return `<div class="text-center text-muted p-3 border rounded">
+                        <i class="fas fa-signature fa-2x mb-2"></i>
+                        <p>Signature Area</p>
+                    </div>`;
+                case 'Lokasi':
+                    return `<div class="text-center text-muted p-3 border rounded">
+                        <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                        <p>GPS Lokasi</p>
+                    </div>`;
+                default:
+                    return `<input type="text" class="form-control" disabled>`;
+            }
+        }
+
+        // Start Penagihan
+        function startCollection(formId) {
+            const Formulir = forms.find(f => f.id === formId);
+            if (!Formulir) return;
+            
+            activeForm = Formulir;
+            activeCollection = {
+                form_id: formId,
+                started_at: new Tanggal().toISOString(),
+                Status: 'in_progress',
+                Data: {}
+            };
+            
+            // Show Formulir builder
+            Dokumen.getElementById('formPreviewCard').style.display = 'Tidak Ada';
+            Dokumen.getElementById('activeFormCard').style.display = 'block';
+            
+            Dokumen.getElementById('activeFormTitle').textContent = Formulir.Nama;
+            
+            loadFormBuilder(Formulir);
+            updateActiveCollection();
+        }
+
+        // Load Formulir builder
+        function loadFormBuilder(Formulir) {
+            const builder = Dokumen.getElementById('formBuilder');
+            
+            let builderHtml = `
+                <div class="form-section">
+                    <h6>Formulir Informasi</h6>
+                    <p class="text-muted">${Formulir.Deskripsi || 'Tidak Deskripsi'}</p>
+                    <span class="badge bg-info">${Formulir.Tipe}</span>
+                </div>
+                
+                <div class="form-section">
+                    <h6>Fill Formulir Fields</h6>
+            `;
+            
+            if (Formulir.fields && Formulir.fields.length > 0) {
+                Formulir.fields.forEach((field, index) => {
+                    builderHtml += `
+                        <div class="mb-3">
+                            <label class="form-label">${field.label} ${field.Wajib ? '*' : ''}</label>
+                            ${getFieldInput(field, index)}
+                        </div>
+                    `;
+                });
+            } else {
+                builderHtml += '<p Kelas="text-muted">Tidak fields defined yet</p>';
+            }
+            
+            builderHtml += `
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-Berhasil" onclick="saveCollection()">
+                        <i class="fas fa-Simpan"></i> Simpan Penagihan
+                    </button>
+                    <button class="btn btn-alert" onclick="saveAsDraft()">
+                        <i class="fas fa-Simpan"></i> Simpan as Draft
+                    </button>
+                    <button class="btn btn-secondary" onclick="cancelCollection()">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            `;
+            
+            builder.innerHTML = builderHtml;
+        }
+
+        // Get field input
+        function getFieldInput(field, index) {
+            const fieldName = `field_${index}`;
+            
+            switch (field.Tipe) {
+                case 'text':
+                    return `<input type="text" class="form-control" name="${fieldName}" placeholder="${field.placeholder || ''}" ${field.required ? 'Wajib' : ''}>`;
+                case 'Nomor':
+                    return `<input type="Nomor" class="form-control" name="${fieldName}" placeholder="${field.placeholder || ''}" ${field.required ? 'Wajib' : ''}>`;
+                case 'Tanggal':
+                    return `<input type="Tanggal" class="form-control" name="${fieldName}" ${field.required ? 'Wajib' : ''}>`;
+                case 'Pilih':
+                    const options = field.options ? field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('') : '';
+                    return `<select class="form-Pilih" name="${fieldName}" ${field.required ? 'Wajib' : ''}>
+                        <option value="">Pilih option</option>
+                        ${options}
+                    </select>`;
+                case 'checkbox':
+                    return `<div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="${fieldName}" id="${fieldName}">
+                        <label class="form-check-label" for="${fieldName}">${field.label}</label>
+                    </div>`;
+                case 'textarea':
+                    return `<textarea class="form-control" name="${fieldName}" rows="3" placeholder="${field.placeholder || ''}" ${field.required ? 'Wajib' : ''}></textarea>`;
+                case 'Foto':
+                    return `<div class="text-center p-3 border rounded" style="border-style: dashed; cursor: pointer;" onclick="capturePhoto('${fieldName}')">
+                        <i class="fas fa-camera fa-2x mb-2 text-muted"></i>
+                        <p class="text-muted">Click to capture Foto</p>
+                    </div>`;
+                case 'signature':
+                    return `<div class="text-center p-3 border rounded" style="border-style: dashed;">
+                        <canvas id="signature_${index}" width="300" height="150" style="border: 1px solid #ddd; cursor: crosshair;"></canvas>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="clearSignature(${index})">Hapus</button>
+                    </div>`;
+                case 'Lokasi':
+                    return `<div class="text-center p-3 border rounded">
+                        <i class="fas fa-map-marker-alt fa-2x mb-2 text-muted"></i>
+                        <p class="text-muted" id="location_${index}">Getting Lokasi...</p>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="getLocation(${index})">Get Lokasi</button>
+                    </div>`;
+                default:
+                    return `<input type="text" class="form-control" name="${fieldName}" ${field.required ? 'Wajib' : ''}>`;
+            }
+        }
+
+        // Simpan Penagihan
+        function saveCollection() {
+            if (!activeForm) return;
+            
+            // Collect Formulir Data
+            const formData = new FormData(Dokumen.querySelector('#formBuilder Formulir'));
+            const Data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                Data[key] = value;
+            }
+            
+            // Perbarui Penagihan
+            activeCollection.Data = Data;
+            activeCollection.completed_at = new Tanggal().toISOString();
+            activeCollection.Status = 'Selesai';
+            
+            // Simpan to collected Data
+            collectedData.push(activeCollection);
+            
+            // Perbarui Statistik
+            const formsToday = parseInt(Dokumen.getElementById('formsToday').textContent) + 1;
+            Dokumen.getElementById('formsToday').textContent = formsToday;
+            
+            // Reset Aktif Penagihan
+            activeCollection = null;
+            activeForm = null;
+            
+            // Hide Formulir builder
+            Dokumen.getElementById('activeFormCard').style.display = 'Tidak Ada';
+            Dokumen.getElementById('formPreviewCard').style.display = 'Tidak Ada';
+            
+            updateActiveCollection();
+            showSuccess('Penagihan saved successfully!');
+        }
+
+        // Simpan as draft
+        function saveAsDraft() {
+            if (!activeForm) return;
+            
+            activeCollection.Status = 'draft';
+            
+            showSuccess('Penagihan saved as draft!');
+        }
+
+        // Batal Penagihan
+        function cancelCollection() {
+            if (!Konfirmasi('Are you sure you want to Batal this Penagihan?')) return;
+            
+            activeCollection = null;
+            activeForm = null;
+            
+            Dokumen.getElementById('activeFormCard').style.display = 'Tidak Ada';
+            Dokumen.getElementById('formPreviewCard').style.display = 'Tidak Ada';
+            
+            updateActiveCollection();
+        }
+
+        // Perbarui Aktif Penagihan
+        function updateActiveCollection() {
+            const activeCollectionDiv = Dokumen.getElementById('activeCollection');
+            
+            if (!activeCollection) {
+                activeCollectionDiv.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-clipboard-Daftar fa-3x mb-3"></i>
+                        <p>Tidak Aktif Penagihan</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const Formulir = forms.find(f => f.id === activeCollection.form_id);
+            
+            activeCollectionDiv.innerHTML = `
+                <div class="mb-3">
+                    <h6>${Formulir ? Formulir.Nama : 'Unknown Formulir'}</h6>
+                    <span class="Data-Penagihan-Status Status-${activeCollection.Status}">${activeCollection.Status.replace('-', ' ')}</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Started: ${formatDateTime(activeCollection.started_at)}</small>
+                </div>
+                ${activeCollection.completed_at ? `
+                    <div class="mb-2">
+                        <small class="text-muted">Selesai: ${formatDateTime(activeCollection.completed_at)}</small>
+                    </div>
+                ` : ''}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewActiveCollection()">
+                        <i class="fas fa-eye"></i> View Detail
+                    </button>
+                    <button class="btn btn-sm btn-outline-alert" onclick="cancelCollection()">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            `;
+        }
+
+        // Create new Formulir
+        function createNewForm() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('newFormModal'));
+            modal.show();
+        }
+
+        // Create Formulir
+        function createForm() {
+            const Nama = Dokumen.getElementById('formName').value;
+            const Tipe = Dokumen.getElementById('formType').value;
+            const Deskripsi = Dokumen.getElementById('formDescription').value;
+            const targetMember = Dokumen.getElementById('targetMember').value;
+            const Prioritas = Dokumen.getElementById('formPriority').value;
+            
+            if (!Nama || !Tipe) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            // Create new Formulir
+            const newForm = {
+                id: 'Formulir-' + Tanggal.now(),
+                Nama: Nama,
+                Tipe: Tipe,
+                Deskripsi: Deskripsi,
+                target_member: targetMember,
+                Prioritas: Prioritas,
+                Status: 'not-started',
+                created_at: new Tanggal().toISOString(),
+                fields: []
+            };
+            
+            forms.unshift(newForm);
+            displayForms();
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('newFormModal'));
+            modal.hide();
+            Dokumen.getElementById('newFormForm').Reset();
+            
+            showSuccess('Formulir Dibuat successfully!');
+        }
+
+        // Edit Formulir
+        function editForm(formId) {
+            const Formulir = forms.find(f => f.id === formId);
+            if (!Formulir) return;
+            
+            activeForm = Formulir;
+            formFields = Formulir.fields || [];
+            
+            // Show Formulir builder
+            Dokumen.getElementById('formPreviewCard').style.display = 'Tidak Ada';
+            Dokumen.getElementById('activeFormCard').style.display = 'block';
+            
+            Dokumen.getElementById('activeFormTitle').textContent = 'Edit Formulir: ' + Formulir.Nama;
+            
+            loadFormEditor();
+        }
+
+        // Load Formulir editor
+        function loadFormEditor() {
+            const builder = Dokumen.getElementById('formBuilder');
+            
+            let builderHtml = `
+                <div class="form-section">
+                    <h6>Formulir Informasi</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Formulir Nama</label>
+                            <input type="text" class="form-control" value="${activeForm.Nama}" id="editFormName">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Formulir Tipe</label>
+                            <select class="form-Pilih" id="editFormType">
+                                <option value="Survei" ${activeForm.type === 'Survei' ? 'selected' : ''}>Survei Formulir</option>
+                                <option value="Verifikasi" ${activeForm.type === 'Verifikasi' ? 'selected' : ''}>Verifikasi Formulir</option>
+                                <option value="assessment" ${activeForm.type === 'assessment' ? 'selected' : ''}>Assessment Formulir</option>
+                                <option value="Penagihan" ${activeForm.type === 'Penagihan' ? 'selected' : ''}>Penagihan Formulir</option>
+                                <option value="custom" ${activeForm.type === 'custom' ? 'selected' : ''}>Custom Formulir</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="editFormDescription" rows="2">${activeForm.Deskripsi || ''}</textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6>Formulir Fields</h6>
+                        <button class="btn btn-sm btn-primary" onclick="openAddFieldModal()">
+                            <i class="fas fa-plus"></i> Tambah Field
+                        </button>
+                    </div>
+                    
+                    <div id="fieldsList">
+                        ${formFields.length > 0 ? formFields.map((field, index) => `
+                            <div class="field-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="field-Tipe-icon field-Tipe-${field.Tipe} me-3">
+                                        <i class="fas fa-${getFieldIcon(field.Tipe)}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">${field.label}</h6>
+                                        <small class="text-muted">${field.Tipe} | ${field.Nama}</small>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-alert me-1" onclick="editField(${index})">
+                                            <i class="fas fa-Edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removeField(${index})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') : '<p Kelas="text-muted">Tidak fields added yet</p>'}
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-Berhasil" onclick="saveFormChanges()">
+                        <i class="fas fa-Simpan"></i> Simpan Changes
+                    </button>
+                    <button class="btn btn-secondary" onclick="cancelEditForm()">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            `;
+            
+            builder.innerHTML = builderHtml;
+        }
+
+        // Get field icon
+        function getFieldIcon(Tipe) {
+            const icons = {
+                'text': 'font',
+                'Nomor': 'hashtag',
+                'Tanggal': 'calendar',
+                'Pilih': 'Daftar',
+                'checkbox': 'check-square',
+                'radio': 'dot-circle',
+                'textarea': 'align-left',
+                'Foto': 'camera',
+                'signature': 'pen',
+                'Lokasi': 'map-marker-alt'
+            };
+            return icons[Tipe] || 'question';
+        }
+
+        // Open Tambah field modal
+        function openAddFieldModal() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('addFieldModal'));
+            modal.show();
+        }
+
+        // Perbarui field options
+        function updateFieldOptions() {
+            const fieldType = Dokumen.getElementById('fieldType').value;
+            const fieldOptions = Dokumen.getElementById('fieldOptions');
+            
+            if (fieldType === 'Pilih' || fieldType === 'radio') {
+                fieldOptions.style.display = 'block';
+            } else {
+                fieldOptions.style.display = 'Tidak Ada';
+            }
+        }
+
+        // Tambah field
+        function addField() {
+            const Tipe = Dokumen.getElementById('fieldType').value;
+            const label = Dokumen.getElementById('fieldLabel').value;
+            const Nama = Dokumen.getElementById('fieldName').value;
+            const Wajib = Dokumen.getElementById('fieldRequired').checked;
+            const optionsText = Dokumen.getElementById('fieldOptionsText').value;
+            
+            if (!Tipe || !label || !Nama) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            const field = {
+                Tipe: Tipe,
+                label: label,
+                Nama: Nama,
+                Wajib: Wajib
+            };
+            
+            if (optionsText) {
+                field.options = optionsText.split('\n').Filter(opt => opt.trim());
+            }
+            
+            formFields.push(field);
+            
+            // Reload Formulir editor
+            loadFormEditor();
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('addFieldModal'));
+            modal.hide();
+            Dokumen.getElementById('addFieldForm').Reset();
+            
+            showSuccess('Field added successfully!');
+        }
+
+        // Remove field
+        function removeField(index) {
+            if (!Konfirmasi('Are you sure you want to remove this field?')) return;
+            
+            formFields.splice(index, 1);
+            loadFormEditor();
+        }
+
+        // Edit field
+        function editField(index) {
+            const field = formFields[index];
+            
+            // Populate modal with field Data
+            Dokumen.getElementById('fieldType').value = field.Tipe;
+            Dokumen.getElementById('fieldLabel').value = field.label;
+            Dokumen.getElementById('fieldName').value = field.Nama;
+            Dokumen.getElementById('fieldRequired').checked = field.Wajib;
+            
+            if (field.options) {
+                Dokumen.getElementById('fieldOptionsText').value = field.options.join('\n');
+            }
+            
+            updateFieldOptions();
+            
+            // Show modal
+            const modal = new bootstrap.Modal(Dokumen.getElementById('addFieldModal'));
+            modal.show();
+            
+            // Remove field and re-Tambah with Diperbarui Data
+            formFields.splice(index, 1);
+        }
+
+        // Simpan Formulir changes
+        function saveFormChanges() {
+            if (!activeForm) return;
+            
+            activeForm.Nama = Dokumen.getElementById('editFormName').value;
+            activeForm.Tipe = Dokumen.getElementById('editFormType').value;
+            activeForm.Deskripsi = Dokumen.getElementById('editFormDescription').value;
+            activeForm.fields = formFields;
+            
+            // Perbarui Formulir in forms array
+            const formIndex = forms.findIndex(f => f.id === activeForm.id);
+            if (formIndex !== -1) {
+                forms[formIndex] = activeForm;
+            }
+            
+            displayForms();
+            
+            // Reset Aktif Formulir
+            activeForm = null;
+            formFields = [];
+            
+            Dokumen.getElementById('activeFormCard').style.display = 'Tidak Ada';
+            
+            showSuccess('Formulir Perubahan disimpan successfully!');
+        }
+
+        // Batal Edit Formulir
+        function cancelEditForm() {
+            activeForm = null;
+            formFields = [];
+            
+            Dokumen.getElementById('activeFormCard').style.display = 'Tidak Ada';
+        }
+
+        // Quick action functions
+        function startNewCollection() {
+            if (forms.length === 0) {
+                Peringatan('Tidak forms available. Please create a Formulir first.');
+                return;
+            }
+            
+            // Show Formulir selection
+            const formNames = forms.map(Formulir => `${Formulir.Nama} (${Formulir.id})`).join('\n');
+            const selectedForm = prompt('Pilih a Formulir:\n' + formNames);
+            
+            if (selectedForm) {
+                const formId = selectedForm.match(/\(([^)]+)\)/)?.[1];
+                if (formId) {
+                    startCollection(formId);
+                }
+            }
+        }
+
+        function viewCollections() {
+            
+        }
+
+        function syncData() {
+            showSuccess('Data sync initiated!');
+            
+            // Perbarui sync Status
+            setTimeout(() => {
+                const synced = parseInt(Dokumen.getElementById('dataSynced').textContent) + 1;
+                Dokumen.getElementById('dataSynced').textContent = synced;
+            }, 1000);
+        }
+
+        function openFormTemplates() {
+            
+        }
+
+        // View Foto
+        function viewPhoto(photoUrl) {
+            window.open(photoUrl, '_blank');
+        }
+
+        // Capture Foto
+        function capturePhoto(fieldName) {
+            // In real app, this would open camera
+            
+            
+            // Simulate Foto capture
+            const photoUrl = `https://picsum.photos/seed/${fieldName}/300/200`;
+            
+            // Tambah to recent photos
+            recentPhotos.unshift({
+                url: photoUrl,
+                timestamp: new Tanggal().toISOString(),
+                field: fieldName
+            });
+            
+            // Simpan to localStorage
+            const allPhotos = JSON.parse(localStorage.getItem('field_photos') || '[]');
+            allPhotos.unshift({
+                url: photoUrl,
+                timestamp: new Tanggal().toISOString(),
+                field: fieldName
+            });
+            localStorage.setItem('field_photos', JSON.stringify(allPhotos));
+            
+            loadRecentPhotos();
+            
+            // Perbarui Foto Jumlah
+            const photoCount = parseInt(Dokumen.getElementById('photosCount').textContent) + 1;
+            Dokumen.getElementById('photosCount').textContent = photoCount;
+        }
+
+        // Get Lokasi
+        function getLocation(index) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(Posisi) {
+                        const lat = Posisi.coords.latitude.toFixed(6);
+                        const lng = Posisi.coords.longitude.toFixed(6);
+                        
+                        Dokumen.getElementById(`location_${index}`).innerHTML = `
+                            <strong>Lokasi captured:</strong><br>
+                            Lat: ${lat}, Lng: ${lng}
+                        `;
+                    },
+                    function(Error) {
+                        Dokumen.getElementById(`location_${index}`).innerHTML = 'Lokasi capture failed';
+                    }
+                );
+            } else {
+                Dokumen.getElementById(`location_${index}`).innerHTML = 'Geolocation not supported';
+            }
+        }
+
+        // Hapus signature
+        function clearSignature(index) {
+            const canvas = Dokumen.getElementById(`signature_${index}`);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Filter forms
+        function filterForms() {
+            displayForms();
+        }
+
+        // View Aktif Penagihan
+        function viewActiveCollection() {
+            if (!activeCollection) return;
+            
+            Peringatan('Aktif Penagihan Detail: ' + JSON.stringify(activeCollection, null, 2));
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Tanggal(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo forms
+        function getDemoForms() {
+            return [
+                {
+                    id: '1',
+                    Nama: 'Anggota Verifikasi Formulir',
+                    Tipe: 'Verifikasi',
+                    Deskripsi: 'Comprehensive Anggota Verifikasi Formulir',
+                    Status: 'Selesai',
+                    created_at: '2026-03-17T08:00:00Z',
+                    fields: [
+                        {
+                            Tipe: 'text',
+                            label: 'Full Nama',
+                            Nama: 'full_name',
+                            Wajib: true
+                        },
+                        {
+                            Tipe: 'text',
+                            label: 'ID Nomor',
+                            Nama: 'id_number',
+                            Wajib: true
+                        },
+                        {
+                            Tipe: 'Foto',
+                            label: 'Anggota Foto',
+                            Nama: 'member_photo',
+                            Wajib: true
+                        }
+                    ]
+                },
+                {
+                    id: '2',
+                    Nama: 'Property Assessment Formulir',
+                    Tipe: 'assessment',
+                    Deskripsi: 'Property condition and value assessment',
+                    Status: 'in_progress',
+                    created_at: '2026-03-17T09:00:00Z',
+                    fields: [
+                        {
+                            Tipe: 'text',
+                            label: 'Property Alamat',
+                            Nama: 'property_address',
+                            Wajib: true
+                        },
+                        {
+                            Tipe: 'Pilih',
+                            label: 'Property Tipe',
+                            Nama: 'property_type',
+                            Wajib: true,
+                            options: ['House', 'Apartment', 'Shop', 'Land']
+                        },
+                        {
+                            Tipe: 'Foto',
+                            label: 'Property Photos',
+                            Nama: 'property_photos',
+                            Wajib: true
+                        }
+                    ]
+                },
+                {
+                    id: '3',
+                    Nama: 'Penagihan Visit Formulir',
+                    Tipe: 'Penagihan',
+                    Deskripsi: 'Penagihan visit documentation',
+                    Status: 'not-started',
+                    created_at: '2026-03-17T10:00:00Z',
+                    fields: [
+                        {
+                            Tipe: 'text',
+                            label: 'Kontak Person',
+                            Nama: 'contact_person',
+                            Wajib: true
+                        },
+                        {
+                            Tipe: 'Pilih',
+                            label: 'Visit Outcome',
+                            Nama: 'visit_outcome',
+                            Wajib: true,
+                            options: ['Pembayaran Received', 'Pembayaran Promise', 'Unable to Kontak', 'Reschedule']
+                        }
+                    ]
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

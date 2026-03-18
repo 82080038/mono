@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anggota Profil - Anggota Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+
+    <style>
+        .header {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+
+        .btn-Keluar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+
+        .btn-Keluar:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .Profil-header {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            Posisi: relative;
+        }
+
+        .Profil-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            color: #20c997;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .Profil-Info h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .Profil-Info p {
+            margin-bottom: 0.25rem;
+            opacity: 0.9;
+        }
+
+        .Profil-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .section-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .Info-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .Info-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        .Info-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .Info-value {
+            color: #6c757d;
+        }
+
+        .Dokumen-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .Dokumen-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #20c997;
+            margin-right: 1rem;
+        }
+
+        .Dokumen-Info {
+            flex-grow: 1;
+        }
+
+        .Dokumen-Nama {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .Dokumen-Tanggal {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .Dokumen-Status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .Status-verified {
+            background: #28a745;
+            color: white;
+        }
+
+        .Status-Menunggu {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .Status-expired {
+            background: #dc3545;
+            color: white;
+        }
+
+        .Status-missing {
+            background: #6c757d;
+            color: white;
+        }
+
+        .Aktivitas-item {
+            display: flex;
+            align-items: start;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .Aktivitas-item:last-child {
+            border-bottom: Tidak Ada;
+        }
+
+        .Aktivitas-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .icon-Berhasil {
+            background: #28a745;
+        }
+
+        .icon-Peringatan {
+            background: #ffc107;
+        }
+
+        .icon-danger {
+            background: #dc3545;
+        }
+
+        .icon-Info {
+            background: #17a2b8;
+        }
+
+        .icon-primary {
+            background: #20c997;
+        }
+
+        .Aktivitas-content {
+            flex-grow: 1;
+        }
+
+        .Aktivitas-Judul {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .Aktivitas-Waktu {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .Kata Sandi-strength {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .Kata Sandi-strength-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .strength-weak {
+            background: #dc3545;
+            width: 33%;
+        }
+
+        .strength-medium {
+            background: #ffc107;
+            width: 66%;
+        }
+
+        .strength-strong {
+            background: #28a745;
+            width: 100%;
+        }
+
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+
+        .quick-action:hover {
+            border-color: #20c997;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: #20c997;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-user"></i> Anggota Profil</h1>
+                <p class="mb-0">Anggota - Personal Informasi & Account Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Profile Header -->
+        <div class="Profil-header">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <div class="Profil-avatar">
+                        <span id="avatarInitial">M</span>
+                    </div>
+                    <button class="btn btn-light btn-sm mt-2" onclick="changeAvatar()">
+                        <i class="fas fa-camera"></i> Change Foto
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <div class="Profil-info">
+                        <h2 id="memberName">Memuat...</h2>
+                        <p><i class="fas fa-id-card"></i> Anggota ID: <span id="memberId">Memuat...</span></p>
+                        <p><i class="fas fa-calendar"></i> Anggota Since: <span id="memberSince">Memuat...</span></p>
+                        <p><i class="fas fa-Telepon"></i> Telepon: <span id="memberPhone">Memuat...</span></p>
+                        <p><i class="fas fa-envelope"></i> Email: <span id="memberEmail">Memuat...</span></p>
+                        <div class="Profil-badge">
+                            <i class="fas fa-check-circle"></i> Verified Anggota
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-end">
+                        <button class="btn btn-light btn-sm mb-2" onclick="editProfile()">
+                            <i class="fas fa-Edit"></i> Edit Profil
+                        </button>
+                        <br>
+                        <button class="btn btn-light btn-sm" onclick="downloadProfile()">
+                            <i class="fas fa-Unduh"></i> Unduh Profil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <!-- Personal Information -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h5><i class="fas fa-user"></i> Personal Informasi</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editPersonalInfo()">
+                            <i class="fas fa-Edit"></i> Edit
+                        </button>
+                    </div>
+                    <div id="personalInfo">
+                        <!-- Personal info will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Account Information -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h5><i class="fas fa-university"></i> Account Informasi</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editAccountInfo()">
+                            <i class="fas fa-Edit"></i> Edit
+                        </button>
+                    </div>
+                    <div id="accountInfo">
+                        <!-- Account info will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h5><i class="fas fa-shield-alt"></i> Keamanan Pengaturan</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editSecuritySettings()">
+                            <i class="fas fa-Edit"></i> Edit
+                        </button>
+                    </div>
+                    <div id="securitySettings">
+                        <!-- Security settings will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h5><i class="fas fa-File-alt"></i> Documents</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="uploadDocument()">
+                            <i class="fas fa-Unggah"></i> Unggah Dokumen
+                        </button>
+                    </div>
+                    <div id="documents">
+                        <!-- Documents will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <div class="quick-action" onclick="changePassword()">
+                                <i class="fas fa-key"></i>
+                                <h6>Change Kata Sandi</h6>
+                                <small class="text-muted">Perbarui Keamanan</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="quick-action" onclick="enable2FA()">
+                                <i class="fas fa-HP-alt"></i>
+                                <h6>2FA Setup</h6>
+                                <small class="text-muted">Tambah Keamanan</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="quick-action" onclick="downloadData()">
+                                <i class="fas fa-Unduh"></i>
+                                <h6>Unduh Data</h6>
+                                <small class="text-muted">Ekspor Info</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="quick-action" onclick="contactSupport()">
+                                <i class="fas fa-headset"></i>
+                                <h6>Support</h6>
+                                <small class="text-muted">Get Bantuan</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Summary -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h5><i class="fas fa-Grafik-pie"></i> Account Ringkasan</h5>
+                    </div>
+                    <div id="accountSummary">
+                        <!-- Account summary will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h5><i class="fas fa-Riwayat"></i> Recent Aktivitas</h5>
+                    </div>
+                    <div id="recentActivity">
+                        <!-- Recent activity will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Edit Profil</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProfileForm">
+                        <input type="hidden" id="csrfToken" name="csrf_token" value="">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">First Nama *</label>
+                                    <input type="text" class="form-control" id="firstName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Last Nama *</label>
+                                    <input type="text" class="form-control" id="lastName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Telepon *</label>
+                                    <input type="tel" class="form-control" id="Telepon" required>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Alamat</label>
+                                    <textarea class="form-control" id="Alamat" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Kota</label>
+                                    <input type="text" class="form-control" id="Kota">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Kode Pos</label>
+                                    <input type="text" class="form-control" id="postalCode">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Tanggal of Birth</label>
+                                    <input type="Tanggal" class="form-control" id="dateOfBirth">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Gender</label>
+                                    <select class="form-Pilih" id="gender">
+                                        <option value="">Pilih gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProfile()">
+                        <i class="fas fa-Simpan"></i> Simpan Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-Judul">Change Kata Sandi</h5>
+                    <button type="button" class="btn-Tutup" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label class="form-label">Current Kata Sandi *</label>
+                            <input type="password" class="form-control" id="currentPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New Kata Sandi *</label>
+                            <input type="password" class="form-control" id="newPassword" required
+                                oninput="checkPasswordStrength()">
+                            <div class="Kata Sandi-strength">
+                                <div class="Kata Sandi-strength-bar" id="passwordStrengthBar"></div>
+                            </div>
+                            <small class="text-muted" id="passwordStrengthText">Kata Sandi strength: Weak</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Konfirmasi New Kata Sandi *</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="updatePassword()">
+                        <i class="fas fa-key"></i> Change Kata Sandi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function () {
+            initializePage();
+            loadProfileData();
+            loadAccountSummary();
+            loadRecentActivity();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+
+            // Check if Pengguna is Anggota
+            const validRoles = ['Anggota'];
+            if (!validRoles.includes(currentUser.role)) {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+
+            // Initialize CSRF token
+            initializeCSRFToken();
+        }
+
+        // Generate CSRF token
+        function generateCSRFToken() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Initialize CSRF token
+        function initializeCSRFToken() {
+            const csrfToken = generateCSRFToken();
+            const csrfInput = Dokumen.getElementById('csrfToken');
+            if (csrfInput) {
+                csrfInput.value = csrfToken;
+            }
+            return csrfToken;
+        }
+
+        // Validate CSRF token
+        function validateCSRFToken(token) {
+            return token && token.length === 64 && /^[0-9a-f]+$/.test(token);
+        }
+
+        // Load Profil Data
+        async function loadProfileData() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=member_profile', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        displayProfileData(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Profil Data:', Error);
+                // Use demo Data
+                displayProfileData(getDemoProfileData());
+            }
+        }
+
+        // Display Profil Data
+        function displayProfileData(profileData) {
+            // Perbarui Profil header
+            Dokumen.getElementById('avatarInitial').textContent = profileData.Nama.charAt(0);
+            Dokumen.getElementById('memberName').textContent = profileData.Nama;
+            Dokumen.getElementById('memberId').textContent = profileData.member_id;
+            Dokumen.getElementById('memberSince').textContent = formatDate(profileData.member_since);
+            Dokumen.getElementById('memberPhone').textContent = profileData.Telepon;
+            Dokumen.getElementById('memberEmail').textContent = profileData.Email;
+
+            // Display personal Informasi
+            const personalInfo = Dokumen.getElementById('personalInfo');
+            personalInfo.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Full Nama:</span>
+                    <span class="info-value">${profileData.Nama}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tanggal of Birth:</span>
+                    <span class="info-value">${formatDate(profileData.date_of_birth)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Gender:</span>
+                    <span class="info-value">${profileData.gender || 'Not specified'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Telepon:</span>
+                    <span class="info-value">${profileData.Telepon}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">${profileData.Email}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Alamat:</span>
+                    <span class="info-value">${profileData.Alamat || 'Not provided'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Kota:</span>
+                    <span class="info-value">${profileData.Kota || 'Not provided'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Kode Pos:</span>
+                    <span class="info-value">${profileData.postal_code || 'Not provided'}</span>
+                </div>
+            `;
+
+            // Display account Informasi
+            const accountInfo = Dokumen.getElementById('accountInfo');
+            accountInfo.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Account Nomor:</span>
+                    <span class="info-value">${profileData.account_number}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Account Tipe:</span>
+                    <span class="info-value">${profileData.account_type}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Branch:</span>
+                    <span class="info-value">${profileData.branch}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Account Status:</span>
+                    <span class="info-value"><span class="badge bg-Berhasil">Aktif</span></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Anggota Since:</span>
+                    <span class="info-value">${formatDate(profileData.member_since)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Masuk:</span>
+                    <span class="info-value">${formatDateTime(profileData.last_login)}</span>
+                </div>
+            `;
+
+            // Display Keamanan Pengaturan
+            const securitySettings = Dokumen.getElementById('securitySettings');
+            securitySettings.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Two-Factor Authentication:</span>
+                    <span class="info-value"><span class="badge bg-alert">Disabled</span></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Kata Sandi Last Changed:</span>
+                    <span class="info-value">${formatDate(profileData.password_changed)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Masuk Notifications:</span>
+                    <span class="info-value"><span class="badge bg-Berhasil">Enabled</span></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Session Timeout:</span>
+                    <span class="info-value">30 minutes</span>
+                </div>
+            `;
+
+            // Display documents
+            const documents = Dokumen.getElementById('documents');
+            documents.innerHTML = profileData.documents.map(doc => `
+                <div class="Dokumen-item">
+                    <div class="Dokumen-icon">
+                        <i class="fas fa-${getDocumentIcon(doc.Tipe)}"></i>
+                    </div>
+                    <div class="Dokumen-info">
+                        <div class="Dokumen-Nama">${doc.Nama}</div>
+                        <div class="Dokumen-Tanggal">Uploaded: ${formatDate(doc.uploaded_at)}</div>
+                    </div>
+                    <div>
+                        <span class="Dokumen-Status Status-${doc.Status}">${doc.Status}</span>
+                        <div class="mt-1">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewDocument('${doc.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-Berhasil" onclick="downloadDocument('${doc.id}')">
+                                <i class="fas fa-Unduh"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load account Ringkasan
+        function loadAccountSummary() {
+            const summaryDiv = Dokumen.getElementById('accountSummary');
+
+            const Ringkasan = [
+                { label: 'Total Saldo', value: 'Rp 15,750,000', icon: 'wallet' },
+                { label: 'Aktif Pinjaman', value: '2', icon: 'hand-holding-usd' },
+                { label: 'Simpanan Account', value: '1', icon: 'piggy-bank' },
+                { label: 'Kredit Skor', value: '750', icon: 'Grafik-line' }
+            ];
+
+            summaryDiv.innerHTML = Ringkasan.map(item => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <i class="fas fa-${item.icon} me-2"></i>
+                        <span>${item.label}</span>
+                    </div>
+                    <div>
+                        <strong>${item.value}</strong>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load recent Aktivitas
+        function loadRecentActivity() {
+            const activityDiv = Dokumen.getElementById('recentActivity');
+
+            const activities = [
+                { Tipe: 'Berhasil', Judul: 'Profil Diperbarui successfully', Waktu: '2 days ago' },
+                { Tipe: 'Info', Judul: 'Kata Sandi changed', Waktu: '1 week ago' },
+                { Tipe: 'primary', Judul: 'New Dokumen uploaded', Waktu: '2 weeks ago' },
+                { Tipe: 'Peringatan', Judul: 'Pinjaman Aplikasi submitted', Waktu: '3 weeks ago' },
+                { Tipe: 'Berhasil', Judul: 'Account verified', Waktu: '1 month ago' }
+            ];
+
+            activityDiv.innerHTML = activities.map(Aktivitas => `
+                <div class="Aktivitas-item">
+                    <div class="Aktivitas-icon icon-${Aktivitas.Tipe}">
+                        <i class="fas fa-${getActivityIcon(Aktivitas.Tipe)}"></i>
+                    </div>
+                    <div class="Aktivitas-content">
+                        <div class="Aktivitas-Judul">${Aktivitas.Judul}</div>
+                        <div class="Aktivitas-Waktu">${Aktivitas.Waktu}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Quick action functions
+        function editProfile() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('editProfileModal'));
+            modal.show();
+        }
+
+        function editPersonalInfo() {
+            editProfile();
+        }
+
+        function editAccountInfo() {
+            
+        }
+
+        function editSecuritySettings() {
+            
+        }
+
+        function changePassword() {
+            const modal = new bootstrap.Modal(Dokumen.getElementById('changePasswordModal'));
+            modal.show();
+        }
+
+        function enable2FA() {
+            
+        }
+
+        function changeAvatar() {
+            
+        }
+
+        function downloadProfile() {
+            
+        }
+
+        function downloadData() {
+            
+        }
+
+        function contactSupport() {
+            
+        }
+
+        function uploadDocument() {
+            
+        }
+
+        function viewDocument(docId) {
+            Peringatan(`View Dokumen: ${docId}`);
+        }
+
+        function downloadDocument(docId) {
+            Peringatan(`Unduh Dokumen: ${docId}`);
+        }
+
+        function saveProfile() {
+            const csrfToken = Dokumen.getElementById('csrfToken').value;
+            const firstName = Dokumen.getElementById('firstName').value;
+            const lastName = Dokumen.getElementById('lastName').value;
+            const Email = Dokumen.getElementById('Email').value;
+            const Telepon = Dokumen.getElementById('Telepon').value;
+
+            if (!firstName || !lastName || !Email || !Telepon) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+
+            // Validate CSRF token
+            if (!validateCSRFToken(csrfToken)) {
+                Peringatan('Tidak Valid CSRF token. Please refresh the page and try again.');
+                return;
+            }
+
+            // Prepare Data with CSRF token
+            const profileData = {
+                csrf_token: csrfToken,
+                firstName: firstName,
+                lastName: lastName,
+                Email: Email,
+                Telepon: Telepon,
+                Alamat: Dokumen.getElementById('Alamat').value,
+                Kota: Dokumen.getElementById('Kota').value,
+                postalCode: Dokumen.getElementById('postalCode').value,
+                dateOfBirth: Dokumen.getElementById('dateOfBirth').value,
+                gender: Dokumen.getElementById('gender').value
+            };
+
+            // Send Data to API
+            fetch('/mono/API/crud.php?path=member_profile&action=Perbarui', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Tipe': 'Aplikasi/json',
+                    'X-CSRF-Token': csrfToken
+                },
+                body: JSON.stringify(profileData)
+            })
+                .then(response => response.json())
+                .then(Data => {
+                    if (Data.Berhasil) {
+                        showSuccess('Profil Diperbarui successfully!');
+
+                        // Tutup modal
+                        const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('editProfileModal'));
+                        modal.hide();
+
+                        // Reload Profil Data
+                        loadProfileData();
+                    } else {
+                        showError('Failed to Perbarui Profil: ' + Data.Pesan);
+                    }
+                })
+                .catch(Error => {
+                    console.Error('Error updating Profil:', Error);
+                    showError('Terjadi kesalahan while updating Profil');
+                });
+        }
+
+        function updatePassword() {
+            const currentPassword = Dokumen.getElementById('currentPassword').value;
+            const newPassword = Dokumen.getElementById('newPassword').value;
+            const confirmPassword = Dokumen.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                Peringatan('Please fill in Semua fields');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                Peringatan('New passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                alert('Kata Sandi must be at least 8 characters long');
+                return;
+            }
+
+            showSuccess('Kata Sandi changed successfully!');
+
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+            modal.hide();
+
+            // Reset form
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('newPassword').value;
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            const strengthText = document.getElementById('passwordStrengthText');
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (Kata Sandi.match(/[a-z]/)) strength++;
+            if (Kata Sandi.match(/[A-Z]/)) strength++;
+            if (Kata Sandi.match(/[0-9]/)) strength++;
+            if (Kata Sandi.match(/[^a-zA-Z0-9]/)) strength++;
+
+            strengthBar.className = 'Kata Sandi-strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+                strengthText.textContent = 'Kata Sandi strength: Weak';
+            } else if (strength <= 4) {
+                strengthBar.classList.add('strength-medium');
+                strengthText.textContent = 'Kata Sandi strength: Medium';
+            } else {
+                strengthBar.classList.add('strength-strong');
+                strengthText.textContent = 'Kata Sandi strength: Strong';
+            }
+        }
+
+        // Utility functions
+        function getDocumentIcon(type) {
+            const icons = {
+                'ktp': 'id-card',
+                'kk': 'Pengguna',
+                'npwp': 'File-invoice',
+                'slip_gaji': 'File-invoice-dollar',
+                'foto': 'Gambar',
+                'other': 'File-alt'
+            };
+            return icons[type] || 'File-alt';
+        }
+
+        function getActivityIcon(type) {
+            const icons = {
+                'Berhasil': 'check',
+                'Peringatan': 'exclamation-triangle',
+                'danger': 'times',
+                'Info': 'Info',
+                'primary': 'Pengguna'
+            };
+            return icons[type] || 'circle';
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Date(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(message) {
+            
+        }
+
+        function showError(message) {
+            console.error('Error:', message);
+        }
+
+        // Get demo profile data
+        function getDemoProfileData() {
+            return {
+                name: 'John Doe',
+                member_id: 'M-2023-001234',
+                member_since: '2023-01-15',
+                phone: '+62 812-3456-7890',
+                email: 'john.doe@Email.com',
+                date_of_birth: '1985-05-15',
+                gender: 'male',
+                address: 'Jl. Sudirman Tidak. 123, Jakarta Selatan',
+                city: 'Jakarta',
+                postal_code: '12345',
+                account_number: '1234-5678-9012',
+                account_type: 'Regular Simpanan',
+                branch: 'Jakarta Main Branch',
+                last_login: '2026-03-17T10:30:00Z',
+                password_changed: '2026-02-15T00:00:00Z',
+                documents: [
+                    {
+                        id: '1',
+                        name: 'KTP',
+                        type: 'ktp',
+                        status: 'verified',
+                        uploaded_at: '2023-01-15T00:00:00Z'
+                    },
+                    {
+                        id: '2',
+                        name: 'Kartu Keluarga',
+                        type: 'kk',
+                        status: 'verified',
+                        uploaded_at: '2023-01-15T00:00:00Z'
+                    },
+                    {
+                        id: '3',
+                        name: 'NPWP',
+                        type: 'npwp',
+                        status: 'verified',
+                        uploaded_at: '2023-01-16T00:00:00Z'
+                    },
+                    {
+                        id: '4',
+                        name: 'Slip Gaji',
+                        type: 'slip_gaji',
+                        status: 'expired',
+                        uploaded_at: '2025-12-01T00:00:00Z'
+                    }
+                ]
+            };
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.location.href = 'Masuk.html';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koperasi SaaS - Mobile Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3498db">
+    <meta name="description" content="Aplikasi mobile banking untuk koperasi">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Koperasi Mobile">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/frontend/manifest.json">
+    
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="/frontend/assets/images/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/frontend/assets/images/icon-32x32.png">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .mobile-header {
+            background: #3498db;
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .balance-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .mobile-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .mobile-nav .nav-item:hover, .mobile-nav .nav-item.active {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .mobile-nav .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .mobile-nav .nav-item span {
+            font-size: 0.8rem;
+        }
+        
+        .install-prompt {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .offline-indicator {
+            background: #f39c12;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: none;
+        }
+        
+        .offline-indicator.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Development Mode Indicator -->
+    <div id="devIndicator" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+        color: white;
+        text-align: center;
+        padding: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        z-index: 9999;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    ">
+        🔧 DEVELOPMENT MODE - PWA Features Disabled
+        <button onclick="clearCache()" style="
+            margin-left: 20px;
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        ">Clear Cache</button>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-coop"></i> Koperasi Mobile</h1>
+            <div>
+                <i class="fas fa-bell" onclick="showNotifications()"></i>
+                <i class="fas fa-user-circle ms-3" onclick="showProfile()"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator">
+        <i class="fas fa-wifi"></i> Anda sedang offline - menggunakan data tersimpan
+    </div>
+    
+    <!-- Install Prompt -->
+    <div id="installPrompt" class="install-prompt" style="display: none;">
+        <i class="fas fa-download"></i>
+        <strong>Install Aplikasi</strong><br>
+        <small>Instal aplikasi untuk pengalaman lebih baik</small>
+    </div>
+    
+    <!-- Balance Card -->
+    <div class="balance-card">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <small>Saldo Total</small>
+                <div class="balance-amount">Rp 5.250.000</div>
+                <small class="text-white-50">Akun: 1234567890</small>
+            </div>
+            <div>
+                <i class="fas fa-eye" onclick="toggleBalance()"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="#" class="action-card primary" onclick="showTransfer()">
+            <i class="fas fa-exchange-alt"></i>
+            <strong>Transfer</strong>
+            <small>Kirim uang</small>
+        </a>
+        
+        <a href="#" class="action-card success" onclick="showDeposit()">
+            <i class="fas fa-piggy-bank"></i>
+            <strong>Simpanan</strong>
+            <small>Tambah saldo</small>
+        </a>
+        
+        <a href="#" class="action-card warning" onclick="showLoan()">
+            <i class="fas fa-hand-holding-usd"></i>
+            <strong>Pinjaman</strong>
+            <small>Ajukan pinjaman</small>
+        </a>
+        
+        <a href="#" class="action-card danger" onclick="showPayment()">
+            <i class="fas fa-qrcode"></i>
+            <strong>Bayar</strong>
+            <small>QRIS/E-wallet</small>
+        </a>
+    </div>
+    
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav">
+        <div class="d-flex justify-content-around">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transaksi</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Analitik</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Pengaturan</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallPrompt();
+        });
+        
+        function showInstallPrompt() {
+            const installPrompt = document.getElementById('installPrompt');
+            installPrompt.style.display = 'block';
+        }
+        
+        document.getElementById('installPrompt').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                
+                if (outcome === 'accepted') {
+                    document.getElementById('installPrompt').style.display = 'none';
+                }
+            }
+        });
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/frontend/service-worker.js')
+                .then(registration => {
+                    console.log('SW registered: ', registration);
+                })
+                .catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+        }
+        
+        // Online/Offline Detection
+        function updateOnlineStatus() {
+            const offlineIndicator = document.getElementById('offlineIndicator');
+            
+            if (navigator.onLine) {
+                offlineIndicator.classList.remove('show');
+                syncOfflineData();
+            } else {
+                offlineIndicator.classList.add('show');
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        // Sync offline data when back online
+        function syncOfflineData() {
+            console.log('Syncing offline data...');
+            // Implementation for syncing offline transactions
+        }
+        
+        // Balance visibility toggle
+        let balanceVisible = true;
+        function toggleBalance() {
+            const balanceElement = document.querySelector('.balance-amount');
+            balanceVisible = !balanceVisible;
+            
+            if (balanceVisible) {
+                balanceElement.textContent = 'Rp 5.250.000';
+            } else {
+                balanceElement.textContent = 'Rp •••••••';
+            }
+        }
+        
+        // Action handlers
+        function showTransfer() {
+            window.location.href = '/frontend/pages/transfer.html';
+        }
+        
+        function showDeposit() {
+            window.location.href = '/frontend/pages/savings/deposit.html';
+        }
+        
+        function showLoan() {
+            window.location.href = '/frontend/pages/loans/apply.html';
+        }
+        
+        function showPayment() {
+            showPaymentModal();
+        }
+        
+        function showPaymentModal() {
+            // Create payment modal
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div class="modal fade show" style="display: block;">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Pilih Metode Pembayaran</h5>
+                                <button type="button" class="btn-close" onclick="this.closest('.modal').remove()"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" onclick="payWithQRIS()">
+                                        <i class="fas fa-qrcode"></i> QRIS
+                                    </button>
+                                    <button class="btn btn-success" onclick="payWithGoPay()">
+                                        <i class="fas fa-wallet"></i> GoPay
+                                    </button>
+                                    <button class="btn btn-danger" onclick="payWithOVO()">
+                                        <i class="fas fa-wallet"></i> OVO
+                                    </button>
+                                    <button class="btn btn-info" onclick="payWithDana()">
+                                        <i class="fas fa-wallet"></i> DANA
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function payWithQRIS() {
+            // Generate QRIS payment
+            fetch('/core/api/payment_gateway.php?action=create_qris', {
+                method: 'POST',
+                body: JSON.stringify({
+                    order_id: Date.now(),
+                    amount: 100000,
+                    description: 'Pembayaran QRIS'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showQRCode(data.qr_code);
+                }
+            });
+        }
+        
+        function showQRCode(qrCode) {
+            // Display QR code
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div class="modal fade show" style="display: block;">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Scan QR Code</h5>
+                                <button type="button" class="btn-close" onclick="this.closest('.modal').remove()"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img src="data:image/png;base64,${qrCode}" style="width: 200px; height: 200px;">
+                                <p class="mt-3">Scan QR code dengan aplikasi pembayaran Anda</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOnlineStatus();
+            
+            // Periodic balance update
+            setInterval(() => {
+                if (navigator.onLine) {
+                    updateBalance();
+                }
+            }, 30000); // Update every 30 seconds
+        });
+        
+        function updateBalance() {
+            // Fetch latest balance from API
+            fetch('/core/api/user_balance.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.balance-amount').textContent = 
+                            'Rp ' + data.balance.toLocaleString('id-ID');
+                    }
+                })
+                .catch(error => {
+                    console.log('Balance update failed:', error);
+                });
+        }
+    </script>
+
+    <script>
+    // Development Mode Script
+    console.log('🔧 DEVELOPMENT MODE ACTIVE');
+    console.log('📱 PWA Features: DISABLED');
+    console.log('🔄 Cache: DISABLED');
+    
+    // Clear cache function
+    function clearCache() {
+        if ('caches' in window) {
+            caches.keys().then(function(cacheNames) {
+                return Promise.all(
+                    cacheNames.map(function(cacheName) {
+                        return caches.delete(cacheName);
+                    })
+                );
+            }).then(function() {
+                console.log('✅ All caches cleared');
+                alert('All caches cleared! Page will reload.');
+                location.reload();
+            });
+        }
+    }
+    
+    // Disable service worker registration
+    if ('serviceWorker' in navigator) {
+        console.log('📱 Service Worker: DISABLED (Development Mode)');
+        // Don't register service worker in development
+    }
+    
+    // Disable install prompt
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        console.log('📱 Install Prompt: DISABLED (Development Mode)');
+    });
+    
+    // Add development mode styles
+    document.addEventListener('DOMContentLoaded', function() {
+        const devIndicator = document.getElementById('devIndicator');
+        if (devIndicator) {
+            devIndicator.innerHTML += ' - Last Updated: ' + new Date().toLocaleTimeString();
+        }
+        
+        // Add development mode class to body
+        document.body.classList.add('development-mode');
+        
+        // Disable offline indicator
+        const offlineIndicator = document.getElementById('offlineIndicator');
+        if (offlineIndicator) {
+            offlineIndicator.style.display = 'none';
+        }
+        
+        // Disable install prompt
+        const installPrompt = document.getElementById('installPrompt');
+        if (installPrompt) {
+            installPrompt.style.display = 'none';
+        }
+    });
+    
+    // Auto-refresh every 5 minutes in development
+    setInterval(function() {
+        console.log('🔄 Auto-refresh (Development Mode)');
+        // Uncomment below to enable auto-refresh
+        // location.reload();
+    }, 300000); // 5 minutes
+    </script>
+
+</body>
+</html>

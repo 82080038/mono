@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penagihan Manajemen - Penagih Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/Semua.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/Grafik.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    
+    <style>
+        .header {
+            background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .btn-Keluar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: Tidak Ada;
+        }
+        
+        .btn-Keluar:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .Penagihan-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #fd7e14;
+            cursor: pointer;
+        }
+        
+        .Penagihan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .Prioritas-critical { border-left-color: #dc3545; }
+        .Prioritas-high { border-left-color: #fd7e14; }
+        .Prioritas-medium { border-left-color: #ffc107; }
+        .Prioritas-low { border-left-color: #28a745; }
+        
+        .Status-new { background-color: #d1ecf1; }
+        .Status-in-progress { background-color: #fff3cd; }
+        .Status-Selesai { background-color: #d4edda; }
+        .Status-failed { background-color: #f8d7da; }
+        .Status-partial { background-color: #e2e3e5; }
+        
+        .Penagihan-Status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .Status-new-badge { background: #17a2b8; color: white; }
+        .Status-in-progress-badge { background: #ffc107; color: #000; }
+        .Status-Selesai-badge { background: #28a745; color: white; }
+        .Status-failed-badge { background: #dc3545; color: white; }
+        .Status-partial-badge { background: #6c757d; color: white; }
+        
+        .Pembayaran-method {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        
+        .method-cash { background: #28a745; color: white; }
+        .method-transfer { background: #007bff; color: white; }
+        .method-check { background: #6c757d; color: white; }
+        .method-other { background: #fd7e14; color: white; }
+        
+        .route-optimization {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .Penagihan-timeline {
+            Posisi: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            Posisi: relative;
+            padding-bottom: 1rem;
+            border-left: 2px solid #dee2e6;
+            padding-left: 1rem;
+            margin-left: -1px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            Posisi: absolute;
+            left: -6px;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fd7e14;
+            border: 2px solid white;
+        }
+        
+        .timeline-item.Selesai::before {
+            background: #28a745;
+        }
+        
+        .timeline-item.failed::before {
+            background: #dc3545;
+        }
+        
+        .quick-action {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: Semua 0.3s;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            border-color: #fd7e14;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .quick-action i {
+            font-size: 2rem;
+            color: #fd7e14;
+            margin-bottom: 0.5rem;
+        }
+        
+        .Jumlah-collected {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .Jumlah-Menunggu {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        
+        .Berhasil-Tarif {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .Berhasil-bar {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .Berhasil-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+            transition: width 0.3s;
+        }
+        
+        .Penagihan-Ringkasan {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .Anggota-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fd7e14;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-hand-holding-usd"></i> Penagihan Manajemen</h1>
+                <p class="mb-0">Penagih - Debt Penagihan & Pembayaran Manajemen</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="Nama Pengguna">Memuat...</span>
+                <span class="badge bg-light text-dark" id="systemStatus">Sistem Online</span>
+                <a href="/mono/Masuk.html" class="btn-Keluar" onclick="Keluar()">Keluar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid mt-4">
+        <!-- Collection Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-alert text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Daftar-alt fa-2x mb-2"></i>
+                        <h5>Total Collections</h5>
+                        <h3 id="totalCollections">0</h3>
+                        <p class="mb-0">Assigned Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-Berhasil text-white">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h5>Selesai</h5>
+                        <h3 id="completedCollections">0</h3>
+                        <p class="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                        <h5>Jumlah Collected</h5>
+                        <h3 id="amountCollected">0</h3>
+                        <p class="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-Persentase fa-2x mb-2"></i>
+                        <h5>Berhasil Tarif</h5>
+                        <h3 id="successRate">0%</h3>
+                        <p class="mb-0">Hari Ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Collection Queue -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-Daftar"></i> Penagihan Queue</h5>
+                        <div>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="priorityFilter" onchange="filterCollections()">
+                                <option value="">Semua Prioritas</option>
+                                <option value="critical">Critical</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                            <select class="form-Pilih form-Pilih-sm d-inline-block w-auto me-2" id="statusFilter" onchange="filterCollections()">
+                                <option value="">Semua Status</option>
+                                <option value="new">New</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="Selesai">Selesai</option>
+                                <option value="failed">Failed</option>
+                                <option value="partial">Partial</option>
+                            </select>
+                            <button class="btn btn-alert btn-sm" onclick="optimizeRoute()">
+                                <i class="fas fa-route"></i> Optimize Route
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="collectionsQueue">
+                            <!-- Collection items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Route Map -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-map-marked-alt"></i> Penagihan Route</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="collectionMap" class="map-container"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="startNewCollection()">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <h6>New Penagihan</h6>
+                                    <small class="text-muted">Start Tugas</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="quick-action" onclick="viewTodayRoute()">
+                                    <i class="fas fa-route"></i>
+                                    <h6>Hari Ini's Route</h6>
+                                    <small Kelas="text-muted">View route</small>
+                                </div>
+                            </div>
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="recordPayment()">
+                                    <i Kelas="fas fa-money-bill"></i>
+                                    <h6>Record Pembayaran</h6>
+                                    <small Kelas="text-muted">Manual entry</small>
+                                </div>
+                            </div>
+                            <div Kelas="col-6 mb-2">
+                                <div Kelas="quick-action" onclick="generateCollectionReport()">
+                                    <i Kelas="fas fa-File-alt"></i>
+                                    <h6>Laporan</h6>
+                                    <small Kelas="text-muted">View Laporan</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Penagihan Ringkasan -->
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Grafik-pie"></i> Penagihan Ringkasan</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="Penagihan-Ringkasan mb-3">
+                            <div Kelas="d-flex justify-content-between align-items-center mb-2">
+                                <span>Target Jumlah:</span>
+                                <strong id="targetAmount">0</strong>
+                            </div>
+                            <div Kelas="d-flex justify-content-between align-items-center mb-2">
+                                <span>Collected Jumlah:</span>
+                                <strong Kelas="Jumlah-collected" id="collectedAmount">0</strong>
+                            </div>
+                            <div Kelas="d-flex justify-content-between align-items-center mb-2">
+                                <span>Menunggu Jumlah:</span>
+                                <strong Kelas="Jumlah-Menunggu" id="pendingAmount">0</strong>
+                            </div>
+                            <div Kelas="progress mb-2">
+                                <div Kelas="progress-bar bg-Berhasil" id="collectionProgress" style="width: 0%"></div>
+                            </div>
+                            <small Kelas="text-muted">Penagihan Progress</small>
+                        </div>
+                        
+                        <div Kelas="Berhasil-Tarif">
+                            <span>Berhasil Tarif:</span>
+                            <div Kelas="Berhasil-bar">
+                                <div Kelas="Berhasil-fill" id="successRateBar" style="width: 0%"></div>
+                            </div>
+                            <span id="successRateText">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Aktif Penagihan -->
+                <div Kelas="card mb-3">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-tasks"></i> Aktif Penagihan</h5>
+                    </div>
+                    <div Kelas="card-body" id="activeCollection">
+                        <div Kelas="text-center text-muted">
+                            <i Kelas="fas fa-hand-holding-usd fa-3x mb-3"></i>
+                            <p>Tidak Aktif Penagihan</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activities -->
+                <div Kelas="card">
+                    <div Kelas="card-header">
+                        <h5><i Kelas="fas fa-Riwayat"></i> Recent Activities</h5>
+                    </div>
+                    <div Kelas="card-body">
+                        <div Kelas="Penagihan-timeline" id="activityTimeline">
+                            <!-- Timeline items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Penagihan Detail Modal -->
+    <div Kelas="modal fade" id="collectionModal" tabindex="-1">
+        <div Kelas="modal-dialog modal-lg">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Penagihan Detail</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body" id="collectionDetails">
+                    <!-- Penagihan Detail will be loaded here -->
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Tutup</button>
+                    <button Tipe="button" Kelas="btn btn-Peringatan" onclick="rescheduleCollection()">
+                        <i Kelas="fas fa-calendar"></i> Reschedule
+                    </button>
+                    <button Tipe="button" Kelas="btn btn-Berhasil" onclick="recordPaymentFromModal()">
+                        <i Kelas="fas fa-money-bill"></i> Record Pembayaran
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pembayaran Recording Modal -->
+    <div Kelas="modal fade" id="paymentModal" tabindex="-1">
+        <div Kelas="modal-dialog">
+            <div Kelas="modal-content">
+                <div Kelas="modal-header">
+                    <h5 Kelas="modal-Judul">Record Pembayaran</h5>
+                    <button Tipe="button" Kelas="btn-Tutup" Data-bs-dismiss="modal"></button>
+                </div>
+                <div Kelas="modal-body">
+                    <Formulir id="paymentForm">
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Penagihan ID</label>
+                            <input Tipe="text" Kelas="form-control" id="paymentCollectionId" readonly>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Anggota Nama</label>
+                            <input Tipe="text" Kelas="form-control" id="paymentMemberName" readonly>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Jumlah Due</label>
+                            <input Tipe="text" Kelas="form-control" id="paymentAmountDue" readonly>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Jumlah Collected *</label>
+                            <div Kelas="input-group">
+                                <span Kelas="input-group-text">Rp</span>
+                                <input Tipe="Nomor" Kelas="form-control" id="paymentAmountCollected" Wajib min="0">
+                            </div>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Pembayaran Method *</label>
+                            <Pilih Kelas="Formulir-Pilih" id="paymentMethod" Wajib>
+                                <option value="">Pilih method</option>
+                                <option value="cash">Cash</option>
+                                <option value="transfer">Bank Transfer</option>
+                                <option value="check">Check</option>
+                                <option value="other">Other</option>
+                            </Pilih>
+                        </div>
+                        <div Kelas="mb-3">
+                            <label Kelas="form-label">Pembayaran Notes</label>
+                            <textarea Kelas="form-control" id="paymentNotes" rows="3" placeholder="Enter Pembayaran notes..."></textarea>
+                        </div>
+                    </Formulir>
+                </div>
+                <div Kelas="modal-footer">
+                    <button Tipe="button" Kelas="btn btn-secondary" Data-bs-dismiss="modal">Batal</button>
+                    <button Tipe="button" Kelas="btn btn-primary" onclick="savePayment()">
+                        <i Kelas="fas fa-Simpan"></i> Simpan Pembayaran
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let authToken = null;
+        let collections = [];
+        let activeCollection = null;
+        let map = null;
+        let markers = [];
+
+        // Initialize page
+        Dokumen.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadCollections();
+            loadStatistics();
+            initializeMap();
+            loadActivityTimeline();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Get Pengguna Info from localStorage
+            const Pengguna = localStorage.getItem('Pengguna') || sessionStorage.getItem('Pengguna');
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!Pengguna || !token) {
+                window.Lokasi.href = 'Masuk.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(Pengguna);
+            authToken = token;
+            
+            // Perbarui UI
+            Dokumen.getElementById('Nama Pengguna').textContent = currentUser.Nama;
+            
+            // Check if Pengguna is Penagih
+            if (currentUser.role !== 'Penagih') {
+                Peringatan('Anda tidak memiliki akses ke halaman ini');
+                window.Lokasi.href = 'Dashboard.html';
+                return;
+            }
+        }
+
+        // Load collections
+        async function loadCollections() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=collections', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        collections = Data.Data;
+                        displayCollections();
+                        updateMapMarkers();
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat collections:', Error);
+                // Use demo Data
+                collections = getDemoCollections();
+                displayCollections();
+                updateMapMarkers();
+            }
+        }
+
+        // Display collections
+        function displayCollections() {
+            const queue = Dokumen.getElementById('collectionsQueue');
+            const priorityFilter = Dokumen.getElementById('priorityFilter').value;
+            const statusFilter = Dokumen.getElementById('statusFilter').value;
+            
+            let filteredCollections = collections;
+            
+            // Filter by Prioritas
+            if (priorityFilter) {
+                filteredCollections = filteredCollections.Filter(c => c.Prioritas === priorityFilter);
+            }
+            
+            // Filter by Status
+            if (statusFilter) {
+                filteredCollections = filteredCollections.Filter(c => c.Status === statusFilter);
+            }
+            
+            queue.innerHTML = '';
+            
+            if (filteredCollections.length === 0) {
+                queue.innerHTML = '<div class="text-center text-muted py-4">Tidak collections found</div>';
+                return;
+            }
+            
+            filteredCollections.forEach(Penagihan => {
+                const collectionCard = Dokumen.createElement('div');
+                collectionCard.className = `Penagihan-card card mb-2 Prioritas-${Penagihan.Prioritas} Status-${Penagihan.Status}`;
+                collectionCard.innerHTML = `
+                    <div Kelas="card-body">
+                        <div Kelas="row align-items-center">
+                            <div Kelas="col-md-8">
+                                <div Kelas="d-flex align-items-center">
+                                    <div Kelas="Anggota-avatar me-3">
+                                        ${Penagihan.member_name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h6 Kelas="mb-1">${Penagihan.member_name}</h6>
+                                        <p Kelas="mb-1">Pinjaman: ${Penagihan.loan_number} | Due: ${formatDate(Penagihan.due_date)}</p>
+                                        <small Kelas="text-muted">
+                                            <i Kelas="fas fa-map-marker-alt"></i> ${Penagihan.Alamat}
+                                            <br>
+                                            <i Kelas="fas fa-Telepon"></i> ${Penagihan.phone_number}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div Kelas="col-md-4 text-end">
+                                <div Kelas="mb-2">
+                                    <strong>Jumlah Due:</strong> ${formatCurrency(Penagihan.amount_due)}
+                                </div>
+                                <div Kelas="mb-2">
+                                    <strong>Days Telat:</strong> 
+                                    <span Kelas="badge bg-${Penagihan.days_overdue > 30 ? 'danger' : Penagihan.days_overdue > 7 ? 'Peringatan' : 'Info'}">
+                                        ${Penagihan.days_overdue} days
+                                    </span>
+                                </div>
+                                <div Kelas="mb-2">
+                                    <span Kelas="Penagihan-Status Status-${Penagihan.Status}-badge">${Penagihan.Status.replace('_', ' ')}</span>
+                                </div>
+                                <div Kelas="mt-2">
+                                    <button Kelas="btn btn-sm btn-outline-primary" onclick="viewCollectionDetails('${Penagihan.id}')">
+                                        <i Kelas="fas fa-eye"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="startCollection('${Penagihan.id}')" ${Penagihan.Status !== 'new' ? 'disabled' : ''}>
+                                        <i Kelas="fas fa-play"></i>
+                                    </button>
+                                    <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="recordPaymentDirect('${Penagihan.id}')" ${Penagihan.Status === 'completed' ? 'disabled' : ''}>
+                                        <i Kelas="fas fa-money-bill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                queue.appendChild(collectionCard);
+            });
+        }
+
+        // Load Statistik
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/mono/API/crud.php?path=collector_statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.OK) {
+                    const Data = await response.json();
+                    if (Data.Berhasil) {
+                        updateStatistics(Data.Data);
+                    }
+                }
+            } catch (Error) {
+                console.Error('Error Memuat Statistik:', Error);
+                // Use demo Data
+                updateStatistics({
+                    total_collections: 15,
+                    completed_collections: 8,
+                    amount_collected: 8500000,
+                    success_rate: 73.3
+                });
+            }
+        }
+
+        // Perbarui Statistik
+        function updateStatistics(stats) {
+            Dokumen.getElementById('totalCollections').textContent = stats.total_collections || 0;
+            Dokumen.getElementById('completedCollections').textContent = stats.completed_collections || 0;
+            Dokumen.getElementById('amountCollected').textContent = formatCurrency(stats.amount_collected || 0);
+            Dokumen.getElementById('successRate').textContent = (stats.success_rate || 0).toFixed(1) + '%';
+            
+            // Perbarui Penagihan Ringkasan
+            const targetAmount = 15000000; // Example Target
+            const collectedAmount = stats.amount_collected || 0;
+            const pendingAmount = targetAmount - collectedAmount;
+            const progress = (collectedAmount / targetAmount) * 100;
+            
+            Dokumen.getElementById('targetAmount').textContent = formatCurrency(targetAmount);
+            Dokumen.getElementById('collectedAmount').textContent = formatCurrency(collectedAmount);
+            Dokumen.getElementById('pendingAmount').textContent = formatCurrency(pendingAmount);
+            Dokumen.getElementById('collectionProgress').style.width = progress + '%';
+            
+            // Perbarui Berhasil Tarif
+            Dokumen.getElementById('successRateBar').style.width = (stats.success_rate || 0) + '%';
+            Dokumen.getElementById('successRateText').textContent = (stats.success_rate || 0).toFixed(1) + '%';
+        }
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('collectionMap').setView([-6.2088, 106.8456], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Perbarui map markers
+        function updateMapMarkers() {
+            // Hapus existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            // Tambah markers for collections
+            collections.forEach(Penagihan => {
+                if (Penagihan.latitude && Penagihan.longitude) {
+                    const markerColor = getMarkerColor(Penagihan.Prioritas);
+                    const marker = L.marker([Penagihan.latitude, Penagihan.longitude], {
+                        icon: L.divIcon({
+                            className: 'Penagihan-marker',
+                            html: `<div style="background: ${markerColor}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><i Kelas="fas fa-hand-holding-usd" style="font-size: 10px;"></i></div>`,
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map)
+                    .bindPopup(`
+                        <strong>${Penagihan.member_name}</strong><br>
+                        Pinjaman: ${Penagihan.loan_number}<br>
+                        Jumlah: ${formatCurrency(Penagihan.amount_due)}<br>
+                        Status: <span Kelas="badge bg-${getStatusColor(Penagihan.Status)}">${Penagihan.Status.replace('_', ' ')}</span><br>
+                        Prioritas: <span Kelas="badge bg-${getPriorityColor(Penagihan.Prioritas)}">${Penagihan.Prioritas}</span>
+                    `);
+                    
+                    markers.push(marker);
+                }
+            });
+            
+            // Fit map to show Semua markers
+            if (markers.length > 0) {
+                const Grup = new L.featureGroup(markers);
+                map.fitBounds(Grup.getBounds().pad(0.1));
+            }
+        }
+
+        // Load Aktivitas timeline
+        function loadActivityTimeline() {
+            const timeline = Dokumen.getElementById('activityTimeline');
+            
+            const activities = [
+                { Tipe: 'Selesai', Deskripsi: 'Collected Pembayaran from Ahmad Wijaya', Waktu: '2 hours ago', Jumlah: 1500000 },
+                { Tipe: 'failed', Deskripsi: 'Failed to Kontak Siti Nurhaliza', Waktu: '3 hours ago' },
+                { Tipe: 'partial', Deskripsi: 'Partial Pembayaran from Budi Santoso', Waktu: '4 hours ago', Jumlah: 500000 },
+                { Tipe: 'Selesai', Deskripsi: 'Collected Pembayaran from Dian Kartika', Waktu: '5 hours ago', Jumlah: 750000 },
+                { Tipe: 'in_progress', Deskripsi: 'Started Penagihan for Eko Prasetyo', Waktu: '6 hours ago' }
+            ];
+            
+            timeline.innerHTML = activities.map(Aktivitas => `
+                <div Kelas="timeline-item ${Aktivitas.Tipe}">
+                    <div>
+                        <strong>${Aktivitas.Deskripsi}</strong>
+                        ${Aktivitas.Jumlah ? `<br><small Kelas="text-Berhasil">${formatCurrency(Aktivitas.Jumlah)}</small>` : ''}
+                        <br>
+                        <small Kelas="text-muted">${Aktivitas.Waktu}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View Penagihan Detail
+        function viewCollectionDetails(collectionId) {
+            const Penagihan = collections.find(c => c.id === collectionId);
+            if (!Penagihan) return;
+            
+            const Detail = Dokumen.getElementById('collectionDetails');
+            
+            Detail.innerHTML = `
+                <div Kelas="row">
+                    <div Kelas="col-md-6">
+                        <h6>Penagihan Informasi</h6>
+                        <Tabel Kelas="Tabel Tabel-sm">
+                            <tr><td>Penagihan ID:</td><td><strong>${Penagihan.collection_id}</strong></td></tr>
+                            <tr><td>Anggota Nama:</td><td>${Penagihan.member_name}</td></tr>
+                            <tr><td>Anggota ID:</td><td>${Penagihan.member_id}</td></tr>
+                            <tr><td>Pinjaman Nomor:</td><td>${Penagihan.loan_number}</td></tr>
+                            <tr><td>Due Tanggal:</td><td>${formatDate(Penagihan.due_date)}</td></tr>
+                            <tr><td>Days Telat:</td><td><span Kelas="badge bg-${Penagihan.days_overdue > 30 ? 'danger' : Penagihan.days_overdue > 7 ? 'Peringatan' : 'Info'}">${Penagihan.days_overdue} days</span></td></tr>
+                        </Tabel>
+                    </div>
+                    <div Kelas="col-md-6">
+                        <h6>Financial Informasi</h6>
+                        <Tabel Kelas="Tabel Tabel-sm">
+                            <tr><td>Jumlah Due:</td><td><strong>${formatCurrency(Penagihan.amount_due)}</strong></td></tr>
+                            <tr><td>Jumlah Collected:</td><td><strong Kelas="text-Berhasil">${formatCurrency(Penagihan.amount_collected || 0)}</strong></td></tr>
+                            <tr><td>Saldo:</td><td><strong Kelas="text-danger">${formatCurrency(Penagihan.amount_due - (Penagihan.amount_collected || 0))}</strong></td></tr>
+                            <tr><td>Prioritas:</td><td><span Kelas="badge bg-${getPriorityColor(Penagihan.Prioritas)}">${Penagihan.Prioritas}</span></td></tr>
+                            <tr><td>Status:</td><td><span Kelas="badge bg-${getStatusColor(Penagihan.Status)}">${Penagihan.Status.replace('_', ' ')}</span></td></tr>
+                        </Tabel>
+                    </div>
+                </div>
+                
+                <div Kelas="row">
+                    <div Kelas="col-md-12">
+                        <h6>Kontak Informasi</h6>
+                        <Tabel Kelas="Tabel Tabel-sm">
+                            <tr><td>Alamat:</td><td>${Penagihan.Alamat}</td></tr>
+                            <tr><td>Telepon Nomor:</td><td>${Penagihan.phone_number}</td></tr>
+                            <tr><td>Email:</td><td>${Penagihan.Email || 'N/A'}</td></tr>
+                        </Tabel>
+                    </div>
+                </div>
+                
+                <div Kelas="row">
+                    <div Kelas="col-md-12">
+                        <h6>Penagihan Riwayat</h6>
+                        <div Kelas="Tabel-responsive">
+                            <Tabel Kelas="Tabel Tabel-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Tipe</th>
+                                        <th>Jumlah</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Penagihan.payment_history ? Penagihan.payment_history.map(Pembayaran => `
+                                        <tr>
+                                            <td>${formatDate(Pembayaran.Tanggal)}</td>
+                                            <td>${Pembayaran.Tipe}</td>
+                                            <td>${formatCurrency(Pembayaran.Jumlah)}</td>
+                                            <td><span Kelas="Pembayaran-method method-${Pembayaran.method}">${Pembayaran.method}</span></td>
+                                            <td><span Kelas="badge bg-${Pembayaran.Status === 'Selesai' ? 'Berhasil' : 'Peringatan'}">${Pembayaran.Status}</span></td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="5">Tidak Pembayaran Riwayat available</td></tr>'}
+                                </tbody>
+                            </Tabel>
+                        </div>
+                    </div>
+                </div>
+                
+                ${Penagihan.notes ? `
+                    <div Kelas="row">
+                        <div Kelas="col-md-12">
+                            <h6>Notes</h6>
+                            <p>${Penagihan.notes}</p>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('collectionModal'));
+            modal.show();
+        }
+
+        // Start Penagihan
+        function startCollection(collectionId) {
+            const Penagihan = collections.find(c => c.id === collectionId);
+            if (!Penagihan) return;
+            
+            // Perbarui Status
+            Penagihan.Status = 'in_progress';
+            Penagihan.started_at = new Tanggal().toISOString();
+            
+            activeCollection = Penagihan;
+            
+            displayCollections();
+            updateActiveCollection();
+            
+            showSuccess('Penagihan started!');
+        }
+
+        // Perbarui Aktif Penagihan
+        function updateActiveCollection() {
+            const activeDiv = Dokumen.getElementById('activeCollection');
+            
+            if (!activeCollection) {
+                activeDiv.innerHTML = `
+                    <div Kelas="text-center text-muted">
+                        <i Kelas="fas fa-hand-holding-usd fa-3x mb-3"></i>
+                        <p>Tidak Aktif Penagihan</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            activeDiv.innerHTML = `
+                <div Kelas="mb-3">
+                    <h6>${activeCollection.member_name}</h6>
+                    <span Kelas="Penagihan-Status Status-${activeCollection.Status}-badge">${activeCollection.Status.replace('_', ' ')}</span>
+                </div>
+                <div Kelas="mb-2">
+                    <small Kelas="text-muted">Pinjaman: ${activeCollection.loan_number}</small>
+                </div>
+                <div Kelas="mb-2">
+                    <small Kelas="text-muted">Jumlah: ${formatCurrency(activeCollection.amount_due)}</small>
+                </div>
+                <div Kelas="mb-2">
+                    <small Kelas="text-muted">Started: ${formatDateTime(activeCollection.started_at)}</small>
+                </div>
+                <div Kelas="d-grid gap-2">
+                    <button Kelas="btn btn-sm btn-outline-primary" onclick="viewCollectionDetails('${activeCollection.id}')">
+                        <i Kelas="fas fa-eye"></i> View Detail
+                    </button>
+                    <button Kelas="btn btn-sm btn-outline-Berhasil" onclick="recordPaymentDirect('${activeCollection.id}')">
+                        <i Kelas="fas fa-money-bill"></i> Record Pembayaran
+                    </button>
+                    <button Kelas="btn btn-sm btn-outline-Peringatan" onclick="completeCollection('${activeCollection.id}')">
+                        <i Kelas="fas fa-check"></i> Complete
+                    </button>
+                </div>
+            `;
+        }
+
+        // Record Pembayaran direct
+        function recordPaymentDirect(collectionId) {
+            const Penagihan = collections.find(c => c.id === collectionId);
+            if (!Penagihan) return;
+            
+            // Load Pembayaran modal
+            Dokumen.getElementById('paymentCollectionId').value = Penagihan.collection_id;
+            Dokumen.getElementById('paymentMemberName').value = Penagihan.member_name;
+            Dokumen.getElementById('paymentAmountDue').value = formatCurrency(Penagihan.amount_due - (Penagihan.amount_collected || 0));
+            
+            const modal = new bootstrap.Modal(Dokumen.getElementById('paymentModal'));
+            modal.show();
+        }
+
+        // Record Pembayaran from modal
+        function recordPaymentFromModal() {
+            recordPaymentDirect(activeCollection.id);
+        }
+
+        // Simpan Pembayaran
+        function savePayment() {
+            const collectionId = Dokumen.getElementById('paymentCollectionId').value;
+            const amountCollected = parseFloat(Dokumen.getElementById('paymentAmountCollected').value);
+            const paymentMethod = Dokumen.getElementById('paymentMethod').value;
+            const paymentNotes = Dokumen.getElementById('paymentNotes').value;
+            
+            if (!amountCollected || !paymentMethod) {
+                Peringatan('Please fill in Semua Wajib fields');
+                return;
+            }
+            
+            const Penagihan = collections.find(c => c.collection_id === collectionId);
+            if (!Penagihan) return;
+            
+            // Perbarui Penagihan
+            if (!Penagihan.amount_collected) {
+                Penagihan.amount_collected = 0;
+            }
+            Penagihan.amount_collected += amountCollected;
+            
+            // Tambah to Pembayaran Riwayat
+            if (!Penagihan.payment_history) {
+                Penagihan.payment_history = [];
+            }
+            Penagihan.payment_history.push({
+                Tanggal: new Tanggal().toISOString(),
+                Tipe: 'Penagihan',
+                Jumlah: amountCollected,
+                method: paymentMethod,
+                Status: 'Selesai',
+                notes: paymentNotes
+            });
+            
+            // Perbarui Status if fully paid
+            if (Penagihan.amount_collected >= Penagihan.amount_due) {
+                Penagihan.Status = 'Selesai';
+                Penagihan.completed_at = new Tanggal().toISOString();
+            }
+            
+            displayCollections();
+            loadStatistics();
+            
+            // Tutup modal and Reset Formulir
+            const modal = bootstrap.Modal.getInstance(Dokumen.getElementById('paymentModal'));
+            modal.hide();
+            Dokumen.getElementById('paymentForm').Reset();
+            
+            showSuccess('Pembayaran recorded successfully!');
+        }
+
+        // Complete Penagihan
+        function completeCollection(collectionId) {
+            if (!Konfirmasi('Are you sure you want to mark this Penagihan as Selesai?')) return;
+            
+            const Penagihan = collections.find(c => c.id === collectionId);
+            if (!Penagihan) return;
+            
+            Penagihan.Status = 'Selesai';
+            Penagihan.completed_at = new Tanggal().toISOString();
+            
+            activeCollection = null;
+            
+            displayCollections();
+            loadStatistics();
+            updateActiveCollection();
+            
+            showSuccess('Penagihan Selesai!');
+        }
+
+        // Optimize route
+        function optimizeRoute() {
+            showSuccess('Route optimization feature will be implemented');
+        }
+
+        // Quick action functions
+        function startNewCollection() {
+            if (collections.Filter(c => c.Status === 'new').length === 0) {
+                Peringatan('Tidak new collections available');
+                return;
+            }
+            
+            // Start first new Penagihan
+            const newCollection = collections.find(c => c.Status === 'new');
+            if (newCollection) {
+                startCollection(newCollection.id);
+            }
+        }
+
+        function viewTodayRoute() {
+            
+        }
+
+        function recordPayment() {
+            if (!activeCollection && collections.Filter(c => c.Status !== 'Selesai').length === 0) {
+                Peringatan('Tidak Aktif collections available');
+                return;
+            }
+            
+            // Use Aktif Penagihan or first incomplete Penagihan
+            const targetCollection = activeCollection || collections.find(c => c.Status !== 'Selesai');
+            if (targetCollection) {
+                recordPaymentDirect(targetCollection.id);
+            }
+        }
+
+        function generateCollectionReport() {
+            
+        }
+
+        // Reschedule Penagihan
+        function rescheduleCollection() {
+            const newDate = prompt('Enter new Penagihan Tanggal (YYYY-MM-DD):');
+            if (!newDate) return;
+            
+            showSuccess('Penagihan rescheduled successfully!');
+        }
+
+        // Filter collections
+        function filterCollections() {
+            displayCollections();
+        }
+
+        // Utility functions
+        function getMarkerColor(Prioritas) {
+            const colors = {
+                'critical': '#dc3545',
+                'high': '#fd7e14',
+                'medium': '#ffc107',
+                'low': '#28a745'
+            };
+            return colors[Prioritas] || '#6c757d';
+        }
+
+        function getStatusColor(Status) {
+            const colors = {
+                'new': 'Info',
+                'in_progress': 'Peringatan',
+                'Selesai': 'Berhasil',
+                'failed': 'danger',
+                'partial': 'secondary'
+            };
+            return colors[Status] || 'secondary';
+        }
+
+        function getPriorityColor(Prioritas) {
+            const colors = {
+                'critical': 'danger',
+                'high': 'Peringatan',
+                'medium': 'Info',
+                'low': 'Berhasil'
+            };
+            return colors[Prioritas] || 'secondary';
+        }
+
+        function formatCurrency(Jumlah) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(Jumlah);
+        }
+
+        function formatDate(dateString) {
+            return new Tanggal(dateString).toLocaleDateString('id-ID');
+        }
+
+        function formatDateTime(dateString) {
+            return new Tanggal(dateString).toLocaleString('id-ID');
+        }
+
+        function showSuccess(Pesan) {
+            
+        }
+
+        function showError(Pesan) {
+            console.Error('Error:', Pesan);
+        }
+
+        // Get demo collections
+        function getDemoCollections() {
+            return [
+                {
+                    id: '1',
+                    collection_id: 'COL-20260317-001',
+                    member_id: 'M-001',
+                    member_name: 'Ahmad Wijaya',
+                    loan_number: 'LN-2026-001',
+                    amount_due: 1500000,
+                    amount_collected: 0,
+                    due_date: '2026-03-15',
+                    days_overdue: 2,
+                    Prioritas: 'high',
+                    Status: 'new',
+                    Alamat: 'Jl. Merdeka Tidak. 123, Jakarta',
+                    phone_number: '08123456789',
+                    Email: 'ahmad@example.com',
+                    latitude: -6.2088,
+                    longitude: 106.8456,
+                    payment_history: []
+                },
+                {
+                    id: '2',
+                    collection_id: 'COL-20260317-002',
+                    member_id: 'M-002',
+                    member_name: 'Siti Nurhaliza',
+                    loan_number: 'LN-2026-002',
+                    amount_due: 2500000,
+                    amount_collected: 1000000,
+                    due_date: '2026-03-10',
+                    days_overdue: 7,
+                    Prioritas: 'critical',
+                    Status: 'in_progress',
+                    Alamat: 'Jl. Sudirman Tidak. 456, Jakarta',
+                    phone_number: '08234567890',
+                    Email: 'siti@example.com',
+                    latitude: -6.2150,
+                    longitude: 106.8500,
+                    payment_history: [
+                        {
+                            Tanggal: '2026-03-17T10:00:00Z',
+                            Tipe: 'Penagihan',
+                            Jumlah: 1000000,
+                            method: 'cash',
+                            Status: 'Selesai',
+                            notes: 'Partial Pembayaran received'
+                        }
+                    ]
+                },
+                {
+                    id: '3',
+                    collection_id: 'COL-20260317-003',
+                    member_id: 'M-003',
+                    member_name: 'Budi Santoso',
+                    loan_number: 'LN-2026-003',
+                    amount_due: 750000,
+                    amount_collected: 750000,
+                    due_date: '2026-03-05',
+                    days_overdue: 12,
+                    Prioritas: 'medium',
+                    Status: 'Selesai',
+                    Alamat: 'Jl. Thamrin Tidak. 789, Jakarta',
+                    phone_number: '08345678901',
+                    Email: 'budi@example.com',
+                    latitude: -6.2000,
+                    longitude: 106.8400,
+                    completed_at: '2026-03-17T14:30:00Z',
+                    payment_history: [
+                        {
+                            Tanggal: '2026-03-17T14:30:00Z',
+                            Tipe: 'Penagihan',
+                            Jumlah: 750000,
+                            method: 'transfer',
+                            Status: 'Selesai',
+                            notes: 'Full Pembayaran received'
+                        }
+                    ]
+                },
+                {
+                    id: '4',
+                    collection_id: 'COL-20260317-004',
+                    member_id: 'M-004',
+                    member_name: 'Dian Kartika',
+                    loan_number: 'LN-2026-004',
+                    amount_due: 3000000,
+                    amount_collected: 500000,
+                    due_date: '2026-03-01',
+                    days_overdue: 16,
+                    Prioritas: 'critical',
+                    Status: 'partial',
+                    Alamat: 'Jl. Gatot Subroto Tidak. 321, Jakarta',
+                    phone_number: '08456789012',
+                    Email: 'dian@example.com',
+                    latitude: -6.1950,
+                    longitude: 106.8350,
+                    payment_history: [
+                        {
+                            Tanggal: '2026-03-17T09:00:00Z',
+                            Tipe: 'Penagihan',
+                            Jumlah: 500000,
+                            method: 'cash',
+                            Status: 'Selesai',
+                            notes: 'Partial Pembayaran, promised to pay remaining Lanjut week'
+                        }
+                    ]
+                }
+            ];
+        }
+
+        // Keluar function
+        function Keluar() {
+            localStorage.removeItem('Pengguna');
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('Pengguna');
+            sessionStorage.removeItem('auth_token');
+            window.Lokasi.href = 'Masuk.html';
+        }
+    </script>
+</body>
+</html>

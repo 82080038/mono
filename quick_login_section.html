@@ -1,0 +1,119 @@
+<!-- Quick Login Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>🚀 Quick Masuk - Test Semua Role</h5>
+                <small class="text-muted">Klik untuk Masuk sebagai role berbeda</small>
+            </div>
+            <div class="card-body">
+                <div class="row" id="quickLoginButtons">
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-primary btn-sm w-100" onclick="quickLogin('test_super_admin@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-user-shield"></i> Super Admin
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-Berhasil btn-sm w-100" onclick="quickLogin('Admin@lamabejaya.coop', 'admin123')">
+                            <i class="fas fa-user-tie"></i> Admin
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-info btn-sm w-100" onclick="quickLogin('test_admin@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-user-cog"></i> Test Admin
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-alert btn-sm w-100" onclick="quickLogin('test_teller@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-cash-Daftar"></i> Teller
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-secondary btn-sm w-100" onclick="quickLogin('test_surveyor@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-Cari-Lokasi"></i> Surveyor
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-dark btn-sm w-100" onclick="quickLogin('test_collector@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-hand-holding-usd"></i> Penagih
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="quickLogin('test_kasir@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-calculator"></i> Kasir
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-outline-Berhasil btn-sm w-100" onclick="quickLogin('test_mantri@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-user"></i> Mantri
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <button class="btn btn-outline-info btn-sm w-100" onclick="quickLogin('test_member@lamabejaya.coop', 'password123')">
+                            <i class="fas fa-user"></i> Anggota
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Quick Masuk untuk testing. Keluar terlebih dahulu sebelum ganti role.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Quick Masuk function
+function quickLogin(Email, Kata Sandi) {
+    // Show Memuat
+    const buttons = Dokumen.querySelectorAll('#quickLoginButtons button');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    // Perform Masuk
+    fetch('/mono/API/auth.php', {
+        method: 'POST',
+        headers: {
+            'Content-Tipe': 'Aplikasi/x-www-Formulir-urlencoded',
+        },
+        body: `action=Masuk&Email=${encodeURIComponent(Email)}&Kata Sandi=${encodeURIComponent(Kata Sandi)}`
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.Berhasil) {
+            // Store session
+            localStorage.setItem('auth_token', result.token);
+            localStorage.setItem('Pengguna', JSON.stringify(result.Pengguna));
+            
+            // Show Berhasil Pesan
+            Peringatan(`Masuk successful! Selamat Datang ${result.Pengguna.Nama} (${result.Pengguna.role})`);
+            
+            // Redirect to appropriate Dashboard
+            const roleDashboards = {
+                'super_admin': 'super_admin_dashboard.html',
+                'Admin': 'admin_dashboard.html',
+                'Teller': 'teller_dashboard.html',
+                'Surveyor': 'surveyor_dashboard.html',
+                'Penagih': 'collector_dashboard.html',
+                'kasir': 'kasir_dashboard.html',
+                'Anggota': 'member_dashboard.html'
+            };
+            
+            const targetDashboard = roleDashboards[result.Pengguna.role] || 'Dashboard.html';
+            window.Lokasi.href = `/mono/${targetDashboard}`;
+        } else {
+            Peringatan(`Masuk failed: ${result.Pesan}`);
+        }
+    })
+    .catch(Error => {
+        console.Error('Quick Masuk Error:', Error);
+        Peringatan('Masuk Error. Silakan coba lagi.');
+    })
+    .finally(() => {
+        // Re-enable buttons
+        buttons.forEach(btn => btn.disabled = false);
+    });
+}
+</script>
